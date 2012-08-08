@@ -10,9 +10,11 @@
 		011CA08E15D3144E007DBC54 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 011CA08D15D3144E007DBC54 /* UIKit.framework */; };
 		011CA09015D3144E007DBC54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 011CA08F15D3144E007DBC54 /* Foundation.framework */; };
 		011CA09215D3144E007DBC54 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 011CA09115D3144E007DBC54 /* CoreGraphics.framework */; };
-		011CA09815D3144E007DBC54 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 011CA09615D3144E007DBC54 /* InfoPlist.strings */; };
-		011CA09A15D3144E007DBC54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 011CA09915D3144E007DBC54 /* main.m */; };
-		011CA09E15D3144E007DBC54 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 011CA09D15D3144E007DBC54 /* AppDelegate.m */; };
+		0145C74115D3182F007244F3 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0145C74015D3182F007244F3 /* MapKit.framework */; };
+		0145C74615D32505007244F3 /* mars.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 0145C74515D32505007244F3 /* mars.jpg */; };
+		017FD73F15D317B1006825B3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 017FD73D15D317A5006825B3 /* AppDelegate.m */; };
+		017FD74015D317B1006825B3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 017FD73C15D3162C006825B3 /* main.m */; };
+		01A6EE6515D49BD500E895D6 /* SMCalloutView.m in Sources */ = {isa = PBXBuildFile; fileRef = 01A6EE6415D49BD500E895D6 /* SMCalloutView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,12 +22,15 @@
 		011CA08D15D3144E007DBC54 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		011CA08F15D3144E007DBC54 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		011CA09115D3144E007DBC54 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		011CA09515D3144E007DBC54 /* CalloutViewSamples-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "CalloutViewSamples-Info.plist"; sourceTree = "<group>"; };
-		011CA09715D3144E007DBC54 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		011CA09915D3144E007DBC54 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		011CA09B15D3144E007DBC54 /* CalloutViewSamples-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CalloutViewSamples-Prefix.pch"; sourceTree = "<group>"; };
-		011CA09C15D3144E007DBC54 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		011CA09D15D3144E007DBC54 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		0145C74015D3182F007244F3 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
+		0145C74515D32505007244F3 /* mars.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = mars.jpg; sourceTree = SOURCE_ROOT; };
+		017FD73A15D3162C006825B3 /* CalloutViewSamples-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "CalloutViewSamples-Info.plist"; sourceTree = SOURCE_ROOT; };
+		017FD73B15D3162C006825B3 /* CalloutViewSamples-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CalloutViewSamples-Prefix.pch"; sourceTree = SOURCE_ROOT; };
+		017FD73C15D3162C006825B3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = SOURCE_ROOT; };
+		017FD73D15D317A5006825B3 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = SOURCE_ROOT; };
+		017FD73E15D317A5006825B3 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = SOURCE_ROOT; };
+		01A6EE6315D49BD500E895D6 /* SMCalloutView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMCalloutView.h; path = ../SMCalloutView.h; sourceTree = "<group>"; };
+		01A6EE6415D49BD500E895D6 /* SMCalloutView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMCalloutView.m; path = ../SMCalloutView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,6 +38,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0145C74115D3182F007244F3 /* MapKit.framework in Frameworks */,
 				011CA08E15D3144E007DBC54 /* UIKit.framework in Frameworks */,
 				011CA09015D3144E007DBC54 /* Foundation.framework in Frameworks */,
 				011CA09215D3144E007DBC54 /* CoreGraphics.framework in Frameworks */,
@@ -45,7 +51,8 @@
 		011CA07E15D3144E007DBC54 = {
 			isa = PBXGroup;
 			children = (
-				011CA09315D3144E007DBC54 /* CalloutViewSamples */,
+				0145C76615D48F0D007244F3 /* Callout View */,
+				011CA09315D3144E007DBC54 /* Samples */,
 				011CA08C15D3144E007DBC54 /* Frameworks */,
 				011CA08A15D3144E007DBC54 /* Products */,
 			);
@@ -65,27 +72,38 @@
 				011CA08D15D3144E007DBC54 /* UIKit.framework */,
 				011CA08F15D3144E007DBC54 /* Foundation.framework */,
 				011CA09115D3144E007DBC54 /* CoreGraphics.framework */,
+				0145C74015D3182F007244F3 /* MapKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		011CA09315D3144E007DBC54 /* CalloutViewSamples */ = {
+		011CA09315D3144E007DBC54 /* Samples */ = {
 			isa = PBXGroup;
 			children = (
-				011CA09C15D3144E007DBC54 /* AppDelegate.h */,
-				011CA09D15D3144E007DBC54 /* AppDelegate.m */,
-				011CA09415D3144E007DBC54 /* Supporting Files */,
+				017FD73E15D317A5006825B3 /* AppDelegate.h */,
+				017FD73D15D317A5006825B3 /* AppDelegate.m */,
+				017FD73915D31618006825B3 /* Supporting Files */,
 			);
+			name = Samples;
 			path = CalloutViewSamples;
 			sourceTree = "<group>";
 		};
-		011CA09415D3144E007DBC54 /* Supporting Files */ = {
+		0145C76615D48F0D007244F3 /* Callout View */ = {
 			isa = PBXGroup;
 			children = (
-				011CA09515D3144E007DBC54 /* CalloutViewSamples-Info.plist */,
-				011CA09615D3144E007DBC54 /* InfoPlist.strings */,
-				011CA09915D3144E007DBC54 /* main.m */,
-				011CA09B15D3144E007DBC54 /* CalloutViewSamples-Prefix.pch */,
+				01A6EE6315D49BD500E895D6 /* SMCalloutView.h */,
+				01A6EE6415D49BD500E895D6 /* SMCalloutView.m */,
+			);
+			name = "Callout View";
+			sourceTree = "<group>";
+		};
+		017FD73915D31618006825B3 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				017FD73A15D3162C006825B3 /* CalloutViewSamples-Info.plist */,
+				017FD73B15D3162C006825B3 /* CalloutViewSamples-Prefix.pch */,
+				017FD73C15D3162C006825B3 /* main.m */,
+				0145C74515D32505007244F3 /* mars.jpg */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -140,7 +158,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				011CA09815D3144E007DBC54 /* InfoPlist.strings in Resources */,
+				0145C74615D32505007244F3 /* mars.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -151,23 +169,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				011CA09A15D3144E007DBC54 /* main.m in Sources */,
-				011CA09E15D3144E007DBC54 /* AppDelegate.m in Sources */,
+				01A6EE6515D49BD500E895D6 /* SMCalloutView.m in Sources */,
+				017FD73F15D317B1006825B3 /* AppDelegate.m in Sources */,
+				017FD74015D317B1006825B3 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		011CA09615D3144E007DBC54 /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				011CA09715D3144E007DBC54 /* en */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		011CA09F15D3144E007DBC54 /* Debug */ = {
@@ -225,8 +233,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "CalloutViewSamples/CalloutViewSamples-Prefix.pch";
-				INFOPLIST_FILE = "CalloutViewSamples/CalloutViewSamples-Info.plist";
+				GCC_PREFIX_HEADER = "CalloutViewSamples-Prefix.pch";
+				INFOPLIST_FILE = "CalloutViewSamples-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -236,8 +245,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "CalloutViewSamples/CalloutViewSamples-Prefix.pch";
-				INFOPLIST_FILE = "CalloutViewSamples/CalloutViewSamples-Info.plist";
+				GCC_PREFIX_HEADER = "CalloutViewSamples-Prefix.pch";
+				INFOPLIST_FILE = "CalloutViewSamples-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -262,6 +272,7 @@
 				011CA0A315D3144E007DBC54 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
