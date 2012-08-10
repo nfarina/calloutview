@@ -1,4 +1,5 @@
 #import "SMCalloutView.h"
+#import <QuartzCore/QuartzCore.h>
 
 //
 // UIView frame helpers - we do a lot of UIView frame fiddling in this class; these functions help keep things readable.
@@ -66,7 +67,7 @@
 
 - (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
     
-    self.frame = CGRectMake(-117, -60, 163, 70);
+    self.frame = CGRectMake(0, 0, 163, 70);
     [view addSubview:self];
     
     // pull the correct anchor into view, hide the other one
@@ -75,6 +76,30 @@
     
     visibleAnchor.$y = 0;
     hiddenAnchor.$y = -100;
+    
+    [self layoutIfNeeded];
+    
+    CGPoint anchor = CGPointMake(CGRectGetMidX(topAnchor.frame), 58);
+    self.layer.anchorPoint = CGPointMake(anchor.x/self.frame.size.width, anchor.y/self.frame.size.height);
+    self.$origin = CGPointMake(-117, -60);
+
+    
+    CAKeyframeAnimation *bounceAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+    CAMediaTimingFunction *easeInOut = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+    
+    bounceAnimation.values = @[@0.05, @1.11245, @0.951807, @1.0];
+    bounceAnimation.keyTimes = @[@0, @(4.0/9.0), @(4.0/9.0+5.0/18.0), @1.0];
+    bounceAnimation.duration = 0.3;
+    bounceAnimation.timingFunctions = @[easeInOut, easeInOut, easeInOut, easeInOut];
+    
+    bounceAnimation.removedOnCompletion = NO;
+    
+    [self.layer addAnimation:bounceAnimation forKey:@"bounce"];
+        
+//    UIView *dot = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 5, 5)];
+//    dot.center = anchor;
+//    dot.backgroundColor = [UIColor redColor];
+//    [self addSubview:dot];
 }
 
 - (void)presentCalloutFromView:(UIView *)view permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
@@ -86,13 +111,13 @@
 }
 
 - (void)layoutSubviews {
-    
+
     leftCap.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
     rightCap.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
 
     leftCap.$x = 0;
     leftBackground.$x = CGRectGetMaxX(leftCap.frame);
-    leftBackground.$width = CGRectGetWidth(self.frame) - CGRectGetMaxX(leftBackground.frame) - CGRectGetWidth(topAnchor.frame) - CGRectGetWidth(rightCap.frame);
+    leftBackground.$width = self.frame.size.width - leftBackground.$x - topAnchor.frame.size.width - rightCap.frame.size.width;
     topAnchor.$x = bottomAnchor.$x = CGRectGetMaxX(leftBackground.frame);
     rightBackground.$x = CGRectGetMaxX(topAnchor.frame);
     rightBackground.$width = 1;

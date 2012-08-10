@@ -15,6 +15,7 @@
 		017FD73F15D317B1006825B3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 017FD73D15D317A5006825B3 /* AppDelegate.m */; };
 		017FD74015D317B1006825B3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 017FD73C15D3162C006825B3 /* main.m */; };
 		01A6EE6515D49BD500E895D6 /* SMCalloutView.m in Sources */ = {isa = PBXBuildFile; fileRef = 01A6EE6415D49BD500E895D6 /* SMCalloutView.m */; };
+		01A6EE7915D572C300E895D6 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01A6EE7815D572C300E895D6 /* QuartzCore.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +32,7 @@
 		017FD73E15D317A5006825B3 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = SOURCE_ROOT; };
 		01A6EE6315D49BD500E895D6 /* SMCalloutView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMCalloutView.h; path = ../SMCalloutView.h; sourceTree = "<group>"; };
 		01A6EE6415D49BD500E895D6 /* SMCalloutView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMCalloutView.m; path = ../SMCalloutView.m; sourceTree = "<group>"; };
+		01A6EE7815D572C300E895D6 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				01A6EE7915D572C300E895D6 /* QuartzCore.framework in Frameworks */,
 				0145C74115D3182F007244F3 /* MapKit.framework in Frameworks */,
 				011CA08E15D3144E007DBC54 /* UIKit.framework in Frameworks */,
 				011CA09015D3144E007DBC54 /* Foundation.framework in Frameworks */,
@@ -73,6 +76,7 @@
 				011CA08F15D3144E007DBC54 /* Foundation.framework */,
 				011CA09115D3144E007DBC54 /* CoreGraphics.framework */,
 				0145C74015D3182F007244F3 /* MapKit.framework */,
+				01A6EE7815D572C300E895D6 /* QuartzCore.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

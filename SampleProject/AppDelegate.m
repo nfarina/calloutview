@@ -1,5 +1,6 @@
 #import "AppDelegate.h"
 #import "SMCalloutView.h"
+#import <QuartzCore/QuartzCore.h>
 
 @interface MapAnnotation : NSObject <MKAnnotation>
 @property (nonatomic, copy) NSString *title;
@@ -83,7 +84,7 @@
     [self.window makeKeyAndVisible];
     
     [self performSelector:@selector(popup) withObject:nil afterDelay:2];
-    [self performSelector:@selector(printHierarchy) withObject:nil afterDelay:5];
+    [self performSelector:@selector(printHierarchy) withObject:nil afterDelay:2];
     
     return YES;
 }
@@ -105,8 +106,25 @@
     [bottomMapView selectAnnotation:bottomPin.annotation animated:YES];
 }
 
+- (UIView *)findSubviewOf:(UIView *)view havingClass:(NSString *)className {
+    if ([NSStringFromClass(view.class) isEqualToString:className])
+        return view;
+    
+    for (UIView *subview in view.subviews) {
+        UIView *found = [self findSubviewOf:subview havingClass:className];
+        if (found) return found;
+    }
+    
+    return nil;
+}
+
 - (void)printHierarchy {
-    NSLog(@"%@", self.window.recursiveDescription);
+//    NSLog(@"%@", self.window.recursiveDescription);
+//    UIView *callout = [self findSubviewOf:bottomMapView havingClass:@"UICalloutView"];
+//    CABasicAnimation *animation = (CABasicAnimation *)[callout.layer animationForKey:@"transform"];
+//    NSLog(@"Callout: %@ duration:%f tx:%@", animation, animation.duration, NSStringFromCGAffineTransform(callout.transform));
+//    if (animation)
+//        [self performSelector:@selector(printHierarchy) withObject:nil afterDelay:0.01];
 }
 
 @end
