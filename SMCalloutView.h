@@ -11,8 +11,10 @@ typedef NSUInteger SMCalloutArrowDirection;
 
 @property (nonatomic, copy) NSString *title;
 
-- (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated;
-- (void)presentCalloutFromView:(UIView *)view permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated;
+// Presents a callout view by adding it to "inView" and pointing at the given rect of inView's bounds.
+// Constrains the callout to the given rect, also in the coordinate system of inView.
+- (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToRect:(CGRect)constrainedRect permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated;
+
 - (void)dismissCalloutAnimated:(BOOL)animated;
 
 @end

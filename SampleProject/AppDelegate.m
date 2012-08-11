@@ -3,7 +3,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 @interface MapAnnotation : NSObject <MKAnnotation>
-@property (nonatomic, copy) NSString *title;
+@property (nonatomic, copy) NSString *title, *subtitle;
 @property (nonatomic, assign) CLLocationCoordinate2D coordinate;
 @end
 @implementation MapAnnotation
@@ -70,8 +70,15 @@
     //
     
     bottomPin = [[MKPinAnnotationView alloc] initWithAnnotation:capeCanaveral reuseIdentifier:@""];
+//    bottomPin.leftCalloutAccessoryView = [[UIView alloc] initWithFrame:CGRectMake(0,0, 5, 5)]; // [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+//    bottomPin.leftCalloutAccessoryView.backgroundColor = [UIColor redColor];
+    bottomPin.rightCalloutAccessoryView = [[UIView alloc] initWithFrame:CGRectMake(0,0, 50, 50)]; // [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+    bottomPin.rightCalloutAccessoryView.backgroundColor = [UIColor redColor];
+    capeCanaveral.subtitle = @"It's a great place to visit!";
+    bottomPin.canShowCallout = YES;
 
     bottomMapView = [[MKMapView alloc] initWithFrame:CGRectOffset(half, 0, half.size.height)];
+    bottomMapView.delegate = self;
     [bottomMapView addAnnotation:capeCanaveral];
         
     //
@@ -84,17 +91,21 @@
     [self.window makeKeyAndVisible];
     
     [self performSelector:@selector(popup) withObject:nil afterDelay:2];
-    [self performSelector:@selector(printHierarchy) withObject:nil afterDelay:2];
+    [self performSelector:@selector(printHierarchy) withObject:nil afterDelay:5];
     
     return YES;
 }
 
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation {
-    return topPin;
+    return mapView == topMapView ? topPin : bottomPin;
 }
 
 - (void)pinTapped:(UITapGestureRecognizer *)recognizer {
-    [calloutView presentCalloutFromView:recognizer.view permittedArrowDirections:SMCalloutArrowDirectionDown animated:YES];
+    [calloutView presentCalloutFromRect:topPin.bounds
+                                 inView:topPin
+                      constrainedToRect:[topMapView convertRect:topMapView.bounds toView:topPin]
+               permittedArrowDirections:SMCalloutArrowDirectionAny
+                               animated:YES];
 }
 
 - (void)marsTapped {
@@ -102,8 +113,19 @@
 }
 
 - (void)popup {
-    [calloutView presentCalloutFromView:topPin permittedArrowDirections:SMCalloutArrowDirectionDown animated:YES];
+
+    [calloutView presentCalloutFromRect:topPin.bounds
+                                 inView:topPin
+                      constrainedToRect:[topMapView convertRect:topMapView.bounds toView:topPin]
+               permittedArrowDirections:SMCalloutArrowDirectionAny
+                               animated:YES];
+    
     [bottomMapView selectAnnotation:bottomPin.annotation animated:YES];
+    
+    [self performSelector:@selector(tweakPopup) withObject:nil afterDelay:1];
+}
+
+- (void)tweakPopup {
 }
 
 - (UIView *)findSubviewOf:(UIView *)view havingClass:(NSString *)className {
@@ -119,7 +141,7 @@
 }
 
 - (void)printHierarchy {
-//    NSLog(@"%@", self.window.recursiveDescription);
+    NSLog(@"%@", self.window.recursiveDescription);
 //    UIView *callout = [self findSubviewOf:bottomMapView havingClass:@"UICalloutView"];
 //    CABasicAnimation *animation = (CABasicAnimation *)[callout.layer animationForKey:@"transform"];
 //    NSLog(@"Callout: %@ duration:%f tx:%@", animation, animation.duration, NSStringFromCGAffineTransform(callout.transform));

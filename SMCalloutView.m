@@ -22,10 +22,26 @@
 // Callout View
 //
 
+#define CALLOUT_MIN_WIDTH 75 // our background graphics limit us to this minimum width...
+#define CALLOUT_HEIGHT 70 // ...and allow only for this exact height.
+#define TITLE_MARGIN 17 // the title view's normal horizontal margin from the edges of our callout view
+#define TITLE_TOP 11 // the top of the title view when no subtitle is present
+#define TITLE_SUB_TOP 3 // the top of the title view when a subtitle IS present
+#define TITLE_HEIGHT 22 // title height, fixed
+#define SUBTITLE_TOP 25 // the top of the subtitle, when present
+#define SUBTITLE_HEIGHT 16 // subtitle height, fixed
+#define TITLE_ACCESSORY_MARGIN 6 // the margin between the title and an accessory if one is present (on either side)
+#define ACCESSORY_MARGIN 14 // the accessory's margin from the edges of our callout view
+#define ACCESSORY_TOP 8 // the top of the accessory "area" in which accessory views are placed
+#define ACCESSORY_HEIGHT 32 // the "suggested" maximum height of an accessory view. shorter accessories will be vertically centered
+
 @implementation SMCalloutView {
     UIImageView *leftCap, *rightCap, *topAnchor, *bottomAnchor, *leftBackground, *rightBackground;
     UILabel *title, *subtitle;
     UIView *leftView, *rightView;
+    
+    CGRect lastConstrainedRect; // remember the last rect we were constrained in; so we can grow later if needed
+    BOOL inLayoutAnimation;
 }
 
 - (id)initWithFrame:(CGRect)frame {
@@ -65,6 +81,16 @@
 - (NSString *)title { return title.text; }
 - (void)setTitle:(NSString *)value { title.text = value; }
 
+- (CGSize)sizeThatFits:(CGSize)size {
+    return [super sizeThatFits:size];
+}
+
+- (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToRect:(CGRect)constrainedRect permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
+
+    // add the callout to the given view
+    [view addSubview:self];
+}
+
 - (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
     
     self.frame = CGRectMake(0, 0, 163, 70);
@@ -103,6 +129,7 @@
 }
 
 - (void)presentCalloutFromView:(UIView *)view permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
+    NSLog(@"Parent frame: %@", NSStringFromCGRect(view.superview.frame));
     [self presentCalloutFromRect:CGRectZero inView:view permittedArrowDirections:arrowDirections animated:animated];
 }
 
