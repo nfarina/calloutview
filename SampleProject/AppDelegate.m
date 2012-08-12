@@ -76,8 +76,10 @@
     //
     
     bottomPin = [[MKPinAnnotationView alloc] initWithAnnotation:capeCanaveral reuseIdentifier:@""];
-    bottomPin.leftCalloutAccessoryView = calloutView.leftAccessoryView;
-    bottomPin.rightCalloutAccessoryView = calloutView.rightAccessoryView;
+    bottomPin.leftCalloutAccessoryView = [[UIView alloc] initWithFrame:CGRectMake(0,0, 30, 30)]; // [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+    bottomPin.leftCalloutAccessoryView.backgroundColor = [UIColor redColor];
+    bottomPin.rightCalloutAccessoryView = [[UIView alloc] initWithFrame:CGRectMake(0,0, 30, 30)]; // [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+    bottomPin.rightCalloutAccessoryView.backgroundColor = [UIColor redColor];
     bottomPin.canShowCallout = YES;
 
     bottomMapView = [[MKMapView alloc] initWithFrame:CGRectOffset(half, 0, half.size.height)];
@@ -93,7 +95,7 @@
 
     [self.window makeKeyAndVisible];
     
-    [self performSelector:@selector(popup) withObject:nil afterDelay:2];
+    [self performSelector:@selector(popup) withObject:nil afterDelay:0];
     [self performSelector:@selector(printHierarchy) withObject:nil afterDelay:5];
     
     return YES;
@@ -144,10 +146,12 @@
 }
 
 - (void)printHierarchy {
-    UIView *callout = [self findSubviewOf:bottomMapView havingClass:@"UICalloutView"];
-    
-    NSLog(@"Size that fits 0,0: %@", NSStringFromCGSize([callout sizeThatFits:CGSizeMake(0, 0)]));
-    NSLog(@"OUR Size that fits 0,0: %@", NSStringFromCGSize([calloutView sizeThatFits:CGSizeMake(0, 0)]));
+//    UIView *callout = [self findSubviewOf:bottomMapView havingClass:@"UICalloutView"];
+//
+//    for (int x=0;x<400;x+=10) {
+//        NSLog(@"Size that fits %i,100: %@", x, NSStringFromCGSize([callout sizeThatFits:CGSizeMake(x, 100)]));
+//        NSLog(@"OUR Size that fits %i,100: %@", x, NSStringFromCGSize([calloutView sizeThatFits:CGSizeMake(x, 100)]));
+//    }
     
     NSLog(@"%@", self.window.recursiveDescription);
     

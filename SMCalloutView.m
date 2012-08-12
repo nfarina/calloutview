@@ -74,7 +74,15 @@
         subtitleView.textColor = [UIColor whiteColor];
         subtitleView.shadowColor = [UIColor colorWithWhite:0 alpha:0.5];
         subtitleView.shadowOffset = CGSizeMake(0, -1);
-        
+
+        // these never change, no matter how we're laid out
+        leftCap.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+        rightCap.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+        leftBackground.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        rightBackground.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        titleView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        subtitleView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+
         [self addSubview:leftCap];
         [self addSubview:rightCap];
         [self addSubview:topAnchor];
@@ -93,6 +101,32 @@
 - (NSString *)subtitle { return subtitleView.text; }
 - (void)setSubtitle:(NSString *)subtitle_ { subtitleView.text = subtitle_; }
 
+- (void)setLeftAccessoryView:(UIView *)leftAccessoryView_ {
+    [_leftAccessoryView removeFromSuperview];
+    _leftAccessoryView = leftAccessoryView_;
+    [self addSubview:_leftAccessoryView];
+}
+
+- (void)setRightAccessoryView:(UIView *)rightAccessoryView_ {
+    [_rightAccessoryView removeFromSuperview];
+    _rightAccessoryView = rightAccessoryView_;
+    [self addSubview:_rightAccessoryView];
+}
+
+- (CGFloat)titleMarginLeft {
+    if (self.leftAccessoryView)
+        return ACCESSORY_MARGIN + self.leftAccessoryView.$width + TITLE_ACCESSORY_MARGIN;
+    else
+        return TITLE_MARGIN;
+}
+
+- (CGFloat)titleMarginRight {
+    if (self.rightAccessoryView)
+        return ACCESSORY_MARGIN + self.rightAccessoryView.$width + TITLE_ACCESSORY_MARGIN;
+    else
+        return TITLE_MARGIN;
+}
+
 - (CGSize)sizeThatFits:(CGSize)size {
     
     // odd behavior, but mimicking UICalloutView
@@ -100,42 +134,41 @@
         return CGSizeMake(CALLOUT_DEFAULT_WIDTH, CALLOUT_HEIGHT);
     
     // calculate how much non-negotiable space we need to reserve for margin and accessories
-    CGFloat margin = 0;
-    
-    if (self.leftAccessoryView)
-        margin += (ACCESSORY_MARGIN + self.leftAccessoryView.$width + TITLE_ACCESSORY_MARGIN);
-    else
-        margin += TITLE_MARGIN;
-    
-    if (self.rightAccessoryView)
-        margin += (ACCESSORY_MARGIN + self.rightAccessoryView.$width + TITLE_ACCESSORY_MARGIN);
-    else
-        margin += TITLE_MARGIN;
+    CGFloat margin = self.titleMarginLeft + self.titleMarginRight;
     
     // how much room is left for text?
     CGFloat availableWidthForText = size.width - margin;
 
     // no room for text? then we'll have to squeeze into the given size somehow.
     if (availableWidthForText < 0)
-        return CGSizeMake(size.width, CALLOUT_HEIGHT);
+        availableWidthForText = 0;
+        //return CGSizeMake(size.width, CALLOUT_HEIGHT);
 
     CGSize preferredTitleSize = [titleView sizeThatFits:CGSizeMake(availableWidthForText, TITLE_HEIGHT)];
     CGSize preferredSubtitleSize = [subtitleView sizeThatFits:CGSizeMake(availableWidthForText, SUBTITLE_HEIGHT)];
     
-    // totle width we'd like
+    // total width we'd like
     CGFloat preferredWidth = MAX(preferredTitleSize.width, preferredSubtitleSize.width) + margin;
-
+    
     // ask to be smaller if we have space, otherwise we'll fit into what we have by truncating the title/subtitle.
     return CGSizeMake(MIN(preferredWidth, size.width), CALLOUT_HEIGHT);
 }
 
 - (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToRect:(CGRect)constrainedRect permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
 
+    // size the callout to fit the width constraint as best as possible
+    self.$size = [self sizeThatFits:CGSizeMake(constrainedRect.size.width, CALLOUT_HEIGHT)];
+    
+    // can we point our arrow down? how much room would we have if so?
+    if ((arrowDirections & SMCalloutArrowDirectionDown) > 0) {
+        
+    }
+    
     // add the callout to the given view
     [view addSubview:self];
 }
 
-- (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
+- (void)presentCalloutFromRectOld:(CGRect)rect inView:(UIView *)view permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
     
     self.frame = CGRectMake(0, 0, 163, 70);
     [view addSubview:self];
@@ -172,10 +205,10 @@
 //    [self addSubview:dot];
 }
 
-- (void)presentCalloutFromView:(UIView *)view permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
-    NSLog(@"Parent frame: %@", NSStringFromCGRect(view.superview.frame));
-    [self presentCalloutFromRect:CGRectZero inView:view permittedArrowDirections:arrowDirections animated:animated];
-}
+//- (void)presentCalloutFromView:(UIView *)view permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
+//    NSLog(@"Parent frame: %@", NSStringFromCGRect(view.superview.frame));
+//    [self presentCalloutFromRect:CGRectZero inView:view permittedArrowDirections:arrowDirections animated:animated];
+//}
 
 - (void)dismissCalloutAnimated:(BOOL)animated {
     [self removeFromSuperview];
@@ -183,19 +216,28 @@
 
 - (void)layoutSubviews {
 
-    leftCap.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
-    rightCap.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
-
     leftCap.$x = 0;
-    leftBackground.$x = CGRectGetMaxX(leftCap.frame);
-    leftBackground.$width = self.frame.size.width - leftBackground.$x - topAnchor.frame.size.width - rightCap.frame.size.width;
-    topAnchor.$x = bottomAnchor.$x = CGRectGetMaxX(leftBackground.frame);
-    rightBackground.$x = CGRectGetMaxX(topAnchor.frame);
-    rightBackground.$width = 1;
-    rightCap.$x = CGRectGetMaxX(rightBackground.frame);
+    rightCap.$x = self.$width - rightCap.$width;
+    leftBackground.$x = leftCap.$width;
+    leftBackground.$width = self.$width - leftCap.$width - rightCap.$width;
     
-    CGFloat titleMargin = 17;
-    titleView.$width = self.frame.size.width - titleMargin*2;
+    topAnchor.$y = -100;
+    bottomAnchor.$y = -100;
+    rightBackground.$y = -100;
+    
+    titleView.$x = self.titleMarginLeft;
+    titleView.$y = self.subtitle ? TITLE_SUB_TOP : TITLE_TOP;
+    titleView.$width = self.$width - self.titleMarginLeft - self.titleMarginRight;
+    titleView.$height = TITLE_HEIGHT;
+    
+    subtitleView.$x = titleView.$x;
+    subtitleView.$y = SUBTITLE_TOP;
+    subtitleView.$width = titleView.$width;
+    subtitleView.$height = SUBTITLE_HEIGHT;
+    
+    // only do one frame-set operation on the accessory views, since they're "foreign" and may not expect multiple frame-sets
+    self.leftAccessoryView.$origin = CGPointMake(ACCESSORY_MARGIN, ACCESSORY_TOP);
+    self.rightAccessoryView.$origin = CGPointMake(self.$width-ACCESSORY_MARGIN-self.rightAccessoryView.$width, ACCESSORY_TOP);
 }
 
 @end
