@@ -31,6 +31,7 @@
     MapAnnotation *capeCanaveral = [MapAnnotation new];
     capeCanaveral.coordinate = (CLLocationCoordinate2D){28.388154, -80.604200};
     capeCanaveral.title = @"Cape Canaveral";
+    capeCanaveral.subtitle = @"It's a great place to visit!";
 
     //
     // Fill top half with a custom view (image) inside a scroll view along with a custom pin view that triggers our custom MTCalloutView.
@@ -64,23 +65,25 @@
 
     calloutView = [SMCalloutView new];
     calloutView.title = capeCanaveral.title;
+    calloutView.subtitle = capeCanaveral.subtitle;
+    calloutView.leftAccessoryView = [[UIView alloc] initWithFrame:CGRectMake(0,0, 30, 30)]; // [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+    calloutView.leftAccessoryView.backgroundColor = [UIColor redColor];
+    calloutView.rightAccessoryView = [[UIView alloc] initWithFrame:CGRectMake(0,0, 30, 30)]; // [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+    calloutView.rightAccessoryView.backgroundColor = [UIColor redColor];
 
     //
     // Fill the bottom half of our window with a standard MKMapView with pin+callout for comparison
     //
     
     bottomPin = [[MKPinAnnotationView alloc] initWithAnnotation:capeCanaveral reuseIdentifier:@""];
-//    bottomPin.leftCalloutAccessoryView = [[UIView alloc] initWithFrame:CGRectMake(0,0, 5, 5)]; // [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-//    bottomPin.leftCalloutAccessoryView.backgroundColor = [UIColor redColor];
-    bottomPin.rightCalloutAccessoryView = [[UIView alloc] initWithFrame:CGRectMake(0,0, 50, 50)]; // [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-    bottomPin.rightCalloutAccessoryView.backgroundColor = [UIColor redColor];
-    capeCanaveral.subtitle = @"It's a great place to visit!";
+    bottomPin.leftCalloutAccessoryView = calloutView.leftAccessoryView;
+    bottomPin.rightCalloutAccessoryView = calloutView.rightAccessoryView;
     bottomPin.canShowCallout = YES;
 
     bottomMapView = [[MKMapView alloc] initWithFrame:CGRectOffset(half, 0, half.size.height)];
     bottomMapView.delegate = self;
     [bottomMapView addAnnotation:capeCanaveral];
-        
+    
     //
     // Put it all on the screen.
     //
@@ -141,8 +144,13 @@
 }
 
 - (void)printHierarchy {
+    UIView *callout = [self findSubviewOf:bottomMapView havingClass:@"UICalloutView"];
+    
+    NSLog(@"Size that fits 0,0: %@", NSStringFromCGSize([callout sizeThatFits:CGSizeMake(0, 0)]));
+    NSLog(@"OUR Size that fits 0,0: %@", NSStringFromCGSize([calloutView sizeThatFits:CGSizeMake(0, 0)]));
+    
     NSLog(@"%@", self.window.recursiveDescription);
-//    UIView *callout = [self findSubviewOf:bottomMapView havingClass:@"UICalloutView"];
+    
 //    CABasicAnimation *animation = (CABasicAnimation *)[callout.layer animationForKey:@"transform"];
 //    NSLog(@"Callout: %@ duration:%f tx:%@", animation, animation.duration, NSStringFromCGAffineTransform(callout.transform));
 //    if (animation)

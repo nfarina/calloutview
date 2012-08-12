@@ -24,6 +24,7 @@
 
 #define CALLOUT_MIN_WIDTH 75 // our background graphics limit us to this minimum width...
 #define CALLOUT_HEIGHT 70 // ...and allow only for this exact height.
+#define CALLOUT_DEFAULT_WIDTH 153 // default "I give up" width when we are asked to present in a space less than our min width
 #define TITLE_MARGIN 17 // the title view's normal horizontal margin from the edges of our callout view
 #define TITLE_TOP 11 // the top of the title view when no subtitle is present
 #define TITLE_SUB_TOP 3 // the top of the title view when a subtitle IS present
@@ -34,11 +35,11 @@
 #define ACCESSORY_MARGIN 14 // the accessory's margin from the edges of our callout view
 #define ACCESSORY_TOP 8 // the top of the accessory "area" in which accessory views are placed
 #define ACCESSORY_HEIGHT 32 // the "suggested" maximum height of an accessory view. shorter accessories will be vertically centered
+#define TOP_ANCHOR_MARGIN 13 // all the above measurements assume a bottom anchor! if we're pointing "up" we'll need to add this top margin to everything.
 
 @implementation SMCalloutView {
     UIImageView *leftCap, *rightCap, *topAnchor, *bottomAnchor, *leftBackground, *rightBackground;
-    UILabel *title, *subtitle;
-    UIView *leftView, *rightView;
+    UILabel *titleView, *subtitleView;
     
     CGRect lastConstrainedRect; // remember the last rect we were constrained in; so we can grow later if needed
     BOOL inLayoutAnimation;
@@ -58,14 +59,21 @@
         leftBackground = [[UIImageView alloc] initWithImage:background];
         rightBackground = [[UIImageView alloc] initWithImage:background];
         
-        title = [UILabel new];
-        title.opaque = NO;
-        title.backgroundColor = [UIColor clearColor];
-        title.font = [UIFont boldSystemFontOfSize:17];
-        title.textColor = [UIColor whiteColor];
-        title.shadowColor = [UIColor colorWithWhite:0 alpha:0.5];
-        title.shadowOffset = CGSizeMake(0, -1);
-        title.frame = CGRectMake(17, 11, 0, 22);
+        titleView = [UILabel new];
+        titleView.opaque = NO;
+        titleView.backgroundColor = [UIColor clearColor];
+        titleView.font = [UIFont boldSystemFontOfSize:17];
+        titleView.textColor = [UIColor whiteColor];
+        titleView.shadowColor = [UIColor colorWithWhite:0 alpha:0.5];
+        titleView.shadowOffset = CGSizeMake(0, -1);
+
+        subtitleView = [UILabel new];
+        subtitleView.opaque = NO;
+        subtitleView.backgroundColor = [UIColor clearColor];
+        subtitleView.font = [UIFont systemFontOfSize:11];
+        subtitleView.textColor = [UIColor whiteColor];
+        subtitleView.shadowColor = [UIColor colorWithWhite:0 alpha:0.5];
+        subtitleView.shadowOffset = CGSizeMake(0, -1);
         
         [self addSubview:leftCap];
         [self addSubview:rightCap];
@@ -73,16 +81,52 @@
         [self addSubview:bottomAnchor];
         [self addSubview:leftBackground];
         [self addSubview:rightBackground];
-        [self addSubview:title];
+        [self addSubview:titleView];
+        [self addSubview:subtitleView];
     }
     return self;
 }
 
-- (NSString *)title { return title.text; }
-- (void)setTitle:(NSString *)value { title.text = value; }
+- (NSString *)title { return titleView.text; }
+- (void)setTitle:(NSString *)title_ { titleView.text = title_; }
+
+- (NSString *)subtitle { return subtitleView.text; }
+- (void)setSubtitle:(NSString *)subtitle_ { subtitleView.text = subtitle_; }
 
 - (CGSize)sizeThatFits:(CGSize)size {
-    return [super sizeThatFits:size];
+    
+    // odd behavior, but mimicking UICalloutView
+    if (size.width < CALLOUT_MIN_WIDTH)
+        return CGSizeMake(CALLOUT_DEFAULT_WIDTH, CALLOUT_HEIGHT);
+    
+    // calculate how much non-negotiable space we need to reserve for margin and accessories
+    CGFloat margin = 0;
+    
+    if (self.leftAccessoryView)
+        margin += (ACCESSORY_MARGIN + self.leftAccessoryView.$width + TITLE_ACCESSORY_MARGIN);
+    else
+        margin += TITLE_MARGIN;
+    
+    if (self.rightAccessoryView)
+        margin += (ACCESSORY_MARGIN + self.rightAccessoryView.$width + TITLE_ACCESSORY_MARGIN);
+    else
+        margin += TITLE_MARGIN;
+    
+    // how much room is left for text?
+    CGFloat availableWidthForText = size.width - margin;
+
+    // no room for text? then we'll have to squeeze into the given size somehow.
+    if (availableWidthForText < 0)
+        return CGSizeMake(size.width, CALLOUT_HEIGHT);
+
+    CGSize preferredTitleSize = [titleView sizeThatFits:CGSizeMake(availableWidthForText, TITLE_HEIGHT)];
+    CGSize preferredSubtitleSize = [subtitleView sizeThatFits:CGSizeMake(availableWidthForText, SUBTITLE_HEIGHT)];
+    
+    // totle width we'd like
+    CGFloat preferredWidth = MAX(preferredTitleSize.width, preferredSubtitleSize.width) + margin;
+
+    // ask to be smaller if we have space, otherwise we'll fit into what we have by truncating the title/subtitle.
+    return CGSizeMake(MIN(preferredWidth, size.width), CALLOUT_HEIGHT);
 }
 
 - (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToRect:(CGRect)constrainedRect permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
@@ -151,7 +195,7 @@
     rightCap.$x = CGRectGetMaxX(rightBackground.frame);
     
     CGFloat titleMargin = 17;
-    title.$width = self.frame.size.width - titleMargin*2;
+    titleView.$width = self.frame.size.width - titleMargin*2;
 }
 
 @end
