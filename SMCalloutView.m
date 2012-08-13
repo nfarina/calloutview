@@ -48,8 +48,6 @@
 - (id)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
         
-        self.clipsToBounds = YES; // match UICalloutView
-        
         leftCap = [[UIImageView alloc] initWithImage:[UIImage embeddedImageNamed:@"UICalloutViewLeftCap"]];
         rightCap = [[UIImageView alloc] initWithImage:[UIImage embeddedImageNamed:@"UICalloutViewRightCap"]];
         topAnchor = [[UIImageView alloc] initWithImage:[UIImage embeddedImageNamed:@"UICalloutViewTopAnchor"]];
@@ -154,8 +152,11 @@
     return CGSizeMake(MIN(preferredWidth, size.width), CALLOUT_HEIGHT);
 }
 
-- (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToRect:(CGRect)constrainedRect permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
+- (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToView:(UIView *)constrainedView permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
 
+    // figure out the constrained view's rect in our popup view's coordinate system
+    CGRect constrainedRect = [constrainedView convertRect:constrainedView.bounds toView:view];
+    
     NSLog(@"Present in box %@ to rect %@", NSStringFromCGRect(constrainedRect), NSStringFromCGRect(rect));
 
     NSLog(@"Screen coords: box %@ to rect %@",
@@ -167,22 +168,37 @@
     // size the callout to fit the width constraint as best as possible
     self.$size = [self sizeThatFits:CGSizeMake(constrainedRect.size.width, CALLOUT_HEIGHT)];
     
-    SMCalloutArrowDirection bestDirection;
-    
     // how much room do we have in the constraint box, both above and below our target rect?
     CGFloat topSpace = CGRectGetMinY(rect) - CGRectGetMinY(constrainedRect);
     CGFloat bottomSpace = CGRectGetMaxY(constrainedRect) - CGRectGetMaxY(rect);
     
-    NSLog(@"Top space: %f, Bottom Space %f", topSpace, bottomSpace);
+    // we prefer to point our arrow down.
+    SMCalloutArrowDirection bestDirection = SMCalloutArrowDirectionDown;
     
-    // can we point our arrow down? how much room would we have if so? we prefer pointing down if all things are equal.
-    if ((arrowDirections & SMCalloutArrowDirectionDown) > 0) {
-        
-    }
+    // we'll point it up though if that's the only option you gave us.
+    if (arrowDirections == SMCalloutArrowDirectionUp)
+        bestDirection = SMCalloutArrowDirectionUp;
+    
+    // or, if we don't have enough space on the top and have more space on the bottom, and you
+    // gave us a choice, then pointing up is the better option.
+    if (arrowDirections == SMCalloutArrowDirectionAny && topSpace < CALLOUT_HEIGHT && bottomSpace > topSpace)
+        bestDirection = SMCalloutArrowDirectionUp;
+
+    // show the correct anchor based on our decision
+    topAnchor.hidden = (bestDirection == SMCalloutArrowDirectionDown);
+    bottomAnchor.hidden = (bestDirection == SMCalloutArrowDirectionUp);
+    
+    // we want to point directly at the horizontal center of the given rect. calculate our final "anchor point" which
+    // we'll set as the *actual* anchor point for our layer so that our "popup" animation starts from this point.
+    self.layer.anchorPoint = (CGPoint){
+        .x = CGRectGetMidX(rect),
+        .y = bestDirection == SMCalloutArrowDirectionDown ? CGRectGetMinY(rect) : CGRectGetMaxY(rect)
+    };
     
     // add the callout to the given view
     [view addSubview:self];
-    
+
+    self.$x = CGRectGetMinX(constrainedRect);
     self.$y = CGRectGetMinY(constrainedRect);
 }
 

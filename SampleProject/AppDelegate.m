@@ -106,11 +106,7 @@
 }
 
 - (void)pinTapped:(UITapGestureRecognizer *)recognizer {
-    [calloutView presentCalloutFromRect:topPin.bounds
-                                 inView:topPin
-                      constrainedToRect:[topMapView convertRect:topMapView.bounds toView:topPin]
-               permittedArrowDirections:SMCalloutArrowDirectionAny
-                               animated:YES];
+    [calloutView presentCalloutFromRect:topPin.bounds inView:topPin constrainedToView:topMapView permittedArrowDirections:SMCalloutArrowDirectionAny animated:YES];
 }
 
 - (void)marsTapped {
@@ -119,11 +115,7 @@
 
 - (void)popup {
     
-    [calloutView presentCalloutFromRect:topPin.bounds
-                                 inView:topPin
-                      constrainedToRect:[topMapView convertRect:topMapView.bounds toView:topPin]
-               permittedArrowDirections:SMCalloutArrowDirectionAny
-                               animated:YES];
+    [calloutView presentCalloutFromRect:topPin.bounds inView:topPin constrainedToView:topMapView permittedArrowDirections:SMCalloutArrowDirectionAny animated:YES];
     
     [bottomMapView selectAnnotation:bottomPin.annotation animated:YES];
     
