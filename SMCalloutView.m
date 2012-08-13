@@ -156,16 +156,34 @@
 
 - (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToRect:(CGRect)constrainedRect permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
 
+    NSLog(@"Present in box %@ to rect %@", NSStringFromCGRect(constrainedRect), NSStringFromCGRect(rect));
+
+    NSLog(@"Screen coords: box %@ to rect %@",
+          NSStringFromCGRect([view convertRect:constrainedRect toView:view.window]),
+          NSStringFromCGRect([view convertRect:rect toView:view.window]));
+    
+    NSLog(@"View bounds: %@", NSStringFromCGRect(view.bounds));
+
     // size the callout to fit the width constraint as best as possible
     self.$size = [self sizeThatFits:CGSizeMake(constrainedRect.size.width, CALLOUT_HEIGHT)];
     
-    // can we point our arrow down? how much room would we have if so?
+    SMCalloutArrowDirection bestDirection;
+    
+    // how much room do we have in the constraint box, both above and below our target rect?
+    CGFloat topSpace = CGRectGetMinY(rect) - CGRectGetMinY(constrainedRect);
+    CGFloat bottomSpace = CGRectGetMaxY(constrainedRect) - CGRectGetMaxY(rect);
+    
+    NSLog(@"Top space: %f, Bottom Space %f", topSpace, bottomSpace);
+    
+    // can we point our arrow down? how much room would we have if so? we prefer pointing down if all things are equal.
     if ((arrowDirections & SMCalloutArrowDirectionDown) > 0) {
         
     }
     
     // add the callout to the given view
     [view addSubview:self];
+    
+    self.$y = CGRectGetMinY(constrainedRect);
 }
 
 - (void)presentCalloutFromRectOld:(CGRect)rect inView:(UIView *)view permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {

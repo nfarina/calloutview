@@ -23,7 +23,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    self.window = [[UIWindow alloc] initWithFrame:CGRectMake(0, 20, 320, 460)];
     self.window.backgroundColor = [UIColor whiteColor];
     
     CGRect half = CGRectMake(0, 0, self.window.frame.size.width, self.window.frame.size.height/2);
@@ -118,7 +118,7 @@
 }
 
 - (void)popup {
-
+    
     [calloutView presentCalloutFromRect:topPin.bounds
                                  inView:topPin
                       constrainedToRect:[topMapView convertRect:topMapView.bounds toView:topPin]
