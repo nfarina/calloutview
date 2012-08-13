@@ -35,6 +35,7 @@
 #define ACCESSORY_MARGIN 14 // the accessory's margin from the edges of our callout view
 #define ACCESSORY_TOP 8 // the top of the accessory "area" in which accessory views are placed
 #define ACCESSORY_HEIGHT 32 // the "suggested" maximum height of an accessory view. shorter accessories will be vertically centered
+#define ANCHOR_MARGIN 37 // the smallest possible distance from the edge of our control to the "tip" of the anchor, from either left or right
 #define TOP_ANCHOR_MARGIN 13 // all the above measurements assume a bottom anchor! if we're pointing "up" we'll need to add this top margin to everything.
 
 @implementation SMCalloutView {
@@ -188,18 +189,30 @@
     topAnchor.hidden = (bestDirection == SMCalloutArrowDirectionDown);
     bottomAnchor.hidden = (bestDirection == SMCalloutArrowDirectionUp);
     
-    // we want to point directly at the horizontal center of the given rect. calculate our final "anchor point" which
-    // we'll set as the *actual* anchor point for our layer so that our "popup" animation starts from this point.
-    self.layer.anchorPoint = (CGPoint){
-        .x = CGRectGetMidX(rect),
-        .y = bestDirection == SMCalloutArrowDirectionDown ? CGRectGetMinY(rect) : CGRectGetMaxY(rect)
-    };
+    // we want to point directly at the horizontal center of the given rect. calculate our "anchor point" in terms of our
+    // target view's coordinate system
+    CGFloat anchorX = CGRectGetMidX(rect);
+    CGFloat anchorY = bestDirection == SMCalloutArrowDirectionDown ? CGRectGetMinY(rect) : CGRectGetMaxY(rect);
     
+    // we prefer to sit in the exact center of our constrained view, so we have visually pleasing equal left/right margins.
+    CGFloat calloutX = roundf(CGRectGetMidX(constrainedRect) - self.$width / 2);
+    
+    // what's the farthest to the left and right that we could point to, given our background image constraints?
+    CGFloat minPointX = calloutX + ANCHOR_MARGIN;
+    CGFloat maxPointX = calloutX + self.$width - ANCHOR_MARGIN;
+    
+    // we may need to scoot over to the left or right to point at the correct spot
+    CGFloat adjustX = 0;
+    if (anchorX < minPointX) adjustX = anchorX - minPointX;
+    if (anchorX > maxPointX) adjustX = anchorX - maxPointX;
+
+    // now set the *actual* anchor point for our layer so that our "popup" animation starts from this point.
+
     // add the callout to the given view
     [view addSubview:self];
 
-    self.$x = CGRectGetMinX(constrainedRect);
-    self.$y = CGRectGetMinY(constrainedRect);
+    self.$x = calloutX + adjustX;
+    self.$y = bestDirection == SMCalloutArrowDirectionDown ? (anchorY - CALLOUT_HEIGHT) : anchorY;
 }
 
 - (void)presentCalloutFromRectOld:(CGRect)rect inView:(UIView *)view permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
