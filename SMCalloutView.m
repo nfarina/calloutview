@@ -70,7 +70,7 @@
         subtitleView = [UILabel new];
         subtitleView.opaque = NO;
         subtitleView.backgroundColor = [UIColor clearColor];
-        subtitleView.font = [UIFont systemFontOfSize:11];
+        subtitleView.font = [UIFont systemFontOfSize:12];
         subtitleView.textColor = [UIColor whiteColor];
         subtitleView.shadowColor = [UIColor colorWithWhite:0 alpha:0.5];
         subtitleView.shadowOffset = CGSizeMake(0, -1);
@@ -242,6 +242,10 @@
     [self removeFromSuperview];
 }
 
+- (CGFloat)centeredPositionOfView:(UIView *)view ifSmallerThan:(CGFloat)height {
+    return view.$height < height ? (height/2 - view.$height/2) : 0; // oddly not rounded, but this is what UICalloutView does and it doesn't seem to blur at half-points.
+}
+
 - (void)layoutSubviews {
 
     leftCap.$x = 0;
@@ -268,8 +272,15 @@
     subtitleView.$height = SUBTITLE_HEIGHT;
     
     // only do one frame-set operation on the accessory views, since they're "foreign" and may not expect multiple frame-sets
-    self.leftAccessoryView.$origin = CGPointMake(ACCESSORY_MARGIN, ACCESSORY_TOP);
-    self.rightAccessoryView.$origin = CGPointMake(self.$width-ACCESSORY_MARGIN-self.rightAccessoryView.$width, ACCESSORY_TOP);
+    self.leftAccessoryView.$origin = (CGPoint) {
+        .x = ACCESSORY_MARGIN,
+        .y = ACCESSORY_TOP + [self centeredPositionOfView:self.leftAccessoryView ifSmallerThan:ACCESSORY_HEIGHT]
+    };
+    
+    self.rightAccessoryView.$origin = (CGPoint) {
+        .x = self.$width-ACCESSORY_MARGIN-self.rightAccessoryView.$width,
+        .y = ACCESSORY_TOP + [self centeredPositionOfView:self.rightAccessoryView ifSmallerThan:ACCESSORY_HEIGHT]
+    };
 }
 
 @end
