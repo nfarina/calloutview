@@ -62,7 +62,8 @@
     topMapView = [[MKMapView alloc] initWithFrame:half];
     topMapView.delegate = self;
     [topMapView addAnnotation:capeCanaveral];
-
+    [topMapView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(mapTapped)]];
+    
     calloutView = [SMCalloutView new];
     calloutView.title = capeCanaveral.title;
     calloutView.subtitle = capeCanaveral.subtitle;
@@ -108,6 +109,10 @@
 
 - (void)pinTapped:(UITapGestureRecognizer *)recognizer {
     [calloutView presentCalloutFromRect:topPin.bounds inView:topPin constrainedToView:topMapView permittedArrowDirections:SMCalloutArrowDirectionAny animated:YES];
+}
+
+- (void)mapTapped {
+    [calloutView dismissCalloutAnimated:YES];
 }
 
 - (void)marsTapped {

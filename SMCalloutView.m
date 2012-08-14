@@ -37,7 +37,7 @@
 #define ACCESSORY_HEIGHT 32 // the "suggested" maximum height of an accessory view. shorter accessories will be vertically centered
 #define ANCHOR_MARGIN 37 // the smallest possible distance from the edge of our control to the "tip" of the anchor, from either left or right
 #define TOP_ANCHOR_MARGIN 13 // all the above measurements assume a bottom anchor! if we're pointing "up" we'll need to add this top margin to everything.
-#define BOTTOM_ANCHOR_MARGIN -10 // if using a bottom anchor, we'll need to account for the shadow below the "tip"
+#define BOTTOM_ANCHOR_MARGIN 10 // if using a bottom anchor, we'll need to account for the shadow below the "tip"
 
 @implementation SMCalloutView {
     UIImageView *leftCap, *rightCap, *topAnchor, *bottomAnchor, *leftBackground, *rightBackground;
@@ -193,7 +193,7 @@
     // we want to point directly at the horizontal center of the given rect. calculate our "anchor point" in terms of our
     // target view's coordinate system. make sure to offset the anchor point as requested if necessary.
     CGFloat anchorX = self.calloutOffset.x + CGRectGetMidX(rect);
-    CGFloat anchorY = self.calloutOffset.y + (bestDirection == SMCalloutArrowDirectionDown ? CGRectGetMinY(rect) - BOTTOM_ANCHOR_MARGIN : CGRectGetMaxY(rect));
+    CGFloat anchorY = self.calloutOffset.y + (bestDirection == SMCalloutArrowDirectionDown ? CGRectGetMinY(rect) + BOTTOM_ANCHOR_MARGIN : CGRectGetMaxY(rect));
     
     // we prefer to sit in the exact center of our constrained view, so we have visually pleasing equal left/right margins.
     CGFloat calloutX = roundf(CGRectGetMidX(constrainedRect) - self.$width / 2);
@@ -218,13 +218,16 @@
     self.$origin = calloutOrigin;
     
     // now set the *actual* anchor point for our layer so that our "popup" animation starts from this point.
-    CGPoint anchorPoint = [view convertPoint:CGPointMake(anchorX, anchorY) toView:self];
+    CGPoint anchorPoint = [view convertPoint:CGPointMake(anchorX, anchorY-BOTTOM_ANCHOR_MARGIN) toView:self];
     anchorPoint.x /= self.$width;
     anchorPoint.y /= self.$height;
     self.layer.anchorPoint = anchorPoint;
     
     // setting the anchor point moves the view a bit, so we need to reset
     self.$origin = calloutOrigin;
+    
+    // layout now so we can immediately start animating to the final position
+    [self layoutIfNeeded];
 
     // bounce!
     CAKeyframeAnimation *bounceAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
