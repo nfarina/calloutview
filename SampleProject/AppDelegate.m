@@ -70,6 +70,7 @@
     calloutView.leftAccessoryView.backgroundColor = [UIColor redColor];
     calloutView.rightAccessoryView = [[UIView alloc] initWithFrame:CGRectMake(0,0, 30, 30)]; // [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
     calloutView.rightAccessoryView.backgroundColor = [UIColor redColor];
+    calloutView.calloutOffset = topPin.calloutOffset;
 
     //
     // Fill the bottom half of our window with a standard MKMapView with pin+callout for comparison

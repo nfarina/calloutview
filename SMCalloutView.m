@@ -7,7 +7,7 @@
 
 @interface UIView (SMFrameAdditions)
 @property (nonatomic, assign) CGPoint $origin;
-@property (nonatomic, assign) CGFloat $x, $y, $width, $height;
+@property (nonatomic, assign) CGFloat $x, $y, $width, $height, $left, $top, $right, $bottom;
 @property (nonatomic, assign) CGSize $size;
 @end
 
@@ -37,6 +37,7 @@
 #define ACCESSORY_HEIGHT 32 // the "suggested" maximum height of an accessory view. shorter accessories will be vertically centered
 #define ANCHOR_MARGIN 37 // the smallest possible distance from the edge of our control to the "tip" of the anchor, from either left or right
 #define TOP_ANCHOR_MARGIN 13 // all the above measurements assume a bottom anchor! if we're pointing "up" we'll need to add this top margin to everything.
+#define BOTTOM_ANCHOR_MARGIN -10 // if using a bottom anchor, we'll need to account for the shadow below the "tip"
 
 @implementation SMCalloutView {
     UIImageView *leftCap, *rightCap, *topAnchor, *bottomAnchor, *leftBackground, *rightBackground;
@@ -190,9 +191,9 @@
     bottomAnchor.hidden = (bestDirection == SMCalloutArrowDirectionUp);
     
     // we want to point directly at the horizontal center of the given rect. calculate our "anchor point" in terms of our
-    // target view's coordinate system
-    CGFloat anchorX = CGRectGetMidX(rect);
-    CGFloat anchorY = bestDirection == SMCalloutArrowDirectionDown ? CGRectGetMinY(rect) : CGRectGetMaxY(rect);
+    // target view's coordinate system. make sure to offset the anchor point as requested if necessary.
+    CGFloat anchorX = self.calloutOffset.x + CGRectGetMidX(rect);
+    CGFloat anchorY = self.calloutOffset.y + (bestDirection == SMCalloutArrowDirectionDown ? CGRectGetMinY(rect) - BOTTOM_ANCHOR_MARGIN : CGRectGetMaxY(rect));
     
     // we prefer to sit in the exact center of our constrained view, so we have visually pleasing equal left/right margins.
     CGFloat calloutX = roundf(CGRectGetMidX(constrainedRect) - self.$width / 2);
@@ -206,34 +207,26 @@
     if (anchorX < minPointX) adjustX = anchorX - minPointX;
     if (anchorX > maxPointX) adjustX = anchorX - maxPointX;
 
-    // now set the *actual* anchor point for our layer so that our "popup" animation starts from this point.
-
     // add the callout to the given view
     [view addSubview:self];
 
-    self.$x = calloutX + adjustX;
-    self.$y = bestDirection == SMCalloutArrowDirectionDown ? (anchorY - CALLOUT_HEIGHT) : anchorY;
-}
+    CGPoint calloutOrigin = {
+        .x = calloutX + adjustX,
+        .y = bestDirection == SMCalloutArrowDirectionDown ? (anchorY - CALLOUT_HEIGHT) : anchorY
+    };
+    
+    self.$origin = calloutOrigin;
+    
+    // now set the *actual* anchor point for our layer so that our "popup" animation starts from this point.
+    CGPoint anchorPoint = [view convertPoint:CGPointMake(anchorX, anchorY) toView:self];
+    anchorPoint.x /= self.$width;
+    anchorPoint.y /= self.$height;
+    self.layer.anchorPoint = anchorPoint;
+    
+    // setting the anchor point moves the view a bit, so we need to reset
+    self.$origin = calloutOrigin;
 
-- (void)presentCalloutFromRectOld:(CGRect)rect inView:(UIView *)view permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
-    
-    self.frame = CGRectMake(0, 0, 163, 70);
-    [view addSubview:self];
-    
-    // pull the correct anchor into view, hide the other one
-    UIImageView *visibleAnchor = bottomAnchor;
-    UIImageView *hiddenAnchor = (visibleAnchor == topAnchor ? bottomAnchor : topAnchor);
-    
-    visibleAnchor.$y = 0;
-    hiddenAnchor.$y = -100;
-    
-    [self layoutIfNeeded];
-    
-    CGPoint anchor = CGPointMake(CGRectGetMidX(topAnchor.frame), 58);
-    self.layer.anchorPoint = CGPointMake(anchor.x/self.frame.size.width, anchor.y/self.frame.size.height);
-    self.$origin = CGPointMake(-117, -60);
-
-    
+    // bounce!
     CAKeyframeAnimation *bounceAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
     CAMediaTimingFunction *easeInOut = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
     
@@ -242,20 +235,8 @@
     bounceAnimation.duration = 0.3;
     bounceAnimation.timingFunctions = @[easeInOut, easeInOut, easeInOut, easeInOut];
     
-    bounceAnimation.removedOnCompletion = NO;
-    
     [self.layer addAnimation:bounceAnimation forKey:@"bounce"];
-        
-//    UIView *dot = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 5, 5)];
-//    dot.center = anchor;
-//    dot.backgroundColor = [UIColor redColor];
-//    [self addSubview:dot];
 }
-
-//- (void)presentCalloutFromView:(UIView *)view permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
-//    NSLog(@"Parent frame: %@", NSStringFromCGRect(view.superview.frame));
-//    [self presentCalloutFromRect:CGRectZero inView:view permittedArrowDirections:arrowDirections animated:animated];
-//}
 
 - (void)dismissCalloutAnimated:(BOOL)animated {
     [self removeFromSuperview];
@@ -265,12 +246,16 @@
 
     leftCap.$x = 0;
     rightCap.$x = self.$width - rightCap.$width;
-    leftBackground.$x = leftCap.$width;
-    leftBackground.$width = self.$width - leftCap.$width - rightCap.$width;
     
-    topAnchor.$y = -100;
-    bottomAnchor.$y = -100;
-    rightBackground.$y = -100;
+    // move both anchors, only one will have been made visible in our -popup method
+    CGFloat anchor = floorf(self.layer.anchorPoint.x * self.$width - bottomAnchor.$width / 2);
+    topAnchor.$origin = CGPointMake(anchor, 0);
+    bottomAnchor.$origin = CGPointMake(anchor, 0);
+
+    leftBackground.$left = leftCap.$width;
+    leftBackground.$right = topAnchor.$left;
+    rightBackground.$left = topAnchor.$right;
+    rightBackground.$right = rightCap.$left;
     
     titleView.$x = self.titleMarginLeft;
     titleView.$y = self.subtitle ? TITLE_SUB_TOP : TITLE_TOP;
@@ -312,6 +297,18 @@
 
 - (CGFloat)$height { return self.frame.size.height; }
 - (void)set$height:(CGFloat)height { self.frame = (CGRect){ .origin=self.frame.origin, .size.width=self.frame.size.width, .size.height=height }; }
+
+- (CGFloat)$left { return self.frame.origin.x; }
+- (void)set$left:(CGFloat)left { self.frame = (CGRect){ .origin.x=left, .origin.y=self.frame.origin.y, .size=self.frame.size }; }
+
+- (CGFloat)$top { return self.frame.origin.y; }
+- (void)set$top:(CGFloat)top { self.frame = (CGRect){ .origin.x=self.frame.origin.x, .origin.y=top, .size=self.frame.size }; }
+
+- (CGFloat)$right { return self.frame.origin.x + self.frame.size.width; }
+- (void)set$right:(CGFloat)right { self.frame = (CGRect){ .origin=self.frame.origin, .size.width=right-self.frame.origin.x, .size.height=self.frame.size.height }; }
+
+- (CGFloat)$bottom { return self.frame.origin.y + self.frame.size.height; }
+- (void)set$bottom:(CGFloat)bottom { self.frame = (CGRect){ .origin=self.frame.origin, .size.width=self.frame.size.width, .size.height=bottom-self.frame.origin.y }; }
 
 @end
 
