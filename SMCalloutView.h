@@ -7,8 +7,13 @@ enum {
 };
 typedef NSUInteger SMCalloutArrowDirection;
 
+extern NSTimeInterval kSMCalloutViewRepositionDelayStandard;
+
+@protocol SMCalloutViewDelegate;
+
 @interface SMCalloutView : UIView
 
+@property (nonatomic, unsafe_unretained) id<SMCalloutViewDelegate> delegate;
 @property (nonatomic, copy) NSString *title, *subtitle;
 @property (nonatomic, retain) UIView *leftAccessoryView, *rightAccessoryView;
 
@@ -20,5 +25,12 @@ typedef NSUInteger SMCalloutArrowDirection;
 - (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToView:(UIView *)constrainedView permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated;
 
 - (void)dismissCalloutAnimated:(BOOL)animated;
+
+@end
+
+@protocol SMCalloutViewDelegate <NSObject>
+@optional
+
+- (NSTimeInterval)calloutView:(SMCalloutView *)calloutView delayForRepositionWithSize:(CGSize)offset;
 
 @end

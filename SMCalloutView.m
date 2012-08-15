@@ -9,6 +9,7 @@
 @property (nonatomic, assign) CGPoint $origin;
 @property (nonatomic, assign) CGFloat $x, $y, $width, $height, $left, $top, $right, $bottom;
 @property (nonatomic, assign) CGSize $size;
+- (void)presentCallout:(NSNumber *)animated;
 @end
 
 //
@@ -21,6 +22,8 @@
 //
 // Callout View
 //
+
+NSTimeInterval kSMCalloutViewRepositionDelayStandard = 0.3;
 
 #define CALLOUT_MIN_WIDTH 75 // our background graphics limit us to this minimum width...
 #define CALLOUT_HEIGHT 70 // ...and allow only for this exact height.
@@ -44,7 +47,7 @@
     UILabel *titleView, *subtitleView;
     
     CGRect lastConstrainedRect; // remember the last rect we were constrained in; so we can grow later if needed
-    BOOL inLayoutAnimation;
+    BOOL inLayoutAnimation, relayoutNeeded;
 }
 
 - (id)initWithFrame:(CGRect)frame {
@@ -142,7 +145,6 @@
     // no room for text? then we'll have to squeeze into the given size somehow.
     if (availableWidthForText < 0)
         availableWidthForText = 0;
-        //return CGSizeMake(size.width, CALLOUT_HEIGHT);
 
     CGSize preferredTitleSize = [titleView sizeThatFits:CGSizeMake(availableWidthForText, TITLE_HEIGHT)];
     CGSize preferredSubtitleSize = [subtitleView sizeThatFits:CGSizeMake(availableWidthForText, SUBTITLE_HEIGHT)];
@@ -154,19 +156,19 @@
     return CGSizeMake(MIN(preferredWidth, size.width), CALLOUT_HEIGHT);
 }
 
+- (CGSize)offsetToContainRect:(CGRect)innerRect inRect:(CGRect)outerRect {
+    CGFloat nudgeRight = MAX(0, CGRectGetMinX(outerRect) - CGRectGetMinX(innerRect));
+    CGFloat nudgeLeft = MIN(0, CGRectGetMaxX(outerRect) - CGRectGetMaxX(innerRect));
+    CGFloat nudgeTop = MAX(0, CGRectGetMinY(outerRect) - CGRectGetMinY(innerRect));
+    CGFloat nudgeBottom = MIN(0, CGRectGetMaxY(outerRect) - CGRectGetMaxY(innerRect));
+    return CGSizeMake(nudgeLeft ?: nudgeRight, nudgeTop ?: nudgeBottom);
+}
+
 - (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToView:(UIView *)constrainedView permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
 
     // figure out the constrained view's rect in our popup view's coordinate system
     CGRect constrainedRect = [constrainedView convertRect:constrainedView.bounds toView:view];
     
-//    NSLog(@"Present in box %@ to rect %@", NSStringFromCGRect(constrainedRect), NSStringFromCGRect(rect));
-//
-//    NSLog(@"Screen coords: box %@ to rect %@",
-//          NSStringFromCGRect([view convertRect:constrainedRect toView:view.window]),
-//          NSStringFromCGRect([view convertRect:rect toView:view.window]));
-//    
-//    NSLog(@"View bounds: %@", NSStringFromCGRect(view.bounds));
-
     // size the callout to fit the width constraint as best as possible
     self.$size = [self sizeThatFits:CGSizeMake(constrainedRect.size.width, CALLOUT_HEIGHT)];
     
@@ -226,20 +228,44 @@
     // setting the anchor point moves the view a bit, so we need to reset
     self.$origin = calloutOrigin;
     
-    // layout now so we can immediately start animating to the final position
+    // layout now so we can immediately start animating to the final position if needed
     [self setNeedsLayout];
     [self layoutIfNeeded];
 
-    // bounce!
-    CAKeyframeAnimation *bounceAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
-    CAMediaTimingFunction *easeInOut = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+    // if we're outside the bounds of our constraint rect, we'll give our delegate an opportunity to shift us into position.
+    CGSize offset = [self offsetToContainRect:rect inRect:constrainedRect];
     
-    bounceAnimation.values = @[@0.05, @1.11245, @0.951807, @1.0];
-    bounceAnimation.keyTimes = @[@0, @(4.0/9.0), @(4.0/9.0+5.0/18.0), @1.0];
-    bounceAnimation.duration = 0.3;
-    bounceAnimation.timingFunctions = @[easeInOut, easeInOut, easeInOut, easeInOut];
+    NSTimeInterval delay = 0;
     
-    [self.layer addAnimation:bounceAnimation forKey:@"bounce"];
+    if (!CGSizeEqualToSize(offset, CGSizeZero))
+        delay = [self.delegate calloutView:self delayForRepositionWithSize:offset];
+
+    // hide in preparation for appearing
+    self.hidden = YES;
+    [self performSelector:@selector(presentCallout:) withObject:@(animated) afterDelay:delay];
+}
+
+- (void)presentCallout:(NSNumber *)animated {
+    self.hidden = NO;
+    
+    if (animated.boolValue == YES) {
+        CAKeyframeAnimation *bounceAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+        CAMediaTimingFunction *easeInOut = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+        
+        //bounceAnimation.beginTime = CACurrentMediaTime() + [self.delegate calloutView:self delayForRepositionWithSize:CGSizeZero];
+        bounceAnimation.values = @[@0.05, @1.11245, @0.951807, @1.0];
+        bounceAnimation.keyTimes = @[@0, @(4.0/9.0), @(4.0/9.0+5.0/18.0), @1.0];
+        bounceAnimation.duration = 0.3;
+        bounceAnimation.timingFunctions = @[easeInOut, easeInOut, easeInOut, easeInOut];
+        
+        [self.layer addAnimation:bounceAnimation forKey:@"bounce"];
+    }
+    
+    inLayoutAnimation = NO;
+    
+    if (relayoutNeeded) {
+        // relayout!
+    }
 }
 
 - (void)dismissCalloutAnimated:(BOOL)animated {

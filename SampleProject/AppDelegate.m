@@ -1,5 +1,4 @@
 #import "AppDelegate.h"
-#import "SMCalloutView.h"
 #import <QuartzCore/QuartzCore.h>
 
 @interface MapAnnotation : NSObject <MKAnnotation>
@@ -65,6 +64,7 @@
     [topMapView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(mapTapped)]];
     
     calloutView = [SMCalloutView new];
+    calloutView.delegate = self;
     calloutView.title = capeCanaveral.title;
     calloutView.subtitle = capeCanaveral.subtitle;
 //    calloutView.leftAccessoryView = [[UIView alloc] initWithFrame:CGRectMake(0,0, 30, 30)]; // [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
@@ -106,8 +106,8 @@
 }
 
 - (void)pinTapped:(UITapGestureRecognizer *)recognizer {
-//    [calloutView presentCalloutFromRect:topPin.bounds inView:topPin constrainedToView:topMapView permittedArrowDirections:SMCalloutArrowDirectionAny animated:YES];
-    [self performSelector:@selector(popup) withObject:nil afterDelay:1.0/3.0];
+    [calloutView presentCalloutFromRect:topPin.bounds inView:topPin constrainedToView:topMapView permittedArrowDirections:SMCalloutArrowDirectionAny animated:YES];
+//    [self performSelector:@selector(popup) withObject:nil afterDelay:1.0/3.0];
 }
 
 - (void)mapTapped {
@@ -125,6 +125,11 @@
     [bottomMapView selectAnnotation:bottomPin.annotation animated:YES];
     
     [self performSelector:@selector(tweakPopup) withObject:nil afterDelay:1];
+}
+
+- (NSTimeInterval)calloutView:(SMCalloutView *)calloutView delayForRepositionWithSize:(CGSize)offset {
+    NSLog(@"Reposition with offset %@", NSStringFromCGSize(offset));
+    return kSMCalloutViewRepositionDelayStandard;
 }
 
 - (void)tweakPopup {
