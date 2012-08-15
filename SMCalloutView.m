@@ -159,13 +159,13 @@
     // figure out the constrained view's rect in our popup view's coordinate system
     CGRect constrainedRect = [constrainedView convertRect:constrainedView.bounds toView:view];
     
-    NSLog(@"Present in box %@ to rect %@", NSStringFromCGRect(constrainedRect), NSStringFromCGRect(rect));
-
-    NSLog(@"Screen coords: box %@ to rect %@",
-          NSStringFromCGRect([view convertRect:constrainedRect toView:view.window]),
-          NSStringFromCGRect([view convertRect:rect toView:view.window]));
-    
-    NSLog(@"View bounds: %@", NSStringFromCGRect(view.bounds));
+//    NSLog(@"Present in box %@ to rect %@", NSStringFromCGRect(constrainedRect), NSStringFromCGRect(rect));
+//
+//    NSLog(@"Screen coords: box %@ to rect %@",
+//          NSStringFromCGRect([view convertRect:constrainedRect toView:view.window]),
+//          NSStringFromCGRect([view convertRect:rect toView:view.window]));
+//    
+//    NSLog(@"View bounds: %@", NSStringFromCGRect(view.bounds));
 
     // size the callout to fit the width constraint as best as possible
     self.$size = [self sizeThatFits:CGSizeMake(constrainedRect.size.width, CALLOUT_HEIGHT)];
@@ -193,7 +193,7 @@
     // we want to point directly at the horizontal center of the given rect. calculate our "anchor point" in terms of our
     // target view's coordinate system. make sure to offset the anchor point as requested if necessary.
     CGFloat anchorX = self.calloutOffset.x + CGRectGetMidX(rect);
-    CGFloat anchorY = self.calloutOffset.y + (bestDirection == SMCalloutArrowDirectionDown ? CGRectGetMinY(rect) + BOTTOM_ANCHOR_MARGIN : CGRectGetMaxY(rect));
+    CGFloat anchorY = self.calloutOffset.y + (bestDirection == SMCalloutArrowDirectionDown ? CGRectGetMinY(rect) : CGRectGetMaxY(rect));
     
     // we prefer to sit in the exact center of our constrained view, so we have visually pleasing equal left/right margins.
     CGFloat calloutX = roundf(CGRectGetMidX(constrainedRect) - self.$width / 2);
@@ -212,13 +212,13 @@
 
     CGPoint calloutOrigin = {
         .x = calloutX + adjustX,
-        .y = bestDirection == SMCalloutArrowDirectionDown ? (anchorY - CALLOUT_HEIGHT) : anchorY
+        .y = bestDirection == SMCalloutArrowDirectionDown ? (anchorY - CALLOUT_HEIGHT + BOTTOM_ANCHOR_MARGIN) : anchorY
     };
     
     self.$origin = calloutOrigin;
     
     // now set the *actual* anchor point for our layer so that our "popup" animation starts from this point.
-    CGPoint anchorPoint = [view convertPoint:CGPointMake(anchorX, anchorY-BOTTOM_ANCHOR_MARGIN) toView:self];
+    CGPoint anchorPoint = [view convertPoint:CGPointMake(anchorX, anchorY) toView:self];
     anchorPoint.x /= self.$width;
     anchorPoint.y /= self.$height;
     self.layer.anchorPoint = anchorPoint;
@@ -227,6 +227,7 @@
     self.$origin = calloutOrigin;
     
     // layout now so we can immediately start animating to the final position
+    [self setNeedsLayout];
     [self layoutIfNeeded];
 
     // bounce!
@@ -246,43 +247,52 @@
 }
 
 - (CGFloat)centeredPositionOfView:(UIView *)view ifSmallerThan:(CGFloat)height {
-    return view.$height < height ? (height/2 - view.$height/2) : 0; // oddly not rounded, but this is what UICalloutView does and it doesn't seem to blur at half-points.
+    return view.$height < height ? floorf(height/2 - view.$height/2) : 0;
 }
 
 - (void)layoutSubviews {
 
+    // if we're pointing up, we'll need to push almost everything down a bit
+    CGFloat dy = !topAnchor.hidden ? TOP_ANCHOR_MARGIN : 0;
+    leftCap.$y = rightCap.$y = leftBackground.$y = rightBackground.$y = dy;
+    
     leftCap.$x = 0;
     rightCap.$x = self.$width - rightCap.$width;
     
     // move both anchors, only one will have been made visible in our -popup method
-    CGFloat anchor = floorf(self.layer.anchorPoint.x * self.$width - bottomAnchor.$width / 2);
-    topAnchor.$origin = CGPointMake(anchor, 0);
-    bottomAnchor.$origin = CGPointMake(anchor, 0);
+    CGFloat anchorX = roundf(self.layer.anchorPoint.x * self.$width - bottomAnchor.$width / 2);
+    topAnchor.$origin = CGPointMake(anchorX, 0);
+    
+    // make sure the anchor graphic isn't overlapping with an endcap
+    if (topAnchor.$left < leftCap.$right) topAnchor.$left = leftCap.$right;
+    if (topAnchor.$right > rightCap.$left) topAnchor.$left = rightCap.$left - topAnchor.$width; // don't stretch it
 
-    leftBackground.$left = leftCap.$width;
+    bottomAnchor.$origin = topAnchor.$origin; // match
+
+    leftBackground.$left = leftCap.$right;
     leftBackground.$right = topAnchor.$left;
     rightBackground.$left = topAnchor.$right;
     rightBackground.$right = rightCap.$left;
     
     titleView.$x = self.titleMarginLeft;
-    titleView.$y = self.subtitle ? TITLE_SUB_TOP : TITLE_TOP;
+    titleView.$y = (self.subtitle ? TITLE_SUB_TOP : TITLE_TOP) + dy;
     titleView.$width = self.$width - self.titleMarginLeft - self.titleMarginRight;
     titleView.$height = TITLE_HEIGHT;
     
     subtitleView.$x = titleView.$x;
-    subtitleView.$y = SUBTITLE_TOP;
+    subtitleView.$y = SUBTITLE_TOP + dy;
     subtitleView.$width = titleView.$width;
     subtitleView.$height = SUBTITLE_HEIGHT;
     
     // only do one frame-set operation on the accessory views, since they're "foreign" and may not expect multiple frame-sets
     self.leftAccessoryView.$origin = (CGPoint) {
         .x = ACCESSORY_MARGIN,
-        .y = ACCESSORY_TOP + [self centeredPositionOfView:self.leftAccessoryView ifSmallerThan:ACCESSORY_HEIGHT]
+        .y = ACCESSORY_TOP + [self centeredPositionOfView:self.leftAccessoryView ifSmallerThan:ACCESSORY_HEIGHT] + dy
     };
     
     self.rightAccessoryView.$origin = (CGPoint) {
         .x = self.$width-ACCESSORY_MARGIN-self.rightAccessoryView.$width,
-        .y = ACCESSORY_TOP + [self centeredPositionOfView:self.rightAccessoryView ifSmallerThan:ACCESSORY_HEIGHT]
+        .y = ACCESSORY_TOP + [self centeredPositionOfView:self.rightAccessoryView ifSmallerThan:ACCESSORY_HEIGHT] + dy
     };
 }
 
@@ -319,10 +329,10 @@
 - (void)set$top:(CGFloat)top { self.frame = (CGRect){ .origin.x=self.frame.origin.x, .origin.y=top, .size=self.frame.size }; }
 
 - (CGFloat)$right { return self.frame.origin.x + self.frame.size.width; }
-- (void)set$right:(CGFloat)right { self.frame = (CGRect){ .origin=self.frame.origin, .size.width=right-self.frame.origin.x, .size.height=self.frame.size.height }; }
+- (void)set$right:(CGFloat)right { self.frame = (CGRect){ .origin=self.frame.origin, .size.width=MAX(right-self.frame.origin.x,0), .size.height=self.frame.size.height }; }
 
 - (CGFloat)$bottom { return self.frame.origin.y + self.frame.size.height; }
-- (void)set$bottom:(CGFloat)bottom { self.frame = (CGRect){ .origin=self.frame.origin, .size.width=self.frame.size.width, .size.height=bottom-self.frame.origin.y }; }
+- (void)set$bottom:(CGFloat)bottom { self.frame = (CGRect){ .origin=self.frame.origin, .size.width=self.frame.size.width, .size.height=MAX(bottom-self.frame.origin.y,0) }; }
 
 @end
 

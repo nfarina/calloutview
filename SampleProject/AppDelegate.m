@@ -67,10 +67,9 @@
     calloutView = [SMCalloutView new];
     calloutView.title = capeCanaveral.title;
     calloutView.subtitle = capeCanaveral.subtitle;
-    calloutView.leftAccessoryView = [[UIView alloc] initWithFrame:CGRectMake(0,0, 30, 30)]; // [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-    calloutView.leftAccessoryView.backgroundColor = [UIColor redColor];
-    calloutView.rightAccessoryView = [[UIView alloc] initWithFrame:CGRectMake(0,0, 30, 30)]; // [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-    calloutView.rightAccessoryView.backgroundColor = [UIColor redColor];
+//    calloutView.leftAccessoryView = [[UIView alloc] initWithFrame:CGRectMake(0,0, 30, 30)]; // [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+//    calloutView.leftAccessoryView.backgroundColor = [UIColor redColor];
+    calloutView.rightAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
     calloutView.calloutOffset = topPin.calloutOffset;
 
     //
@@ -78,10 +77,9 @@
     //
     
     bottomPin = [[MKPinAnnotationView alloc] initWithAnnotation:capeCanaveral reuseIdentifier:@""];
-    bottomPin.leftCalloutAccessoryView = [[UIView alloc] initWithFrame:CGRectMake(0,0, 30, 30)]; // [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-    bottomPin.leftCalloutAccessoryView.backgroundColor = [UIColor redColor];
-    bottomPin.rightCalloutAccessoryView = [[UIView alloc] initWithFrame:CGRectMake(0,0, 30, 30)]; // [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-    bottomPin.rightCalloutAccessoryView.backgroundColor = [UIColor redColor];
+//    bottomPin.leftCalloutAccessoryView = [[UIView alloc] initWithFrame:CGRectMake(0,0, 30, 30)]; // [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+//    bottomPin.leftCalloutAccessoryView.backgroundColor = [UIColor redColor];
+    bottomPin.rightCalloutAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
     bottomPin.canShowCallout = YES;
 
     bottomMapView = [[MKMapView alloc] initWithFrame:CGRectOffset(half, 0, half.size.height)];
@@ -108,7 +106,8 @@
 }
 
 - (void)pinTapped:(UITapGestureRecognizer *)recognizer {
-    [calloutView presentCalloutFromRect:topPin.bounds inView:topPin constrainedToView:topMapView permittedArrowDirections:SMCalloutArrowDirectionAny animated:YES];
+//    [calloutView presentCalloutFromRect:topPin.bounds inView:topPin constrainedToView:topMapView permittedArrowDirections:SMCalloutArrowDirectionAny animated:YES];
+    [self performSelector:@selector(popup) withObject:nil afterDelay:1.0/3.0];
 }
 
 - (void)mapTapped {
