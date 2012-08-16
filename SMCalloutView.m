@@ -23,7 +23,7 @@
 // Callout View
 //
 
-NSTimeInterval kSMCalloutViewRepositionDelayStandard = 0.3;
+NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 #define CALLOUT_MIN_WIDTH 75 // our background graphics limit us to this minimum width...
 #define CALLOUT_HEIGHT 70 // ...and allow only for this exact height.
@@ -41,13 +41,14 @@ NSTimeInterval kSMCalloutViewRepositionDelayStandard = 0.3;
 #define ANCHOR_MARGIN 37 // the smallest possible distance from the edge of our control to the "tip" of the anchor, from either left or right
 #define TOP_ANCHOR_MARGIN 13 // all the above measurements assume a bottom anchor! if we're pointing "up" we'll need to add this top margin to everything.
 #define BOTTOM_ANCHOR_MARGIN 10 // if using a bottom anchor, we'll need to account for the shadow below the "tip"
+#define CONTENT_MARGIN 10 // when we try to reposition content to be visible, we'll consider this margin around your target rect
 
 @implementation SMCalloutView {
     UIImageView *leftCap, *rightCap, *topAnchor, *bottomAnchor, *leftBackground, *rightBackground;
     UILabel *titleView, *subtitleView;
     
     CGRect lastConstrainedRect; // remember the last rect we were constrained in; so we can grow later if needed
-    BOOL inLayoutAnimation, relayoutNeeded;
+    BOOL popupCancelled, relayoutNeeded;
 }
 
 - (id)initWithFrame:(CGRect)frame {
@@ -232,36 +233,43 @@ NSTimeInterval kSMCalloutViewRepositionDelayStandard = 0.3;
     [self setNeedsLayout];
     [self layoutIfNeeded];
 
+    //NSLog(@"Callout frame: %@ [%@ window]", NSStringFromCGRect(self.frame), NSStringFromCGRect([view convertRect:self.frame toView:view.window]));
+    //NSLog(@"Constrained frame: %@ [%@ window]", NSStringFromCGRect(constrainedRect), NSStringFromCGRect([view convertRect:constrainedRect toView:view.window]));
+
     // if we're outside the bounds of our constraint rect, we'll give our delegate an opportunity to shift us into position.
-    CGSize offset = [self offsetToContainRect:rect inRect:constrainedRect];
+    // consider both our size and the size of our target rect (which we'll assume to be the size of the content you want to scroll into view.
+    CGRect contentRect = CGRectUnion(self.frame, CGRectInset(rect, -10, -10));
+    CGSize offset = [self offsetToContainRect:contentRect inRect:constrainedRect];
     
     NSTimeInterval delay = 0;
+    popupCancelled = NO; // reset this before calling our delegate below
     
-    if (!CGSizeEqualToSize(offset, CGSizeZero))
+    if ([self.delegate respondsToSelector:@selector(calloutView:delayForRepositionWithSize:)] && !CGSizeEqualToSize(offset, CGSizeZero))
         delay = [self.delegate calloutView:self delayForRepositionWithSize:offset];
 
-    // hide in preparation for appearing
-    self.hidden = YES;
-    [self performSelector:@selector(presentCallout:) withObject:@(animated) afterDelay:delay];
+    // there's a chance that user code in the delegate method may have called -dismissCalloutAnimated to cancel things; if that
+    // happened then we need to bail!
+    if (popupCancelled) return;
+    
+    // if we need to delay, we don't want to be visible while we're delaying, so shrink us in preparation for our popup
+    self.layer.transform = CATransform3DMakeScale(0, 0, 0);
+    self.alpha = 1; // in case it's zero from fading out in -dismissCalloutAnimated
+    
+    CAKeyframeAnimation *bounceAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+    CAMediaTimingFunction *easeInOut = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+    
+    bounceAnimation.beginTime = CACurrentMediaTime() + delay;
+    bounceAnimation.values = @[@0.05, @1.11245, @0.951807, @1.0];
+    bounceAnimation.keyTimes = @[@0, @(4.0/9.0), @(4.0/9.0+5.0/18.0), @1.0];
+    bounceAnimation.duration = animated ? 0.3 : 0;
+    bounceAnimation.timingFunctions = @[easeInOut, easeInOut, easeInOut, easeInOut];
+    bounceAnimation.delegate = self;
+    
+    [self.layer addAnimation:bounceAnimation forKey:@"bounce"];
 }
 
-- (void)presentCallout:(NSNumber *)animated {
-    self.hidden = NO;
-    
-    if (animated.boolValue == YES) {
-        CAKeyframeAnimation *bounceAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
-        CAMediaTimingFunction *easeInOut = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-        
-        //bounceAnimation.beginTime = CACurrentMediaTime() + [self.delegate calloutView:self delayForRepositionWithSize:CGSizeZero];
-        bounceAnimation.values = @[@0.05, @1.11245, @0.951807, @1.0];
-        bounceAnimation.keyTimes = @[@0, @(4.0/9.0), @(4.0/9.0+5.0/18.0), @1.0];
-        bounceAnimation.duration = 0.3;
-        bounceAnimation.timingFunctions = @[easeInOut, easeInOut, easeInOut, easeInOut];
-        
-        [self.layer addAnimation:bounceAnimation forKey:@"bounce"];
-    }
-    
-    inLayoutAnimation = NO;
+- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
+    self.layer.transform = CATransform3DIdentity;
     
     if (relayoutNeeded) {
         // relayout!
@@ -269,7 +277,19 @@ NSTimeInterval kSMCalloutViewRepositionDelayStandard = 0.3;
 }
 
 - (void)dismissCalloutAnimated:(BOOL)animated {
-    [self removeFromSuperview];
+    [self.layer removeAnimationForKey:@"bounce"];
+    
+    popupCancelled = YES;
+    
+    if (animated) {
+        [UIView beginAnimations:nil context:NULL];
+        [UIView setAnimationDuration:1.0/3.0];
+        [UIView setAnimationDelegate:self];
+        [UIView setAnimationDidStopSelector:@selector(removeFromSuperview)];
+        self.alpha = 0;
+        [UIView commitAnimations];
+    }
+    else [self removeFromSuperview];
 }
 
 - (CGFloat)centeredPositionOfView:(UIView *)view ifSmallerThan:(CGFloat)height {

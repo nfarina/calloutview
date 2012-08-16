@@ -34,6 +34,7 @@
     //
     
     scrollView = [[UIScrollView alloc] initWithFrame:half];
+    scrollView.backgroundColor = [UIColor grayColor];
     
     marsView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"mars.jpg"]];
     marsView.userInteractionEnabled = YES;
@@ -41,9 +42,10 @@
     
     [scrollView addSubview:marsView];
     scrollView.contentSize = marsView.frame.size;
+    scrollView.contentOffset = CGPointMake(150, 50);
     
     topPin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
-    topPin.center = CGPointMake(half.size.width/2, half.size.height/2 + 50);
+    topPin.center = CGPointMake(half.size.width/2 + 190, half.size.height/2 + 120);
     [topPin addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(pinTapped)]];
     [marsView addSubview:topPin];
 
@@ -64,7 +66,7 @@
 //    topMapView = [[MKMapView alloc] initWithFrame:half];
 //    topMapView.delegate = self;
 //    [topMapView addAnnotation:capeCanaveral];
-//    [topMapView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(mapTapped)]];
+//    [topMapView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(marsTapped)]];
 //
 //    calloutView = [SMCalloutView new];
 //    calloutView.delegate = self;
@@ -98,7 +100,7 @@
 
     [self.window makeKeyAndVisible];
     
-    [self performSelector:@selector(popup) withObject:nil afterDelay:1];
+    //[self performSelector:@selector(popup) withObject:nil afterDelay:3];
     [self performSelector:@selector(printHierarchy) withObject:nil afterDelay:5];
     
     return YES;
@@ -110,29 +112,27 @@
 }
 
 - (void)pinTapped {
-    [calloutView presentCalloutFromRect:topPin.bounds inView:topPin constrainedToView:marsView permittedArrowDirections:SMCalloutArrowDirectionAny animated:YES];
-}
-
-- (void)mapTapped {
-    [calloutView dismissCalloutAnimated:YES];
+    [calloutView presentCalloutFromRect:topPin.bounds inView:topPin constrainedToView:scrollView permittedArrowDirections:SMCalloutArrowDirectionDown animated:YES];
 }
 
 - (void)marsTapped {
-    [calloutView dismissCalloutAnimated:YES];
+    [calloutView dismissCalloutAnimated:NO];
 }
 
 - (void)popup {
-    
-    [calloutView presentCalloutFromRect:topPin.bounds inView:topPin constrainedToView:marsView permittedArrowDirections:SMCalloutArrowDirectionAny animated:YES];
-    
+    [calloutView presentCalloutFromRect:topPin.bounds inView:topPin constrainedToView:scrollView permittedArrowDirections:SMCalloutArrowDirectionDown animated:YES];
     [bottomMapView selectAnnotation:bottomPin.annotation animated:YES];
-    
     [self performSelector:@selector(tweakPopup) withObject:nil afterDelay:1];
 }
 
-- (NSTimeInterval)calloutView:(SMCalloutView *)calloutView delayForRepositionWithSize:(CGSize)offset {
-    NSLog(@"Reposition with offset %@", NSStringFromCGSize(offset));
-    return kSMCalloutViewRepositionDelayStandard;
+- (NSTimeInterval)calloutView:(SMCalloutView *)theCalloutView delayForRepositionWithSize:(CGSize)offset {
+    
+    // We could cancel the popup here if we wanted to:
+    // [calloutView dismissCalloutAnimated:NO];
+
+    [scrollView setContentOffset:CGPointMake(scrollView.contentOffset.x-offset.width, scrollView.contentOffset.y-offset.height) animated:YES];
+    
+    return kSMCalloutViewRepositionDelayForUIScrollView;
 }
 
 - (void)tweakPopup {

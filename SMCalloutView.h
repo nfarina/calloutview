@@ -7,7 +7,9 @@ enum {
 };
 typedef NSUInteger SMCalloutArrowDirection;
 
-extern NSTimeInterval kSMCalloutViewRepositionDelayStandard;
+// when delaying our popup in order to scroll content into view, you can use this amount to match the
+// animation duration of UIScrollView when using -setContentOffset:animated.
+extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 
 @protocol SMCalloutViewDelegate;
 
@@ -21,7 +23,8 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayStandard;
 @property (nonatomic, assign) CGPoint calloutOffset;
 
 // Presents a callout view by adding it to "inView" and pointing at the given rect of inView's bounds.
-// Constrains the callout to the bounds of the given view.
+// Constrains the callout to the bounds of the given view. Optionally scrolls the given rect into view (plus margins)
+// if -delegate is set and responds to -delayForRepositionWithSize.
 - (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToView:(UIView *)constrainedView permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated;
 
 - (void)dismissCalloutAnimated:(BOOL)animated;
@@ -31,6 +34,13 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayStandard;
 @protocol SMCalloutViewDelegate <NSObject>
 @optional
 
+// Called when the callout view detects that it will be outside the constrained view when it appears,
+// or if the target rect was already outside the constrained view. You can implement this selector to
+// respond to this situation by repositioning your content first in order to make everything visible. The
+// CGSize passed is the calculated offset necessary to make everything visible (plus a nice margin).
+// It expects you to return the amount of time you need to reposition things so the popup can be delayed.
+// Typically you would return kSMCalloutViewRepositionDelayForUIScrollView if you're repositioning by
+// calling [UIScrollView setContentOffset:animated:].
 - (NSTimeInterval)calloutView:(SMCalloutView *)calloutView delayForRepositionWithSize:(CGSize)offset;
 
 @end
