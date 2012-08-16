@@ -1,8 +1,7 @@
 #import "AppDelegate.h"
 #import <QuartzCore/QuartzCore.h>
 
-@implementation MapAnnotation
-@end
+@implementation MapAnnotation @end
 
 @implementation AppDelegate {
     UIScrollView *scrollView;

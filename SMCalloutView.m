@@ -20,6 +20,23 @@
 @end
 
 //
+// Callout View background
+//
+@implementation SMCalloutViewBackground
+
++ (SMCalloutViewBackground *)systemBackground {
+    SMCalloutViewBackground *background = [SMCalloutViewBackground new];
+    background.leftCapImage = [UIImage embeddedImageNamed:@"UICalloutViewLeftCap"];
+    background.rightCapImage = [UIImage embeddedImageNamed:@"UICalloutViewRightCap"];
+    background.topAnchorImage = [UIImage embeddedImageNamed:@"UICalloutViewTopAnchor"];
+    background.bottomAnchorImage = [UIImage embeddedImageNamed:@"UICalloutViewBottomAnchor"];
+    background.backgroundImage = [UIImage embeddedImageNamed:@"UICalloutViewBackground"];
+    return background;
+}
+
+@end
+
+//
 // Callout View
 //
 
@@ -51,15 +68,13 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 - (id)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-        
-        leftCap = [[UIImageView alloc] initWithImage:[UIImage embeddedImageNamed:@"UICalloutViewLeftCap"]];
-        rightCap = [[UIImageView alloc] initWithImage:[UIImage embeddedImageNamed:@"UICalloutViewRightCap"]];
-        topAnchor = [[UIImageView alloc] initWithImage:[UIImage embeddedImageNamed:@"UICalloutViewTopAnchor"]];
-        bottomAnchor = [[UIImageView alloc] initWithImage:[UIImage embeddedImageNamed:@"UICalloutViewBottomAnchor"]];
 
-        UIImage *background = [UIImage embeddedImageNamed:@"UICalloutViewBackground"];
-        leftBackground = [[UIImageView alloc] initWithImage:background];
-        rightBackground = [[UIImageView alloc] initWithImage:background];
+        leftCap = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 17, 57)];
+        rightCap = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 17, 57)];
+        topAnchor = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 41, 70)];
+        bottomAnchor = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 41, 70)];
+        leftBackground = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 1, 57)];
+        rightBackground = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 1, 57)];
         
         titleView = [UILabel new];
         titleView.opaque = NO;
@@ -113,6 +128,11 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     [_rightAccessoryView removeFromSuperview];
     _rightAccessoryView = rightAccessoryView_;
     [self addSubview:_rightAccessoryView];
+}
+
+- (SMCalloutViewBackground *)background {
+    // create our default background on first access only if it's nil, since you might have set your own background anyway.
+    return _background ?: (_background = [SMCalloutViewBackground systemBackground]);
 }
 
 - (CGFloat)titleMarginLeft {
@@ -250,7 +270,8 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     if (popupCancelled) return;
     
     // if we need to delay, we don't want to be visible while we're delaying, so shrink us in preparation for our popup
-    self.layer.transform = CATransform3DMakeScale(0, 0, 0);
+    if (delay > 0) self.layer.transform = CATransform3DMakeScale(0, 0, 0);
+    
     self.alpha = 1; // in case it's zero from fading out in -dismissCalloutAnimated
     
     CAKeyframeAnimation *bounceAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
@@ -293,6 +314,14 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 - (void)layoutSubviews {
 
+    // apply our background graphics
+    leftCap.image = self.background.leftCapImage;
+    rightCap.image = self.background.rightCapImage;
+    topAnchor.image = self.background.topAnchorImage;
+    bottomAnchor.image = self.background.bottomAnchorImage;
+    leftBackground.image = self.background.backgroundImage;
+    rightBackground.image = self.background.backgroundImage;
+    
     // if we're pointing up, we'll need to push almost everything down a bit
     CGFloat dy = !topAnchor.hidden ? TOP_ANCHOR_MARGIN : 0;
     leftCap.$y = rightCap.$y = leftBackground.$y = rightBackground.$y = dy;

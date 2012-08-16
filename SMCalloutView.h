@@ -12,12 +12,14 @@ typedef NSUInteger SMCalloutArrowDirection;
 extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 
 @protocol SMCalloutViewDelegate;
+@class SMCalloutViewBackground;
 
 @interface SMCalloutView : UIView
 
 @property (nonatomic, unsafe_unretained) id<SMCalloutViewDelegate> delegate;
 @property (nonatomic, copy) NSString *title, *subtitle;
 @property (nonatomic, retain) UIView *leftAccessoryView, *rightAccessoryView;
+@property (nonatomic, retain) SMCalloutViewBackground *background;
 
 // calloutOffset is the offset in screen points from the top-middle of the annotation view, where the anchor of the callout should be shown.
 @property (nonatomic, assign) CGPoint calloutOffset;
@@ -29,6 +31,11 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 
 - (void)dismissCalloutAnimated:(BOOL)animated;
 
+@end
+
+@interface SMCalloutViewBackground : NSObject
+@property (nonatomic, retain) UIImage *leftCapImage, *rightCapImage, *topAnchorImage, *bottomAnchorImage, *backgroundImage;
++ (SMCalloutViewBackground *)systemBackground;
 @end
 
 @protocol SMCalloutViewDelegate <NSObject>
