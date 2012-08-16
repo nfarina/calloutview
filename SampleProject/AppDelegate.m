@@ -13,11 +13,13 @@
 @end
 
 @implementation AppDelegate {
-//    UIScrollView *scrollView;
-//    UIImageView *marsView;
-    MKMapView *topMapView, *bottomMapView;
-    MKPinAnnotationView *topPin, *bottomPin;
+    UIScrollView *scrollView;
+    UIImageView *marsView;
+    MKPinAnnotationView *topPin;
     SMCalloutView *calloutView;
+    
+    MKMapView *bottomMapView;
+    MKPinAnnotationView *bottomPin;
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -27,58 +29,59 @@
     
     CGRect half = CGRectMake(0, 0, self.window.frame.size.width, self.window.frame.size.height/2);
     
-    MapAnnotation *capeCanaveral = [MapAnnotation new];
-    capeCanaveral.coordinate = (CLLocationCoordinate2D){28.388154, -80.604200};
-    capeCanaveral.title = @"Cape Canaveral";
-    capeCanaveral.subtitle = @"It's a great place to visit!";
-
     //
     // Fill top half with a custom view (image) inside a scroll view along with a custom pin view that triggers our custom MTCalloutView.
     //
     
-//    scrollView = [[UIScrollView alloc] initWithFrame:half];
-//    
-//    marsView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"mars.jpg"]];
-//    marsView.userInteractionEnabled = YES;
-//    [marsView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(marsTapped)]];
-//    
-//    [scrollView addSubview:marsView];
-//    scrollView.contentSize = marsView.frame.size;
-//    
-//    pin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
-//    pin.center = CGPointMake(half.size.width/2, half.size.height/2 + 50);
-//    [pin addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(pinTapped)]];
-//    [marsView addSubview:pin];
+    scrollView = [[UIScrollView alloc] initWithFrame:half];
+    
+    marsView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"mars.jpg"]];
+    marsView.userInteractionEnabled = YES;
+    [marsView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(marsTapped)]];
+    
+    [scrollView addSubview:marsView];
+    scrollView.contentSize = marsView.frame.size;
+    
+    topPin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
+    topPin.center = CGPointMake(half.size.width/2, half.size.height/2 + 50);
+    [topPin addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(pinTapped)]];
+    [marsView addSubview:topPin];
+
+    calloutView = [SMCalloutView new];
+    calloutView.delegate = self;
+    calloutView.title = @"Curiosity";
+    calloutView.rightAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+    calloutView.calloutOffset = topPin.calloutOffset;
 
     //
     // Fill top half with an MKMapView with a pin view that triggers our custom MTCalloutView.
     //
 
-    topPin = [[MKPinAnnotationView alloc] initWithAnnotation:capeCanaveral reuseIdentifier:@""];
-    topPin.canShowCallout = NO;
-    [topPin addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(pinTapped:)]];
-
-    topMapView = [[MKMapView alloc] initWithFrame:half];
-    topMapView.delegate = self;
-    [topMapView addAnnotation:capeCanaveral];
-    [topMapView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(mapTapped)]];
-    
-    calloutView = [SMCalloutView new];
-    calloutView.delegate = self;
-    calloutView.title = capeCanaveral.title;
-    calloutView.subtitle = capeCanaveral.subtitle;
-//    calloutView.leftAccessoryView = [[UIView alloc] initWithFrame:CGRectMake(0,0, 30, 30)]; // [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-//    calloutView.leftAccessoryView.backgroundColor = [UIColor redColor];
-    calloutView.rightAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-    calloutView.calloutOffset = topPin.calloutOffset;
+//    topPin = [[MKPinAnnotationView alloc] initWithAnnotation:capeCanaveral reuseIdentifier:@""];
+//    topPin.canShowCallout = NO;
+//    [topPin addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(pinTapped)]];
+//
+//    topMapView = [[MKMapView alloc] initWithFrame:half];
+//    topMapView.delegate = self;
+//    [topMapView addAnnotation:capeCanaveral];
+//    [topMapView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(mapTapped)]];
+//
+//    calloutView = [SMCalloutView new];
+//    calloutView.delegate = self;
+//    calloutView.title = capeCanaveral.title;
+//    calloutView.subtitle = capeCanaveral.subtitle;
+//    calloutView.rightAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+//    calloutView.calloutOffset = topPin.calloutOffset;
 
     //
     // Fill the bottom half of our window with a standard MKMapView with pin+callout for comparison
     //
     
+    MapAnnotation *capeCanaveral = [MapAnnotation new];
+    capeCanaveral.coordinate = (CLLocationCoordinate2D){28.388154, -80.604200};
+    capeCanaveral.title = @"Cape Canaveral";
+
     bottomPin = [[MKPinAnnotationView alloc] initWithAnnotation:capeCanaveral reuseIdentifier:@""];
-//    bottomPin.leftCalloutAccessoryView = [[UIView alloc] initWithFrame:CGRectMake(0,0, 30, 30)]; // [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-//    bottomPin.leftCalloutAccessoryView.backgroundColor = [UIColor redColor];
     bottomPin.rightCalloutAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
     bottomPin.canShowCallout = YES;
 
@@ -90,24 +93,24 @@
     // Put it all on the screen.
     //
 
-    [self.window addSubview:topMapView];
+    [self.window addSubview:scrollView];
     [self.window addSubview:bottomMapView];
 
     [self.window makeKeyAndVisible];
     
-    [self performSelector:@selector(popup) withObject:nil afterDelay:0];
+    [self performSelector:@selector(popup) withObject:nil afterDelay:1];
     [self performSelector:@selector(printHierarchy) withObject:nil afterDelay:5];
     
     return YES;
 }
 
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation {
-    return mapView == topMapView ? topPin : bottomPin;
+//    return mapView == topMapView ? topPin : bottomPin;
+    return bottomPin;
 }
 
-- (void)pinTapped:(UITapGestureRecognizer *)recognizer {
-    [calloutView presentCalloutFromRect:topPin.bounds inView:topPin constrainedToView:topMapView permittedArrowDirections:SMCalloutArrowDirectionAny animated:YES];
-//    [self performSelector:@selector(popup) withObject:nil afterDelay:1.0/3.0];
+- (void)pinTapped {
+    [calloutView presentCalloutFromRect:topPin.bounds inView:topPin constrainedToView:marsView permittedArrowDirections:SMCalloutArrowDirectionAny animated:YES];
 }
 
 - (void)mapTapped {
@@ -120,7 +123,7 @@
 
 - (void)popup {
     
-    [calloutView presentCalloutFromRect:topPin.bounds inView:topPin constrainedToView:topMapView permittedArrowDirections:SMCalloutArrowDirectionAny animated:YES];
+    [calloutView presentCalloutFromRect:topPin.bounds inView:topPin constrainedToView:marsView permittedArrowDirections:SMCalloutArrowDirectionAny animated:YES];
     
     [bottomMapView selectAnnotation:bottomPin.annotation animated:YES];
     
@@ -155,7 +158,7 @@
 //        NSLog(@"OUR Size that fits %i,100: %@", x, NSStringFromCGSize([calloutView sizeThatFits:CGSizeMake(x, 100)]));
 //    }
     
-    NSLog(@"%@", self.window.recursiveDescription);
+//    NSLog(@"%@", self.window.recursiveDescription);
     
 //    CABasicAnimation *animation = (CABasicAnimation *)[callout.layer animationForKey:@"transform"];
 //    NSLog(@"Callout: %@ duration:%f tx:%@", animation, animation.duration, NSStringFromCGAffineTransform(callout.transform));
