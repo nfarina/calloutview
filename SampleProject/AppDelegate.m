@@ -40,7 +40,8 @@
 
     calloutView = [SMCalloutView new];
     calloutView.delegate = self;
-    calloutView.title = @"Curiosity";
+    calloutView.titleView.text = @"Curiosity";
+    calloutView.subtitleView.text = @"10 Photos";
     calloutView.rightAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
     calloutView.calloutOffset = topPin.calloutOffset;
 

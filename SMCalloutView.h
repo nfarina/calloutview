@@ -14,10 +14,14 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 @protocol SMCalloutViewDelegate;
 @class SMCalloutViewBackground;
 
+//
+// Callout view.
+//
+
 @interface SMCalloutView : UIView
 
 @property (nonatomic, unsafe_unretained) id<SMCalloutViewDelegate> delegate;
-@property (nonatomic, copy) NSString *title, *subtitle;
+@property (nonatomic, readonly) UILabel *titleView, *subtitleView;
 @property (nonatomic, retain) UIView *leftAccessoryView, *rightAccessoryView;
 @property (nonatomic, retain) SMCalloutViewBackground *background;
 
@@ -32,6 +36,10 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 - (void)dismissCalloutAnimated:(BOOL)animated;
 
 @end
+
+//
+// Class for collating the various background images that are pieced together to form the overall background graphic with the pointy arrow.
+//
 
 @interface SMCalloutViewBackground : NSObject
 @property (nonatomic, retain) UIImage *leftCapImage, *rightCapImage, *topAnchorImage, *bottomAnchorImage, *backgroundImage;
