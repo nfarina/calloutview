@@ -38,11 +38,13 @@
     [topPin addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(topPinTapped)]];
     [marsView addSubview:topPin];
 
+    UIButton *disclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+    [disclosure addTarget:self action:@selector(disclosureTapped) forControlEvents:UIControlEventTouchUpInside];
+    
     calloutView = [SMCalloutView new];
     calloutView.delegate = self;
     calloutView.titleView.text = @"Curiosity";
-    calloutView.subtitleView.text = @"10 Photos";
-    calloutView.rightAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+    calloutView.rightAccessoryView = disclosure;
     calloutView.calloutOffset = topPin.calloutOffset;
 
     //
@@ -77,13 +79,28 @@
 }
 
 - (void)topPinTapped {
-    // show our callout!
-    [calloutView presentCalloutFromRect:topPin.bounds inView:topPin constrainedToView:scrollView permittedArrowDirections:SMCalloutArrowDirectionDown animated:YES];
+    // show our callout if it's not already shown!
+    // now in this example we're going to introduce an artificial delay in order to make our popup feel identical to MKMapView.
+    // MKMapView has a delay after tapping so that it can intercept a double-tap for zooming. We don't need that delay but we'll
+    // add it just so things feel the same.
+    if (!calloutView.window)
+        [self performSelector:@selector(popupCalloutView) withObject:nil afterDelay:1.0/3.0];
+}
+
+- (void)popupCalloutView {
+
+    // This does all the magic.
+    [calloutView presentCalloutFromRect:topPin.frame
+                                 inView:marsView
+                      constrainedToView:scrollView
+               permittedArrowDirections:SMCalloutArrowDirectionDown
+                               animated:YES];
+    
 }
 
 - (NSTimeInterval)calloutView:(SMCalloutView *)theCalloutView delayForRepositionWithSize:(CGSize)offset {
     
-    // We could cancel the popup here if we wanted to:
+    // Uncomment this to cancel the popup
     // [calloutView dismissCalloutAnimated:NO];
 
     [scrollView setContentOffset:CGPointMake(scrollView.contentOffset.x-offset.width, scrollView.contentOffset.y-offset.height) animated:YES];
@@ -91,8 +108,15 @@
     return kSMCalloutViewRepositionDelayForUIScrollView;
 }
 
+- (void)disclosureTapped {
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Tap!" message:@"You tapped the disclosure button."
+                                                   delegate:nil cancelButtonTitle:nil otherButtonTitles:@"Whatevs",nil];
+    [alert show];
+}
+
 - (void)marsTapped {
-    [calloutView dismissCalloutAnimated:NO];
+    // again, we'll introduce an artifical delay to feel more like MKMapView for this demonstration.
+    [calloutView performSelector:@selector(dismissCalloutAnimated:) withObject:nil afterDelay:1.0/3.0];
 }
 
 @end
