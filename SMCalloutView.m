@@ -7,9 +7,9 @@
 
 @interface UIView (SMFrameAdditions)
 @property (nonatomic, assign) CGPoint $origin;
-@property (nonatomic, assign) CGFloat $x, $y, $width, $height, $left, $top, $right, $bottom;
 @property (nonatomic, assign) CGSize $size;
-- (void)presentCallout:(NSNumber *)animated;
+@property (nonatomic, assign) CGFloat $x, $y, $width, $height; // normal rect properties
+@property (nonatomic, assign) CGFloat $left, $top, $right, $bottom; // these will stretch/shrink the rect
 @end
 
 //
@@ -290,8 +290,8 @@ NSTimeInterval kSMCalloutViewRepositionDelayStandard = 0.3;
     topAnchor.$origin = CGPointMake(anchorX, 0);
     
     // make sure the anchor graphic isn't overlapping with an endcap
-    if (topAnchor.$left < leftCap.$right) topAnchor.$left = leftCap.$right;
-    if (topAnchor.$right > rightCap.$left) topAnchor.$left = rightCap.$left - topAnchor.$width; // don't stretch it
+    if (topAnchor.$left < leftCap.$right) topAnchor.$x = leftCap.$right;
+    if (topAnchor.$right > rightCap.$left) topAnchor.$x = rightCap.$left - topAnchor.$width; // don't stretch it
 
     bottomAnchor.$origin = topAnchor.$origin; // match
 
@@ -349,10 +349,10 @@ NSTimeInterval kSMCalloutViewRepositionDelayStandard = 0.3;
 - (void)set$height:(CGFloat)height { self.frame = (CGRect){ .origin=self.frame.origin, .size.width=self.frame.size.width, .size.height=height }; }
 
 - (CGFloat)$left { return self.frame.origin.x; }
-- (void)set$left:(CGFloat)left { self.frame = (CGRect){ .origin.x=left, .origin.y=self.frame.origin.y, .size=self.frame.size }; }
+- (void)set$left:(CGFloat)left { self.frame = (CGRect){ .origin.x=left, .origin.y=self.frame.origin.y, .size.width=MAX(self.frame.origin.x+self.frame.size.width-left,0), .size.height=self.frame.size.height }; }
 
 - (CGFloat)$top { return self.frame.origin.y; }
-- (void)set$top:(CGFloat)top { self.frame = (CGRect){ .origin.x=self.frame.origin.x, .origin.y=top, .size=self.frame.size }; }
+- (void)set$top:(CGFloat)top { self.frame = (CGRect){ .origin.x=self.frame.origin.x, .origin.y=top, .size.width=self.frame.size.width, .size.height=MAX(self.frame.origin.y+self.frame.size.height-top,0) }; }
 
 - (CGFloat)$right { return self.frame.origin.x + self.frame.size.width; }
 - (void)set$right:(CGFloat)right { self.frame = (CGRect){ .origin=self.frame.origin, .size.width=MAX(right-self.frame.origin.x,0), .size.height=self.frame.size.height }; }
