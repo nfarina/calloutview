@@ -13,30 +13,6 @@
 @end
 
 //
-// Helpers to load our embedded images.
-//
-@interface UIImage (SMEmbeddedImageAdditions)
-+ (UIImage *)embeddedImageNamed:(NSString *)name;
-@end
-
-//
-// Callout View background.
-//
-@implementation SMCalloutViewBackground
-
-+ (SMCalloutViewBackground *)systemBackground {
-    SMCalloutViewBackground *background = [SMCalloutViewBackground new];
-    background.leftCapImage = [UIImage embeddedImageNamed:@"UICalloutViewLeftCap"];
-    background.rightCapImage = [UIImage embeddedImageNamed:@"UICalloutViewRightCap"];
-    background.topAnchorImage = [UIImage embeddedImageNamed:@"UICalloutViewTopAnchor"];
-    background.bottomAnchorImage = [UIImage embeddedImageNamed:@"UICalloutViewBottomAnchor"];
-    background.backgroundImage = [UIImage embeddedImageNamed:@"UICalloutViewBackground"];
-    return background;
-}
-
-@end
-
-//
 // Callout View.
 //
 
@@ -396,12 +372,23 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 @end
 
-
 //
-// Helper function for decoding Base64-encoded strings
+// Callout View background.
 //
 
-NSData *NSDataWithBase64EncodedString(NSString *string) {
+@implementation SMCalloutViewBackground
+
++ (SMCalloutViewBackground *)systemBackground {
+    SMCalloutViewBackground *background = [SMCalloutViewBackground new];
+    background.leftCapImage = [self embeddedImageNamed:@"UICalloutViewLeftCap"];
+    background.rightCapImage = [self embeddedImageNamed:@"UICalloutViewRightCap"];
+    background.topAnchorImage = [self embeddedImageNamed:@"UICalloutViewTopAnchor"];
+    background.bottomAnchorImage = [self embeddedImageNamed:@"UICalloutViewBottomAnchor"];
+    background.backgroundImage = [self embeddedImageNamed:@"UICalloutViewBackground"];
+    return background;
+}
+
++ (NSData *)dataWithBase64EncodedString:(NSString *)string {
     //
     //  NSData+Base64.m
     //
@@ -478,13 +465,6 @@ NSData *NSDataWithBase64EncodedString(NSString *string) {
     return outputLength? outputData: nil;
 }
 
-
-//
-// Our embedded UIImage helpers implementation
-//
-
-@implementation UIImage (SMEmbeddedImageAdditions)
-
 + (UIImage *)embeddedImageNamed:(NSString *)name {
     if ([UIScreen mainScreen].scale == 2)
         name = [name stringByAppendingString:@"$2x"];
@@ -502,19 +482,14 @@ NSData *NSDataWithBase64EncodedString(NSString *string) {
     NSString *base64String = [(id)self performSelector:selector];
     #pragma clang diagnostic pop
     
-    UIImage *rawImage = [UIImage imageWithData:NSDataWithBase64EncodedString(base64String)];
+    UIImage *rawImage = [UIImage imageWithData:[self dataWithBase64EncodedString:base64String]];
     return [UIImage imageWithCGImage:rawImage.CGImage scale:[UIScreen mainScreen].scale orientation:UIImageOrientationUp];
 }
-
-@end
-
 
 //
 // I didn't want this class to require adding any images to your Xcode project. So instead the images needed are embedded below.
 // These images were extracted using the amazing UIKit-Artwork-Extractor by @0xced: https://github.com/0xced/UIKit-Artwork-Extractor/
 //
-
-@implementation UIImage (SMCalloutViewImages)
 
 + (NSString *)UICalloutViewLeftCap { return @"iVBORw0KGgoAAAANSUhEUgAAABEAAAA5CAYAAADQksChAAAAHGlET1QAAAACAAAAAAAAAB0AAAAoAAAAHQAAABwAAAKS6krCNQAAAl5JREFUSA2klNmKGkEUhs0yM9nIglnctQc3zKioqOCKwQVXFBRUcLnxwvtci88gPkpeIlATEshVSM2rmP9UUo3dajuQi49TVX3OZ3mquk273c50DpPJ9OAID7H2l2MCXYFMfoT1xzouML842MU/gabQ4XAUo9Ho10KhcFcqlbgejWRPIH/10ul0fq7X67/X6/X3zWZzu91umR5VohPQNq/MZvOndrv9a7VafVssFmw+n7PZbKYi50JyTIC1Zz6f78tyufwxnU7ZZDI5iV5CjbsiAXiZy+V+jsfjW8BGo9FJ9iXUh0vwlATAnEwm74bDIRsMBoZICZ2G3MULjN8ASzgc5v1+n3W73QN6vR4j6BlyxUUiCTVT7uIdxo5QKMQpqdPpaGi1WmIuI3KFRP6V55iLXSAqgUCAUyKOmDWbTdZoNESUY5oT+xJqKP0VM7ADL06HU0GtVlOpVqtMIteRK3ZC/XgCqKFvgRMEvF4vp4JyuWwIcg8k77HmBiFFUXilUmG45oaQRJ4MNfUV+AA84KPH46H3hBWLRZbP50WUY5pLkKuRvMbcAhRwQxIqwqUzBLlCQsdLt1QjcblcnASZTEZDNptV5zQ+JbnGgxuSUFI6nTbESBLGZ4DTLlKplGBfJtconpVQId4hVUTj/flZCb5oPBaLsXg8LkgkEuwYhjux2+0cF06VkExKZaS1sxJcOOb3+0UxFR7DUGK1WjlJcEqMYjAYZPg8sEgkouGsxO12M5wSQ380kdYk95KQwIj/kthsNiE3lFgsFk79oGRZIMcy0g7vJUGDVZEslpGe/QEAAP//KqClBgAAAfBJREFU7ZTRatNQHIfjdFaj1El1prW2Sbti2aZeKEMFB+pAEFREFAa79d5n8YF8gkzUi93M7VXq9x08I82y7QH04iNpOP34/37nJEmSJAuwCCksQQYjuJdl2cFgMCh7vV6g2+2WVXzub9aeLan+sen+v2S+3H+12Hioms7IWZ2ss+AwntiTBKdJCk6hkr08z3f7/f7cca8L44m9wM1liO9OkHQ6nW/j8fjncDgsFZ0Uqy65xoNbkMNamqafEexPJpPvo9GoNFoTrE3OgZNcgjYswxBWYaPdbn9lmt/T6fQH7EJZh3XHJDd4dgfuwkPYbLVaX4jyqyiKQ4QHdVgTJOe5tuAqdOA2rMADeAov4DW8h0+wDTsVjiQXeXgFroMfJstdg0fwDLZA0Tv4AB9BoQRJ/Lq5Q/ZyE/owgfuwAYpewitQ9gbeBmazGdfwdbPcGClOY8F2o8iJjLYJz0Gh020lfyXukL0YKU5jN11Q5ERGsyPLdrLH8CRQkRgpTpNybyxF9mM0O1oBJ1sFpeuBmsRp/PIbK4qMZkfK3DW33+lyUFyEOKeIjOa2O5UyJ1O4DJ5sxdmRpEFkNDvyJCtz+6NQqa+I79rSnKQmsiPjKTOiQmMqjWLl6TFJReSOibKqUGlE+WKjRFEVFkZh9RrlC38A3S8C8jPZQY0AAAAASUVORK5CYII="; }
 + (NSString *)UICalloutViewLeftCap$2x { return @"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"; }
