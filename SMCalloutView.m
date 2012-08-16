@@ -46,9 +46,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 @implementation SMCalloutView {
     UIImageView *leftCap, *rightCap, *topAnchor, *bottomAnchor, *leftBackground, *rightBackground;
     UILabel *titleView, *subtitleView;
-    
-    CGRect lastConstrainedRect; // remember the last rect we were constrained in; so we can grow later if needed
-    BOOL popupCancelled, relayoutNeeded;
+    BOOL popupCancelled;
 }
 
 - (id)initWithFrame:(CGRect)frame {
@@ -269,11 +267,8 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 }
 
 - (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
+    // because we set our scale to zero in preparation for animating in, we need to set it back to identity here
     self.layer.transform = CATransform3DIdentity;
-    
-    if (relayoutNeeded) {
-        // relayout!
-    }
 }
 
 - (void)dismissCalloutAnimated:(BOOL)animated {
