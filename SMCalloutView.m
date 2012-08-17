@@ -35,6 +35,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 #define TOP_ANCHOR_MARGIN 13 // all the above measurements assume a bottom anchor! if we're pointing "up" we'll need to add this top margin to everything.
 #define BOTTOM_ANCHOR_MARGIN 10 // if using a bottom anchor, we'll need to account for the shadow below the "tip"
 #define CONTENT_MARGIN 10 // when we try to reposition content to be visible, we'll consider this margin around your target rect
+#define BOUNCE_ANIMATION_DURATION (1.0/3.0) // the official bounce animation duration adds up to 0.3 seconds; but there is a bit of delay introduced by Apple using a sequence of callback-based CABasicAnimations rather than a single CAKeyframeAnimation. So we bump it up to 0.33333 to make it feel identical on the device.
 
 @implementation SMCalloutView {
     UIImageView *leftCap, *rightCap, *topAnchor, *bottomAnchor, *leftBackground, *rightBackground;
@@ -246,7 +247,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     bounceAnimation.beginTime = CACurrentMediaTime() + delay;
     bounceAnimation.values = @[@0.05, @1.11245, @0.951807, @1.0];
     bounceAnimation.keyTimes = @[@0, @(4.0/9.0), @(4.0/9.0+5.0/18.0), @1.0];
-    bounceAnimation.duration = animated ? 0.3 : 0;
+    bounceAnimation.duration = animated ? BOUNCE_ANIMATION_DURATION : 0;
     bounceAnimation.timingFunctions = @[easeInOut, easeInOut, easeInOut, easeInOut];
     bounceAnimation.delegate = self;
     
