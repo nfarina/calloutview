@@ -236,8 +236,8 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     // happened then we need to bail!
     if (popupCancelled) return;
     
-    // if we need to delay, we don't want to be visible while we're delaying, so shrink us in preparation for our popup
-    if (delay > 0) self.layer.transform = CATransform3DMakeScale(0, 0, 0);
+    // if we need to delay, we don't want to be visible while we're delaying, so hide us in preparation for our popup
+    self.hidden = YES;
     
     self.alpha = 1; // in case it's zero from fading out in -dismissCalloutAnimated
     
@@ -254,9 +254,9 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     [self.layer addAnimation:bounceAnimation forKey:@"bounce"];
 }
 
-- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
-    // because we set our scale to zero in preparation for animating in, we need to set it back to identity here
-    self.layer.transform = CATransform3DIdentity;
+- (void)animationDidStart:(CAAnimation *)anim {
+    // ok, animation is on, let's make ourselves visible!
+    self.hidden = NO;
 }
 
 - (void)dismissCalloutAnimated:(BOOL)animated {
