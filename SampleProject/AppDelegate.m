@@ -34,7 +34,7 @@
     scrollView.contentOffset = CGPointMake(150, 50);
     
     topPin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
-    topPin.center = CGPointMake(half.size.width/2 + 190, half.size.height/2 + 120);
+    topPin.center = CGPointMake(half.size.width/2 + 230, half.size.height/2 + 120);
     [topPin addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(topPinTapped)]];
     [marsView addSubview:topPin];
 
