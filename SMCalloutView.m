@@ -139,17 +139,17 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     CGSize preferredSubtitleSize = [self.subtitleView sizeThatFits:CGSizeMake(availableWidthForText, SUBTITLE_HEIGHT)];
     
     // total width we'd like
-    CGFloat preferredWidth = MAX(preferredTitleSize.width, preferredSubtitleSize.width) + margin;
+    CGFloat preferredWidth = fmaxf(preferredTitleSize.width, preferredSubtitleSize.width) + margin;
     
     // ask to be smaller if we have space, otherwise we'll fit into what we have by truncating the title/subtitle.
-    return CGSizeMake(MIN(preferredWidth, size.width), CALLOUT_HEIGHT);
+    return CGSizeMake(fminf(preferredWidth, size.width), CALLOUT_HEIGHT);
 }
 
 - (CGSize)offsetToContainRect:(CGRect)innerRect inRect:(CGRect)outerRect {
-    CGFloat nudgeRight = MAX(0, CGRectGetMinX(outerRect) - CGRectGetMinX(innerRect));
-    CGFloat nudgeLeft = MIN(0, CGRectGetMaxX(outerRect) - CGRectGetMaxX(innerRect));
-    CGFloat nudgeTop = MAX(0, CGRectGetMinY(outerRect) - CGRectGetMinY(innerRect));
-    CGFloat nudgeBottom = MIN(0, CGRectGetMaxY(outerRect) - CGRectGetMaxY(innerRect));
+    CGFloat nudgeRight = fmaxf(0, CGRectGetMinX(outerRect) - CGRectGetMinX(innerRect));
+    CGFloat nudgeLeft = fminf(0, CGRectGetMaxX(outerRect) - CGRectGetMaxX(innerRect));
+    CGFloat nudgeTop = fmaxf(0, CGRectGetMinY(outerRect) - CGRectGetMinY(innerRect));
+    CGFloat nudgeBottom = fminf(0, CGRectGetMaxY(outerRect) - CGRectGetMaxY(innerRect));
     return CGSizeMake(nudgeLeft ?: nudgeRight, nudgeTop ?: nudgeBottom);
 }
 
@@ -360,16 +360,16 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 - (void)set$height:(CGFloat)height { self.frame = (CGRect){ .origin=self.frame.origin, .size.width=self.frame.size.width, .size.height=height }; }
 
 - (CGFloat)$left { return self.frame.origin.x; }
-- (void)set$left:(CGFloat)left { self.frame = (CGRect){ .origin.x=left, .origin.y=self.frame.origin.y, .size.width=MAX(self.frame.origin.x+self.frame.size.width-left,0), .size.height=self.frame.size.height }; }
+- (void)set$left:(CGFloat)left { self.frame = (CGRect){ .origin.x=left, .origin.y=self.frame.origin.y, .size.width=fmaxf(self.frame.origin.x+self.frame.size.width-left,0), .size.height=self.frame.size.height }; }
 
 - (CGFloat)$top { return self.frame.origin.y; }
-- (void)set$top:(CGFloat)top { self.frame = (CGRect){ .origin.x=self.frame.origin.x, .origin.y=top, .size.width=self.frame.size.width, .size.height=MAX(self.frame.origin.y+self.frame.size.height-top,0) }; }
+- (void)set$top:(CGFloat)top { self.frame = (CGRect){ .origin.x=self.frame.origin.x, .origin.y=top, .size.width=self.frame.size.width, .size.height=fmaxf(self.frame.origin.y+self.frame.size.height-top,0) }; }
 
 - (CGFloat)$right { return self.frame.origin.x + self.frame.size.width; }
-- (void)set$right:(CGFloat)right { self.frame = (CGRect){ .origin=self.frame.origin, .size.width=MAX(right-self.frame.origin.x,0), .size.height=self.frame.size.height }; }
+- (void)set$right:(CGFloat)right { self.frame = (CGRect){ .origin=self.frame.origin, .size.width=fmaxf(right-self.frame.origin.x,0), .size.height=self.frame.size.height }; }
 
 - (CGFloat)$bottom { return self.frame.origin.y + self.frame.size.height; }
-- (void)set$bottom:(CGFloat)bottom { self.frame = (CGRect){ .origin=self.frame.origin, .size.width=self.frame.size.width, .size.height=MAX(bottom-self.frame.origin.y,0) }; }
+- (void)set$bottom:(CGFloat)bottom { self.frame = (CGRect){ .origin=self.frame.origin, .size.width=self.frame.size.width, .size.height=fmaxf(bottom-self.frame.origin.y,0) }; }
 
 @end
 
