@@ -17,7 +17,7 @@ You can study the included project's `AppDelegate.m` for a working example.
 
 You can read more info if you wish in the [blog post][].
 
-  [blog post]: http://nfarina.com
+  [blog post]: http://nfarina.com/post/29883229869/callout-view
 
 ### ARC Support
 
