@@ -38,71 +38,81 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 #define BOUNCE_ANIMATION_DURATION (1.0/3.0) // the official bounce animation duration adds up to 0.3 seconds; but there is a bit of delay introduced by Apple using a sequence of callback-based CABasicAnimations rather than a single CAKeyframeAnimation. So we bump it up to 0.33333 to make it feel identical on the device.
 
 @implementation SMCalloutView {
+    UILabel *titleLabel, *subtitleLabel;
     UIImageView *leftCap, *rightCap, *topAnchor, *bottomAnchor, *leftBackground, *rightBackground;
     BOOL popupCancelled;
 }
 
 - (id)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-
         leftCap = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 17, 57)];
         rightCap = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 17, 57)];
         topAnchor = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 41, 70)];
         bottomAnchor = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 41, 70)];
         leftBackground = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 1, 57)];
         rightBackground = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 1, 57)];
-        
-        _titleView = [UILabel new];
-        self.titleView.opaque = NO;
-        self.titleView.backgroundColor = [UIColor clearColor];
-        self.titleView.font = [UIFont boldSystemFontOfSize:17];
-        self.titleView.textColor = [UIColor whiteColor];
-        self.titleView.shadowColor = [UIColor colorWithWhite:0 alpha:0.5];
-        self.titleView.shadowOffset = CGSizeMake(0, -1);
-
-        _subtitleView = [UILabel new];
-        self.subtitleView.opaque = NO;
-        self.subtitleView.backgroundColor = [UIColor clearColor];
-        self.subtitleView.font = [UIFont systemFontOfSize:12];
-        self.subtitleView.textColor = [UIColor whiteColor];
-        self.subtitleView.shadowColor = [UIColor colorWithWhite:0 alpha:0.5];
-        self.subtitleView.shadowOffset = CGSizeMake(0, -1);
-
-        // these never change, no matter how we're laid out
-        leftCap.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
-        rightCap.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
-        leftBackground.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        rightBackground.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        self.titleView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        self.subtitleView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-
-        [self addSubview:leftCap];
-        [self addSubview:rightCap];
-        [self addSubview:topAnchor];
-        [self addSubview:bottomAnchor];
-        [self addSubview:leftBackground];
-        [self addSubview:rightBackground];
-        [self addSubview:self.titleView];
-        [self addSubview:self.subtitleView];
     }
     return self;
 }
 
-- (void)setLeftAccessoryView:(UIView *)leftAccessoryView_ {
-    [_leftAccessoryView removeFromSuperview];
-    _leftAccessoryView = leftAccessoryView_;
-    [self addSubview:_leftAccessoryView];
+- (UIView *)titleViewOrDefault {
+    if (self.titleView)
+        // if you have a custom title view defined, return that.
+        return self.titleView;
+    else {
+        if (!titleLabel) {
+            // create a default titleView
+            titleLabel = [UILabel new];
+            titleLabel.$height = TITLE_HEIGHT;
+            titleLabel.opaque = NO;
+            titleLabel.backgroundColor = [UIColor clearColor];
+            titleLabel.font = [UIFont boldSystemFontOfSize:17];
+            titleLabel.textColor = [UIColor whiteColor];
+            titleLabel.shadowColor = [UIColor colorWithWhite:0 alpha:0.5];
+            titleLabel.shadowOffset = CGSizeMake(0, -1);
+        }
+        return titleLabel;
+    }
 }
 
-- (void)setRightAccessoryView:(UIView *)rightAccessoryView_ {
-    [_rightAccessoryView removeFromSuperview];
-    _rightAccessoryView = rightAccessoryView_;
-    [self addSubview:_rightAccessoryView];
+- (UIView *)subtitleViewOrDefault {
+    if (self.subtitleView)
+        // if you have a custom subtitle view defined, return that.
+        return self.subtitleView;
+    else {
+        if (!subtitleLabel) {
+            // create a default subtitleView
+            subtitleLabel = [UILabel new];
+            subtitleLabel.$height = SUBTITLE_HEIGHT;
+            subtitleLabel.opaque = NO;
+            subtitleLabel.backgroundColor = [UIColor clearColor];
+            subtitleLabel.font = [UIFont systemFontOfSize:12];
+            subtitleLabel.textColor = [UIColor whiteColor];
+            subtitleLabel.shadowColor = [UIColor colorWithWhite:0 alpha:0.5];
+            subtitleLabel.shadowOffset = CGSizeMake(0, -1);
+        }
+        return subtitleLabel;
+    }
 }
 
 - (SMCalloutViewBackground *)background {
     // create our default background on first access only if it's nil, since you might have set your own background anyway.
     return _background ?: (_background = [SMCalloutViewBackground systemBackground]);
+}
+
+- (void)rebuildSubviews {
+    // remove and re-add our appropriate subviews in the appropriate order
+    [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    [self addSubview:leftCap];
+    [self addSubview:rightCap];
+    [self addSubview:topAnchor];
+    [self addSubview:bottomAnchor];
+    [self addSubview:leftBackground];
+    [self addSubview:rightBackground];
+    if (self.titleViewOrDefault) [self addSubview:self.titleViewOrDefault];
+    if (self.subtitleViewOrDefault) [self addSubview:self.subtitleViewOrDefault];
+    if (self.leftAccessoryView) [self addSubview:self.leftAccessoryView];
+    if (self.rightAccessoryView) [self addSubview:self.rightAccessoryView];
 }
 
 - (CGFloat)titleMarginLeft {
@@ -135,8 +145,8 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     if (availableWidthForText < 0)
         availableWidthForText = 0;
 
-    CGSize preferredTitleSize = [self.titleView sizeThatFits:CGSizeMake(availableWidthForText, TITLE_HEIGHT)];
-    CGSize preferredSubtitleSize = [self.subtitleView sizeThatFits:CGSizeMake(availableWidthForText, SUBTITLE_HEIGHT)];
+    CGSize preferredTitleSize = [self.titleViewOrDefault sizeThatFits:CGSizeMake(availableWidthForText, TITLE_HEIGHT)];
+    CGSize preferredSubtitleSize = [self.subtitleViewOrDefault sizeThatFits:CGSizeMake(availableWidthForText, SUBTITLE_HEIGHT)];
     
     // total width we'd like
     CGFloat preferredWidth = fmaxf(preferredTitleSize.width, preferredSubtitleSize.width) + margin;
@@ -157,7 +167,14 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
     // figure out the constrained view's rect in our popup view's coordinate system
     CGRect constrainedRect = [constrainedView convertRect:constrainedView.bounds toView:view];
+
+    // form our subviews based on our content set so far
+    [self rebuildSubviews];
     
+    // apply title/subtitle (if present
+    titleLabel.text = self.title;
+    subtitleLabel.text = self.subtitle;
+        
     // size the callout to fit the width constraint as best as possible
     self.$size = [self sizeThatFits:CGSizeMake(constrainedRect.size.width, CALLOUT_HEIGHT)];
     
@@ -311,26 +328,19 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     rightBackground.$left = topAnchor.$right;
     rightBackground.$right = rightCap.$left;
     
-    self.titleView.$x = self.titleMarginLeft;
-    self.titleView.$y = (self.subtitleView.text.length ? TITLE_SUB_TOP : TITLE_TOP) + dy;
-    self.titleView.$width = self.$width - self.titleMarginLeft - self.titleMarginRight;
-    self.titleView.$height = TITLE_HEIGHT;
+    self.titleViewOrDefault.$x = self.titleMarginLeft;
+    self.titleViewOrDefault.$y = (self.subtitleView || self.subtitle.length ? TITLE_SUB_TOP : TITLE_TOP) + dy;
+    self.titleViewOrDefault.$width = self.$width - self.titleMarginLeft - self.titleMarginRight;
     
-    self.subtitleView.$x = self.titleView.$x;
-    self.subtitleView.$y = SUBTITLE_TOP + dy;
-    self.subtitleView.$width = self.titleView.$width;
-    self.subtitleView.$height = SUBTITLE_HEIGHT;
+    self.subtitleViewOrDefault.$x = self.titleViewOrDefault.$x;
+    self.subtitleViewOrDefault.$y = SUBTITLE_TOP + dy;
+    self.subtitleViewOrDefault.$width = self.titleViewOrDefault.$width;
     
-    // only do one frame-set operation on the accessory views, since they're "foreign" and may not expect multiple frame-sets
-    self.leftAccessoryView.$origin = (CGPoint) {
-        .x = ACCESSORY_MARGIN,
-        .y = ACCESSORY_TOP + [self centeredPositionOfView:self.leftAccessoryView ifSmallerThan:ACCESSORY_HEIGHT] + dy
-    };
+    self.leftAccessoryView.$x = ACCESSORY_MARGIN;
+    self.leftAccessoryView.$y = ACCESSORY_TOP + [self centeredPositionOfView:self.leftAccessoryView ifSmallerThan:ACCESSORY_HEIGHT] + dy;
     
-    self.rightAccessoryView.$origin = (CGPoint) {
-        .x = self.$width-ACCESSORY_MARGIN-self.rightAccessoryView.$width,
-        .y = ACCESSORY_TOP + [self centeredPositionOfView:self.rightAccessoryView ifSmallerThan:ACCESSORY_HEIGHT] + dy
-    };
+    self.rightAccessoryView.$x = self.$width-ACCESSORY_MARGIN-self.rightAccessoryView.$width;
+    self.rightAccessoryView.$y = ACCESSORY_TOP + [self centeredPositionOfView:self.rightAccessoryView ifSmallerThan:ACCESSORY_HEIGHT] + dy;
 }
 
 @end

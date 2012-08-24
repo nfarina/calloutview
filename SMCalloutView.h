@@ -21,7 +21,8 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 @interface SMCalloutView : UIView
 
 @property (nonatomic, unsafe_unretained) id<SMCalloutViewDelegate> delegate;
-@property (nonatomic, readonly) UILabel *titleView, *subtitleView;
+@property (nonatomic, copy) NSString *title, *subtitle;
+@property (nonatomic, retain) UIView *titleView, *subtitleView;
 @property (nonatomic, retain) UIView *leftAccessoryView, *rightAccessoryView;
 @property (nonatomic, retain) SMCalloutViewBackground *background;
 

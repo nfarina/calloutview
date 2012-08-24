@@ -43,7 +43,7 @@
     
     calloutView = [SMCalloutView new];
     calloutView.delegate = self;
-    calloutView.titleView.text = @"Curiosity";
+    calloutView.title = @"Curiosity";
     calloutView.rightAccessoryView = disclosure;
     calloutView.calloutOffset = topPin.calloutOffset;
 
