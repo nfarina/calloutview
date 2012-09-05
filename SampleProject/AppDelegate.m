@@ -38,13 +38,13 @@
     [topPin addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(topPinTapped)]];
     [marsView addSubview:topPin];
 
-    UIButton *disclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-    [disclosure addTarget:self action:@selector(disclosureTapped) forControlEvents:UIControlEventTouchUpInside];
+    UIButton *topDisclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+    [topDisclosure addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(disclosureTapped)]];
     
     calloutView = [SMCalloutView new];
     calloutView.delegate = self;
     calloutView.title = @"Curiosity";
-    calloutView.rightAccessoryView = disclosure;
+    calloutView.rightAccessoryView = topDisclosure;
     calloutView.calloutOffset = topPin.calloutOffset;
 
     //
@@ -55,8 +55,11 @@
     capeCanaveral.coordinate = (CLLocationCoordinate2D){28.388154, -80.604200};
     capeCanaveral.title = @"Cape Canaveral";
 
+    UIButton *bottomDisclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+    [bottomDisclosure addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(disclosureTapped)]];
+
     bottomPin = [[MKPinAnnotationView alloc] initWithAnnotation:capeCanaveral reuseIdentifier:@""];
-    bottomPin.rightCalloutAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+    bottomPin.rightCalloutAccessoryView = bottomDisclosure;
     bottomPin.canShowCallout = YES;
 
     bottomMapView = [[MKMapView alloc] initWithFrame:CGRectOffset(half, 0, half.size.height)];
