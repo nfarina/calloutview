@@ -276,6 +276,15 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     self.hidden = NO;
 }
 
+- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag{
+    if (flag){
+        if ([_delegate respondsToSelector:@selector(calloutViewDidShow:)]){
+            [_delegate calloutViewDidShow:self];
+        }
+    }
+    
+}
+
 - (void)dismissCalloutAnimated:(BOOL)animated {
     [self.layer removeAnimationForKey:@"bounce"];
     
