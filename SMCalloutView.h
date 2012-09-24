@@ -59,4 +59,8 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 // calling [UIScrollView setContentOffset:animated:].
 - (NSTimeInterval)calloutView:(SMCalloutView *)calloutView delayForRepositionWithSize:(CGSize)offset;
 
+// Called when showing animation is finished
+- (void)calloutViewDidShow:(SMCalloutView *)calloutView;
+
+
 @end
