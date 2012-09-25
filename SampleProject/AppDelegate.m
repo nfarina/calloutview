@@ -14,7 +14,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    self.window = [[UIWindow alloc] initWithFrame:CGRectMake(0, 20, 320, 460)];
+    self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].applicationFrame];
     self.window.backgroundColor = [UIColor whiteColor];
     CGRect half = CGRectMake(0, 0, self.window.frame.size.width, self.window.frame.size.height/2);
     
@@ -34,7 +34,7 @@
     scrollView.contentOffset = CGPointMake(150, 50);
     
     topPin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
-    topPin.center = CGPointMake(half.size.width/2 + 230, half.size.height/2 + 120);
+    topPin.center = CGPointMake(half.size.width/2 + 230, half.size.height/2 + 100);
     [topPin addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(topPinTapped)]];
     [marsView addSubview:topPin];
 
