@@ -264,7 +264,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     bounceAnimation.beginTime = CACurrentMediaTime() + delay;
     bounceAnimation.values = @[@0.05, @1.11245, @0.951807, @1.0];
     bounceAnimation.keyTimes = @[@0, @(4.0/9.0), @(4.0/9.0+5.0/18.0), @1.0];
-    bounceAnimation.duration = animated ? BOUNCE_ANIMATION_DURATION : 0;
+    bounceAnimation.duration = animated ? BOUNCE_ANIMATION_DURATION : 0.0000001; // can't be zero or the animation won't "run"
     bounceAnimation.timingFunctions = @[easeInOut, easeInOut, easeInOut, easeInOut];
     bounceAnimation.delegate = self;
     
@@ -276,13 +276,10 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     self.hidden = NO;
 }
 
-- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag{
-    if (flag){
-        if ([_delegate respondsToSelector:@selector(calloutViewDidShow:)]){
-            [_delegate calloutViewDidShow:self];
-        }
-    }
-    
+- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)finished {
+    if (finished)
+        if ([_delegate respondsToSelector:@selector(calloutViewDidAppear:)])
+            [_delegate calloutViewDidAppear:self];
 }
 
 - (void)dismissCalloutAnimated:(BOOL)animated {
