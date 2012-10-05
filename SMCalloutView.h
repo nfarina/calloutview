@@ -32,7 +32,7 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 // Presents a callout view by adding it to "inView" and pointing at the given rect of inView's bounds.
 // Constrains the callout to the bounds of the given view. Optionally scrolls the given rect into view (plus margins)
 // if -delegate is set and responds to -delayForRepositionWithSize.
-- (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToView:(UIView *)constrainedView permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated;
+- (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view aboveSubview:(UIView *)subview constrainedToView:(UIView *)constrainedView permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated;
 
 - (void)dismissCalloutAnimated:(BOOL)animated;
 

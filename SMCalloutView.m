@@ -163,7 +163,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     return CGSizeMake(nudgeLeft ?: nudgeRight, nudgeTop ?: nudgeBottom);
 }
 
-- (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToView:(UIView *)constrainedView permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
+- (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view aboveSubview:(UIView *)subview constrainedToView:(UIView *)constrainedView permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
 
     // figure out the constrained view's rect in our popup view's coordinate system
     CGRect constrainedRect = [constrainedView convertRect:constrainedView.bounds toView:view];
@@ -216,7 +216,10 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     if (anchorX > maxPointX) adjustX = anchorX - maxPointX;
 
     // add the callout to the given view
-    [view addSubview:self];
+    if (subview)
+        [view insertSubview:self aboveSubview:subview];
+    else
+        [view addSubview:self];
 
     CGPoint calloutOrigin = {
         .x = calloutX + adjustX,
