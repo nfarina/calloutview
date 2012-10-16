@@ -99,6 +99,15 @@
                permittedArrowDirections:SMCalloutArrowDirectionDown
                                animated:YES];
     
+    // Here's an alternate method that adds the callout *inside* the pin view. This may seem strange, but it's how MKMapView
+    // does it. It brings the selected pin to the front, then pops up the callout inside the pin's view. This way, the callout
+    // is "anchored" to the pin itself. Visually, there's no difference; the callout still looks like it's floating outside the pin.
+
+//    [calloutView presentCalloutFromRect:topPin.bounds
+//                                 inView:topPin
+//                      constrainedToView:scrollView
+//               permittedArrowDirections:SMCalloutArrowDirectionDown
+//                               animated:YES];
 }
 
 - (NSTimeInterval)calloutView:(SMCalloutView *)theCalloutView delayForRepositionWithSize:(CGSize)offset {
