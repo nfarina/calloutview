@@ -321,7 +321,18 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
             [_delegate calloutViewDidAppear:self];
     }
     else if (finished && !presenting) {
-        [self removeFromSuperview];
+        
+        // removing a layer from a superlayer causes an implicit fade-out animation that we wish to disable.
+        [CATransaction begin];
+        [CATransaction setDisableActions:YES];
+        
+        if (self.superview)
+            [self removeFromSuperview];
+        else
+            [self.layer removeFromSuperlayer];
+        
+        [CATransaction commit];
+        
         if ([_delegate respondsToSelector:@selector(calloutViewDidDisappear:)])
             [_delegate calloutViewDidDisappear:self];
     }
