@@ -31,6 +31,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 #define ACCESSORY_MARGIN 14 // the accessory's margin from the edges of our callout view
 #define ACCESSORY_TOP 8 // the top of the accessory "area" in which accessory views are placed
 #define ACCESSORY_HEIGHT 32 // the "suggested" maximum height of an accessory view. shorter accessories will be vertically centered
+#define BETWEEN_ACCESSORIES_MARGIN 7 // if we have no title or subtitle, but have two accessory views, then this is the space between them
 #define ANCHOR_MARGIN 37 // the smallest possible distance from the edge of our control to the "tip" of the anchor, from either left or right
 #define TOP_ANCHOR_MARGIN 13 // all the above measurements assume a bottom anchor! if we're pointing "up" we'll need to add this top margin to everything.
 #define BOTTOM_ANCHOR_MARGIN 10 // if using a bottom anchor, we'll need to account for the shadow below the "tip"
@@ -137,7 +138,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     
     // calculate how much non-negotiable space we need to reserve for margin and accessories
     CGFloat margin = self.titleMarginLeft + self.titleMarginRight;
-    
+
     // how much room is left for text?
     CGFloat availableWidthForText = size.width - margin;
 
@@ -167,17 +168,29 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 }
 
 - (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToView:(UIView *)constrainedView permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
+    [self presentCalloutFromRect:rect inLayer:view.layer ofView:view constrainedToLayer:constrainedView.layer permittedArrowDirections:arrowDirections animated:animated];
+}
+
+- (void)presentCalloutFromRect:(CGRect)rect inLayer:(CALayer *)layer constrainedToLayer:(CALayer *)constrainedLayer permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
+    [self presentCalloutFromRect:rect inLayer:layer ofView:nil constrainedToLayer:constrainedLayer permittedArrowDirections:arrowDirections animated:animated];
+}
+
+// this private method handles both CALayer and UIView parents depending on what's passed.
+- (void)presentCalloutFromRect:(CGRect)rect inLayer:(CALayer *)layer ofView:(UIView *)view constrainedToLayer:(CALayer *)constrainedLayer permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
+    
+    // Sanity check: dismiss this callout immediately if it's displayed somewhere
+    if (self.layer.superlayer) [self dismissCalloutAnimated:NO];
 
     // figure out the constrained view's rect in our popup view's coordinate system
-    CGRect constrainedRect = [constrainedView convertRect:constrainedView.bounds toView:view];
-
+    CGRect constrainedRect = [constrainedLayer convertRect:constrainedLayer.bounds toLayer:layer];
+    
     // form our subviews based on our content set so far
     [self rebuildSubviews];
     
     // apply title/subtitle (if present
     titleLabel.text = self.title;
     subtitleLabel.text = self.subtitle;
-        
+    
     // size the callout to fit the width constraint as best as possible
     self.$size = [self sizeThatFits:CGSizeMake(constrainedRect.size.width, CALLOUT_HEIGHT)];
     
@@ -196,7 +209,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     // gave us a choice, then pointing up is the better option.
     if (arrowDirections == SMCalloutArrowDirectionAny && topSpace < CALLOUT_HEIGHT && bottomSpace > topSpace)
         bestDirection = SMCalloutArrowDirectionUp;
-
+    
     // show the correct anchor based on our decision
     topAnchor.hidden = (bestDirection == SMCalloutArrowDirectionDown);
     bottomAnchor.hidden = (bestDirection == SMCalloutArrowDirectionUp);
@@ -217,10 +230,13 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     CGFloat adjustX = 0;
     if (anchorX < minPointX) adjustX = anchorX - minPointX;
     if (anchorX > maxPointX) adjustX = anchorX - maxPointX;
-
-    // add the callout to the given view
-    [view addSubview:self];
-
+    
+    // add the callout to the given layer (or view if possible, to receive touch events)
+    if (view)
+        [view addSubview:self];
+    else
+        [layer addSublayer:self.layer];
+    
     CGPoint calloutOrigin = {
         .x = calloutX + adjustX,
         .y = bestDirection == SMCalloutArrowDirectionDown ? (anchorY - CALLOUT_HEIGHT + BOTTOM_ANCHOR_MARGIN) : anchorY
@@ -229,7 +245,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     self.$origin = calloutOrigin;
     
     // now set the *actual* anchor point for our layer so that our "popup" animation starts from this point.
-    CGPoint anchorPoint = [view convertPoint:CGPointMake(anchorX, anchorY) toView:self];
+    CGPoint anchorPoint = [layer convertPoint:CGPointMake(anchorX, anchorY) toLayer:self.layer];
     anchorPoint.x /= self.$width;
     anchorPoint.y /= self.$height;
     self.layer.anchorPoint = anchorPoint;
@@ -240,7 +256,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     // layout now so we can immediately start animating to the final position if needed
     [self setNeedsLayout];
     [self layoutIfNeeded];
-
+    
     // if we're outside the bounds of our constraint rect, we'll give our delegate an opportunity to shift us into position.
     // consider both our size and the size of our target rect (which we'll assume to be the size of the content you want to scroll into view.
     CGRect contentRect = CGRectUnion(self.frame, CGRectInset(rect, -10, -10));
@@ -251,7 +267,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     
     if ([self.delegate respondsToSelector:@selector(calloutView:delayForRepositionWithSize:)] && !CGSizeEqualToSize(offset, CGSizeZero))
         delay = [self.delegate calloutView:self delayForRepositionWithSize:offset];
-
+    
     // there's a chance that user code in the delegate method may have called -dismissCalloutAnimated to cancel things; if that
     // happened then we need to bail!
     if (popupCancelled) return;

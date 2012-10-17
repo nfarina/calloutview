@@ -34,6 +34,10 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 // if -delegate is set and responds to -delayForRepositionWithSize.
 - (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToView:(UIView *)constrainedView permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated;
 
+// Same as the view-based presentation, but inserts the callout into a CALayer hierarchy instead. Be aware that you'll have to direct
+// your own touches to any accessory views, since CALayer doesn't relay touch events.
+- (void)presentCalloutFromRect:(CGRect)rect inLayer:(CALayer *)layer constrainedToLayer:(CALayer *)constrainedLayer permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated;
+
 - (void)dismissCalloutAnimated:(BOOL)animated;
 
 @end
