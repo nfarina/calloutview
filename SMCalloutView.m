@@ -319,7 +319,9 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     // we want to match UICalloutView, which doesn't "capture" touches outside the accessory areas. This way you can click on other pins and things *behind* a translucent callout.
     return
         [self.leftAccessoryView pointInside:[self.leftAccessoryView convertPoint:point fromView:self] withEvent:nil] ||
-        [self.rightAccessoryView pointInside:[self.rightAccessoryView convertPoint:point fromView:self] withEvent:nil];
+        [self.rightAccessoryView pointInside:[self.rightAccessoryView convertPoint:point fromView:self] withEvent:nil] ||
+        [self.titleView pointInside:[self.titleView convertPoint:point fromView:self] withEvent:nil] ||
+        [self.subtitleView pointInside:[self.subtitleView convertPoint:point fromView:self] withEvent:nil];
 }
 
 - (void)dismissCalloutAnimated:(BOOL)animated {
