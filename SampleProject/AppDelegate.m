@@ -128,7 +128,11 @@
 
 - (void)marsTapped {
     // again, we'll introduce an artifical delay to feel more like MKMapView for this demonstration.
-    [calloutView performSelector:@selector(dismissCalloutAnimated:) withObject:nil afterDelay:1.0/3.0];
+    [self performSelector:@selector(dismissCallout) withObject:nil afterDelay:1.0/3.0];
+}
+
+- (void)dismissCallout {
+    [calloutView dismissCalloutAnimated:NO];
 }
 
 @end

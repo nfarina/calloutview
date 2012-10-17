@@ -1,11 +1,19 @@
 #import <UIKit/UIKit.h>
 
+// options for which directions the callout is allowed to "point" in.
 enum {
     SMCalloutArrowDirectionUp = 1UL << 0,
     SMCalloutArrowDirectionDown = 1UL << 1,
     SMCalloutArrowDirectionAny = SMCalloutArrowDirectionUp | SMCalloutArrowDirectionDown
 };
 typedef NSUInteger SMCalloutArrowDirection;
+
+// options for the callout present/dismiss animation
+typedef NS_ENUM(NSInteger, SMCalloutAnimation) {
+    SMCalloutAnimationBounce, // the "bounce" animation we all know and love from UIAlertView
+    SMCalloutAnimationFade, // a simple fade in or out
+    SMCalloutAnimationStretch // grow or shrink linearly, like in the iPad Calendar app
+};
 
 // when delaying our popup in order to scroll content into view, you can use this amount to match the
 // animation duration of UIScrollView when using -setContentOffset:animated.
@@ -28,6 +36,8 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 
 // calloutOffset is the offset in screen points from the top-middle of the annotation view, where the anchor of the callout should be shown.
 @property (nonatomic, assign) CGPoint calloutOffset;
+
+@property (nonatomic, assign) SMCalloutAnimation presentAnimation, dismissAnimation; // default SMCalloutAnimationBounce, SMCalloutAnimationFade respectively
 
 // Presents a callout view by adding it to "inView" and pointing at the given rect of inView's bounds.
 // Constrains the callout to the bounds of the given view. Optionally scrolls the given rect into view (plus margins)
@@ -66,5 +76,7 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 // Called after the callout view appears on screen, or after the appearance animation is complete.
 - (void)calloutViewDidAppear:(SMCalloutView *)calloutView;
 
+// Called after the callout view is removed from the screen, or after the disappearance animation is complete.
+- (void)calloutViewDidDisappear:(SMCalloutView *)calloutView;
 
 @end

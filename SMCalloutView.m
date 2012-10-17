@@ -36,7 +36,6 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 #define TOP_ANCHOR_MARGIN 13 // all the above measurements assume a bottom anchor! if we're pointing "up" we'll need to add this top margin to everything.
 #define BOTTOM_ANCHOR_MARGIN 10 // if using a bottom anchor, we'll need to account for the shadow below the "tip"
 #define CONTENT_MARGIN 10 // when we try to reposition content to be visible, we'll consider this margin around your target rect
-#define BOUNCE_ANIMATION_DURATION (1.0/3.0) // the official bounce animation duration adds up to 0.3 seconds; but there is a bit of delay introduced by Apple using a sequence of callback-based CABasicAnimations rather than a single CAKeyframeAnimation. So we bump it up to 0.33333 to make it feel identical on the device.
 
 @implementation SMCalloutView {
     UILabel *titleLabel, *subtitleLabel;
@@ -52,6 +51,8 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         bottomAnchor = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 41, 70)];
         leftBackground = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 1, 57)];
         rightBackground = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 1, 57)];
+        _presentAnimation = SMCalloutAnimationBounce;
+        _dismissAnimation = SMCalloutAnimationFade;
     }
     return self;
 }
@@ -289,30 +290,41 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     // if we need to delay, we don't want to be visible while we're delaying, so hide us in preparation for our popup
     self.hidden = YES;
     
-    self.alpha = 1; // in case it's zero from fading out in -dismissCalloutAnimated
+    self.layer.opacity = 1; // in case it's zero from fading out in -dismissCalloutAnimated
+
+    // create the appropriate animation, even if we're not animated
+    CAAnimation *animation = [self animationWithType:self.presentAnimation presenting:YES];
     
-    CAKeyframeAnimation *bounceAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
-    CAMediaTimingFunction *easeInOut = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+    // nuke the duration if no animation requested - we'll still need to "run" the animation to get delays and callbacks
+    if (!animated)
+        animation.duration = 0.0000001; // can't be zero or the animation won't "run"
     
-    bounceAnimation.beginTime = CACurrentMediaTime() + delay;
-    bounceAnimation.values = @[@0.05, @1.11245, @0.951807, @1.0];
-    bounceAnimation.keyTimes = @[@0, @(4.0/9.0), @(4.0/9.0+5.0/18.0), @1.0];
-    bounceAnimation.duration = animated ? BOUNCE_ANIMATION_DURATION : 0.0000001; // can't be zero or the animation won't "run"
-    bounceAnimation.timingFunctions = @[easeInOut, easeInOut, easeInOut, easeInOut];
-    bounceAnimation.delegate = self;
+    animation.beginTime = CACurrentMediaTime() + delay;
+    animation.delegate = self;
     
-    [self.layer addAnimation:bounceAnimation forKey:@"bounce"];
+    [self.layer addAnimation:animation forKey:@"present"];
 }
 
 - (void)animationDidStart:(CAAnimation *)anim {
-    // ok, animation is on, let's make ourselves visible!
-    self.hidden = NO;
+    BOOL presenting = [[anim valueForKey:@"presenting"] boolValue];
+
+    if (presenting)
+        // ok, animation is on, let's make ourselves visible!
+        self.hidden = NO;
 }
 
 - (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)finished {
-    if (finished)
+    BOOL presenting = [[anim valueForKey:@"presenting"] boolValue];
+    
+    if (finished && presenting) {
         if ([_delegate respondsToSelector:@selector(calloutViewDidAppear:)])
             [_delegate calloutViewDidAppear:self];
+    }
+    else if (finished && !presenting) {
+        [self removeFromSuperview];
+        if ([_delegate respondsToSelector:@selector(calloutViewDidDisappear:)])
+            [_delegate calloutViewDidDisappear:self];
+    }
 }
 
 - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
@@ -325,19 +337,54 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 }
 
 - (void)dismissCalloutAnimated:(BOOL)animated {
-    [self.layer removeAnimationForKey:@"bounce"];
+    [self.layer removeAnimationForKey:@"present"];
     
     popupCancelled = YES;
     
     if (animated) {
-        [UIView beginAnimations:nil context:NULL];
-        [UIView setAnimationDuration:1.0/3.0];
-        [UIView setAnimationDelegate:self];
-        [UIView setAnimationDidStopSelector:@selector(removeFromSuperview)];
-        self.alpha = 0;
-        [UIView commitAnimations];
+        CAAnimation *animation = [self animationWithType:self.dismissAnimation presenting:NO];
+        animation.delegate = self;
+        [self.layer addAnimation:animation forKey:@"dismiss"];
     }
     else [self removeFromSuperview];
+}
+
+- (CAAnimation *)animationWithType:(SMCalloutAnimation)type presenting:(BOOL)presenting {
+    CAAnimation *animation = nil;
+    
+    if (type == SMCalloutAnimationBounce) {
+        CAKeyframeAnimation *bounceAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+        CAMediaTimingFunction *easeInOut = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+        
+        bounceAnimation.values = @[@0.05, @1.11245, @0.951807, @1.0];
+        bounceAnimation.keyTimes = @[@0, @(4.0/9.0), @(4.0/9.0+5.0/18.0), @1.0];
+        bounceAnimation.duration = 1.0/3.0; // the official bounce animation duration adds up to 0.3 seconds; but there is a bit of delay introduced by Apple using a sequence of callback-based CABasicAnimations rather than a single CAKeyframeAnimation. So we bump it up to 0.33333 to make it feel identical on the device
+        bounceAnimation.timingFunctions = @[easeInOut, easeInOut, easeInOut, easeInOut];
+        
+        if (!presenting)
+            bounceAnimation.values = [[bounceAnimation.values reverseObjectEnumerator] allObjects]; // reverse values
+        
+        animation = bounceAnimation;
+    }
+    else if (type == SMCalloutAnimationFade) {
+        CABasicAnimation *fadeAnimation = [CABasicAnimation animationWithKeyPath:@"opacity"];
+        fadeAnimation.duration = 1.0/3.0;
+        fadeAnimation.fromValue = presenting ? @0.0 : @1.0;
+        fadeAnimation.toValue = presenting ? @1.0 : @0.0;
+        animation = fadeAnimation;
+    }
+    else if (type == SMCalloutAnimationStretch) {
+        CABasicAnimation *stretchAnimation = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
+        stretchAnimation.duration = 0.1;
+        stretchAnimation.fromValue = presenting ? @0.0 : @1.0;
+        stretchAnimation.toValue = presenting ? @1.0 : @0.0;
+        animation = stretchAnimation;
+    }
+    
+    // CAAnimation is KVC compliant, so we can store whether we're presenting for lookup in our delegate methods
+    [animation setValue:@(presenting) forKey:@"presenting"];
+    
+    return animation;
 }
 
 - (CGFloat)centeredPositionOfView:(UIView *)view ifSmallerThan:(CGFloat)height {
