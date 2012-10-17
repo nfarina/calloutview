@@ -49,14 +49,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 }
 
 - (id)initWithFrame:(CGRect)frame {
-    if (self = [super initWithFrame:frame]) {
-        leftCap = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 17, 57)];
-        rightCap = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 17, 57)];
-        topAnchor = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 41, 70)];
-        bottomAnchor = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 41, 70)];
-        leftBackground = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 1, 57)];
-        rightBackground = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 1, 57)];
-		
+    if (self = [super initWithFrame:frame]) {		
 		self.backgroundColor = [UIColor clearColor];
     }
     return self;
@@ -335,26 +328,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 - (void)layoutSubviews {
     
     // if we're pointing up, we'll need to push almost everything down a bit
-    CGFloat dy = !topAnchor.hidden ? TOP_ANCHOR_MARGIN : 0;
-    leftCap.$y = rightCap.$y = leftBackground.$y = rightBackground.$y = dy;
-    
-    leftCap.$x = 0;
-    rightCap.$x = self.$width - rightCap.$width;
-    
-    // move both anchors, only one will have been made visible in our -popup method
-    CGFloat anchorX = roundf(self.layer.anchorPoint.x * self.$width - bottomAnchor.$width / 2);
-    topAnchor.$origin = CGPointMake(anchorX, 0);
-    
-    // make sure the anchor graphic isn't overlapping with an endcap
-    if (topAnchor.$left < leftCap.$right) topAnchor.$x = leftCap.$right;
-    if (topAnchor.$right > rightCap.$left) topAnchor.$x = rightCap.$left - topAnchor.$width; // don't stretch it
-
-    bottomAnchor.$origin = topAnchor.$origin; // match
-
-    leftBackground.$left = leftCap.$right;
-    leftBackground.$right = topAnchor.$left;
-    rightBackground.$left = topAnchor.$right;
-    rightBackground.$right = rightCap.$left;
+    CGFloat dy = arrowDirection == SMCalloutArrowDirectionUp ? TOP_ANCHOR_MARGIN : 0;
     
     self.titleViewOrDefault.$x = self.innerContentMarginLeft;
     self.titleViewOrDefault.$y = (self.subtitleView || self.subtitle.length ? TITLE_SUB_TOP : TITLE_TOP) + dy;
@@ -512,10 +486,6 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 	CGColorSpaceRelease(space);
 	CGGradientRelease(gradient);
 	CGGradientRelease(gradient2);
-}
-
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-	NSLog(@"callout: touches began");
 }
 
 @end
