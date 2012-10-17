@@ -152,6 +152,20 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     // total width we'd like
     CGFloat preferredWidth = fmaxf(preferredTitleSize.width, preferredSubtitleSize.width) + margin;
     
+    if (preferredTitleSize.width >= 0.000001 || preferredSubtitleSize.width >= 0.000001) {
+        
+        // if we have a title or subtitle, then our assumed margins are valid, and we can apply them
+        preferredWidth = fmaxf(preferredTitleSize.width, preferredSubtitleSize.width) + margin;
+    }
+    else {
+        // ok we have no title or subtitle to speak of. In this case, the system callout would actually not display
+        // at all! But we can handle it.
+        preferredWidth = self.leftAccessoryView.$width + self.rightAccessoryView.$width + ACCESSORY_MARGIN*2;
+        
+        if (self.leftAccessoryView && self.rightAccessoryView)
+            preferredWidth += BETWEEN_ACCESSORIES_MARGIN;
+    }
+    
     // ensure we're big enough to fit our graphics!
     preferredWidth = fmaxf(preferredWidth, CALLOUT_MIN_WIDTH);
     
