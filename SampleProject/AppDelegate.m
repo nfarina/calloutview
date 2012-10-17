@@ -102,6 +102,11 @@
     // Here's an alternate method that adds the callout *inside* the pin view. This may seem strange, but it's how MKMapView
     // does it. It brings the selected pin to the front, then pops up the callout inside the pin's view. This way, the callout
     // is "anchored" to the pin itself. Visually, there's no difference; the callout still looks like it's floating outside the pin.
+    
+    // Note that this technique will require overriding -hitTest:withEvent inside the view containing the callout view, in order
+    // to send touches to any accessory views of the callout. See this thread for more discussion: https://github.com/nfarina/calloutview/issues/9
+    
+    // You'll notice this example won't let you click on the blue disclosure button because we're not overriding -hitTest.
 
 //    [calloutView presentCalloutFromRect:topPin.bounds
 //                                 inView:topPin
