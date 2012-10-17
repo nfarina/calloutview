@@ -163,10 +163,10 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     return CGSizeMake(nudgeLeft ?: nudgeRight, nudgeTop ?: nudgeBottom);
 }
 
-- (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view aboveSubview:(UIView *)subview constrainedToView:(UIView *)constrainedView permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
+- (void)presentCalloutFromRect:(CGRect)rect inLayer:(CALayer *)layer constrainedToLayer:(CALayer *)constrainedLayer permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
 
     // figure out the constrained view's rect in our popup view's coordinate system
-    CGRect constrainedRect = [constrainedView convertRect:constrainedView.bounds toView:view];
+    CGRect constrainedRect = [constrainedLayer convertRect:constrainedLayer.bounds toLayer:layer];
 
     // form our subviews based on our content set so far
     [self rebuildSubviews];
@@ -215,11 +215,8 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     if (anchorX < minPointX) adjustX = anchorX - minPointX;
     if (anchorX > maxPointX) adjustX = anchorX - maxPointX;
 
-    // add the callout to the given view
-    if (subview)
-        [view insertSubview:self aboveSubview:subview];
-    else
-        [view addSubview:self];
+    // add the callout to the given layer
+    [layer addSublayer:self.layer];
 
     CGPoint calloutOrigin = {
         .x = calloutX + adjustX,
@@ -229,7 +226,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     self.$origin = calloutOrigin;
     
     // now set the *actual* anchor point for our layer so that our "popup" animation starts from this point.
-    CGPoint anchorPoint = [view convertPoint:CGPointMake(anchorX, anchorY) toView:self];
+    CGPoint anchorPoint = [layer convertPoint:CGPointMake(anchorX, anchorY) toLayer:self.layer];
     anchorPoint.x /= self.$width;
     anchorPoint.y /= self.$height;
     self.layer.anchorPoint = anchorPoint;
