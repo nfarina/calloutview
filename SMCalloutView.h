@@ -12,7 +12,6 @@ typedef NSUInteger SMCalloutArrowDirection;
 extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 
 @protocol SMCalloutViewDelegate;
-@class SMCalloutViewBackground;
 
 //
 // Callout view.
@@ -22,9 +21,8 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 
 @property (nonatomic, unsafe_unretained) id<SMCalloutViewDelegate> delegate;
 @property (nonatomic, copy) NSString *title, *subtitle; // title/titleView relationship mimics UINavigationBar.
-@property (nonatomic, retain) UIView *titleView, *subtitleView; // if these are set, the respective title/subtitle properties will be ignored
+@property (nonatomic, retain) UIView *titleView, *subtitleView, *contentView; // if these are set, the respective title/subtitle properties will be ignored
 @property (nonatomic, retain) UIView *leftAccessoryView, *rightAccessoryView;
-@property (nonatomic, retain) SMCalloutViewBackground *background;
 
 // calloutOffset is the offset in screen points from the top-middle of the annotation view, where the anchor of the callout should be shown.
 @property (nonatomic, assign) CGPoint calloutOffset;
@@ -38,15 +36,6 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 
 @end
 
-//
-// Class for collating the various background images that are pieced together to form the overall background graphic with the pointy arrow.
-//
-
-@interface SMCalloutViewBackground : NSObject
-@property (nonatomic, retain) UIImage *leftCapImage, *rightCapImage, *topAnchorImage, *bottomAnchorImage, *backgroundImage;
-+ (SMCalloutViewBackground *)systemBackground;
-@end
-
 @protocol SMCalloutViewDelegate <NSObject>
 @optional
 
@@ -58,5 +47,9 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 // Typically you would return kSMCalloutViewRepositionDelayForUIScrollView if you're repositioning by
 // calling [UIScrollView setContentOffset:animated:].
 - (NSTimeInterval)calloutView:(SMCalloutView *)calloutView delayForRepositionWithSize:(CGSize)offset;
+
+// Called after the callout view appears on screen, or after the appearance animation is complete.
+- (void)calloutViewDidAppear:(SMCalloutView *)calloutView;
+
 
 @end
