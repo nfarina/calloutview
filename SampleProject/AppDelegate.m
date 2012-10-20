@@ -3,6 +3,18 @@
 
 @implementation MapAnnotation @end
 
+@implementation CustomPinAnnotationView
+@synthesize calloutView;
+- (UIView *) hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+	
+    UIView *calloutMaybe = [self.calloutView hitTest:[self.calloutView convertPoint:point fromView:self] withEvent:event];
+    if (calloutMaybe) return calloutMaybe;
+	
+    return [super hitTest:point withEvent:event];
+}
+@end
+
+
 @implementation AppDelegate {
     UIScrollView *scrollView;
     UIImageView *marsView;
@@ -64,7 +76,7 @@
     UIButton *bottomDisclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
     [bottomDisclosure addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(disclosureTapped)]];
 	
-    bottomPin = [[MKPinAnnotationView alloc] initWithAnnotation:capeCanaveral reuseIdentifier:@""];
+    bottomPin = [[CustomPinAnnotationView alloc] initWithAnnotation:capeCanaveral reuseIdentifier:@""];
 	
     bottomMapView = [[MKMapView alloc] initWithFrame:CGRectOffset(half, 0, half.size.height)];
     bottomMapView.delegate = self;
@@ -81,12 +93,15 @@
 }
 
 - (void)topPinTapped {
-    // show our callout if it's not already shown!
-    // now in this example we're going to introduce an artificial delay in order to make our popup feel identical to MKMapView.
+    // dismiss out callout if it's already shown but on a different parent view
+    if (calloutView.window)
+		bottomPin.selected = NO;
+		//[calloutView dismissCalloutAnimated:NO];
+	
+	// now in this example we're going to introduce an artificial delay in order to make our popup feel identical to MKMapView.
     // MKMapView has a delay after tapping so that it can intercept a double-tap for zooming. We don't need that delay but we'll
     // add it just so things feel the same.
-    if (!calloutView.window)
-        [self performSelector:@selector(popupCalloutView) withObject:nil afterDelay:1.0/3.0];
+	[self performSelector:@selector(popupCalloutView) withObject:nil afterDelay:1.0/3.0];
 }
 
 #pragma mark - MKMapView
@@ -97,12 +112,15 @@
 }
 
 - (void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKAnnotationView *)view {
-	// show our callout if it's not already shown!
+    // dismiss out callout if it's already shown but on a different parent view
+	NSLog(@"window=%@", calloutView.window);
+    if (calloutView.window)
+		[calloutView dismissCalloutAnimated:NO];
+	
     // now in this example we're going to introduce an artificial delay in order to make our popup feel identical to MKMapView.
     // MKMapView has a delay after tapping so that it can intercept a double-tap for zooming. We don't need that delay but we'll
     // add it just so things feel the same.
-    if (!calloutView.window)
-        [self performSelector:@selector(popupMapCalloutView) withObject:nil afterDelay:1.0/3.0];
+	[self performSelector:@selector(popupMapCalloutView) withObject:nil afterDelay:1.0/3.0];
 }
 
 - (void)mapView:(MKMapView *)mapView didDeselectAnnotationView:(MKAnnotationView *)view {
@@ -113,6 +131,12 @@
 #pragma mark - SMCalloutView
 
 - (void)popupCalloutView {
+	
+	// custom view to be used in our callout
+	UIView *customView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
+	customView.backgroundColor = [UIColor colorWithRed:200.0/255.0 green:0.0/255.0 blue:0.0/255.0 alpha:.6];
+	// if you provide a custom view for the callout content, the title and subtitle will not be displayed
+	calloutView.contentView = customView;
 	
 	// This does all the magic.
     [calloutView presentCalloutFromRect:topPin.frame
@@ -138,6 +162,14 @@
 }
 
 - (void)popupMapCalloutView {
+	
+	// custom view to be used in our callout
+	UIView *customView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 50)];
+	customView.backgroundColor = [UIColor colorWithRed:0.0/255.0 green:0.0/255.0 blue:200.0/255.0 alpha:.6];
+	// if you provide a custom view for the callout content, the title and subtitle will not be displayed
+	calloutView.contentView = customView;
+	
+	((CustomPinAnnotationView *)bottomPin).calloutView = calloutView;
 	[calloutView presentCalloutFromRect:bottomPin.bounds
                                  inView:bottomPin
                       constrainedToView:bottomMapView
