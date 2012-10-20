@@ -10,3 +10,10 @@
 @property (nonatomic, copy) NSString *title, *subtitle;
 @property (nonatomic, assign) CLLocationCoordinate2D coordinate;
 @end
+
+// We need a custom MKAnnotationView implementation to override hitTest:withEvent: in order to intercept touches
+// in our annotation's callout view
+// hat tip: https://github.com/nfarina/calloutview/pull/9
+@interface CustomPinAnnotationView : MKPinAnnotationView
+@property (strong, nonatomic) SMCalloutView *calloutView;
+@end
