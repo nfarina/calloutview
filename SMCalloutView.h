@@ -1,5 +1,14 @@
 #import <UIKit/UIKit.h>
 
+/*
+
+SMCalloutView
+-------------
+Created by Nick Farina (nfarina@gmail.com)
+Version 1.0.1
+
+*/
+
 // options for which directions the callout is allowed to "point" in.
 enum {
     SMCalloutArrowDirectionUp = 1UL << 0,
