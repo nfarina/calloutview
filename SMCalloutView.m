@@ -290,8 +290,6 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     // if we need to delay, we don't want to be visible while we're delaying, so hide us in preparation for our popup
     self.hidden = YES;
     
-    self.layer.opacity = 1; // in case it's zero from fading out in -dismissCalloutAnimated
-
     // create the appropriate animation, even if we're not animated
     CAAnimation *animation = [self animationWithType:self.presentAnimation presenting:YES];
     
@@ -332,7 +330,9 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
             [self.layer removeFromSuperlayer];
         
         [CATransaction commit];
-        
+
+        [self.layer removeAnimationForKey:@"dismiss"];
+
         if ([_delegate respondsToSelector:@selector(calloutViewDidDisappear:)])
             [_delegate calloutViewDidDisappear:self];
     }
@@ -382,6 +382,8 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         fadeAnimation.duration = 1.0/3.0;
         fadeAnimation.fromValue = presenting ? @0.0 : @1.0;
         fadeAnimation.toValue = presenting ? @1.0 : @0.0;
+        fadeAnimation.fillMode = kCAFillModeForwards;
+        fadeAnimation.removedOnCompletion = NO;
         animation = fadeAnimation;
     }
     else if (type == SMCalloutAnimationStretch) {
