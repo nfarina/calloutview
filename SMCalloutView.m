@@ -382,8 +382,6 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         fadeAnimation.duration = 1.0/3.0;
         fadeAnimation.fromValue = presenting ? @0.0 : @1.0;
         fadeAnimation.toValue = presenting ? @1.0 : @0.0;
-        fadeAnimation.fillMode = kCAFillModeForwards;
-        fadeAnimation.removedOnCompletion = NO;
         animation = fadeAnimation;
     }
     else if (type == SMCalloutAnimationStretch) {
@@ -397,6 +395,8 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     // CAAnimation is KVC compliant, so we can store whether we're presenting for lookup in our delegate methods
     [animation setValue:@(presenting) forKey:@"presenting"];
     
+    animation.fillMode = kCAFillModeForwards;
+    animation.removedOnCompletion = NO;
     return animation;
 }
 
