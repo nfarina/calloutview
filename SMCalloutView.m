@@ -437,7 +437,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     self.titleViewOrDefault.$width = self.$width - self.innerContentMarginLeft - self.innerContentMarginRight;
     
     self.subtitleViewOrDefault.$x = self.titleViewOrDefault.$x;
-    self.subtitleViewOrDefault.$y = SUBTITLE_TOP + dy;
+    self.subtitleViewOrDefault.$y = (self.titleView || self.title.length ? SUBTITLE_TOP : TITLE_TOP) + dy;
     self.subtitleViewOrDefault.$width = self.titleViewOrDefault.$width;
     
     self.leftAccessoryView.$x = ACCESSORY_MARGIN;
