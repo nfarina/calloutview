@@ -159,8 +159,6 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     
     // total width we'd like
     CGFloat preferredWidth = fmaxf(preferredTitleSize.width, preferredSubtitleSize.width) + margin;
-	if (self.contentView)
-		preferredWidth = self.contentView.$width + margin;
     
     // ensure we're big enough to fit our graphics!
     //preferredWidth = fmaxf(preferredWidth, CALLOUT_MIN_WIDTH);
@@ -178,6 +176,9 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         if (self.leftAccessoryView && self.rightAccessoryView)
             preferredWidth += BETWEEN_ACCESSORIES_MARGIN;
     }
+    
+	if (self.contentView)
+		preferredWidth = self.contentView.$width + margin;
     
     // ensure we're big enough to fit our graphics!
     preferredWidth = fmaxf(preferredWidth, CALLOUT_MIN_WIDTH);
