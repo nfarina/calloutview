@@ -40,6 +40,9 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 @property (nonatomic, copy) NSString *title, *subtitle; // title/titleView relationship mimics UINavigationBar.
 @property (nonatomic, retain) UIView *leftAccessoryView, *rightAccessoryView;
 
+// Customize Presentation
+@property (nonatomic, assign) CGFloat opacity;
+
 // Custom title/subtitle views. if these are set, the respective title/subtitle properties will be ignored.
 // Keep in mind that SMCalloutView calls -sizeThatFits on titleView/subtitleView if defined, so your view
 // may be resized as a result of that (especially if you're using UILabel/UITextField). You may want to subclass
