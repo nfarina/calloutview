@@ -42,6 +42,8 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 
 // Customize Presentation
 @property (nonatomic, assign) CGFloat opacity;
+@property (nonatomic, strong) UIColor *fillColor;
+@property (nonatomic, strong) UIColor *borderColor;
 
 // Custom title/subtitle views. if these are set, the respective title/subtitle properties will be ignored.
 // Keep in mind that SMCalloutView calls -sizeThatFits on titleView/subtitleView if defined, so your view

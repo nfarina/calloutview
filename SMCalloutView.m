@@ -54,6 +54,8 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         _dismissAnimation = SMCalloutAnimationFade;
 		self.backgroundColor = [UIColor clearColor];
         self.opacity = 0.6;
+        self.borderColor = [UIColor blackColor];
+        self.fillColor = [UIColor blackColor];
     }
     return self;
 }
@@ -462,6 +464,16 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     [self setNeedsDisplay];
 }
 
+- (void)setFillColor:(UIColor *)fillColor {
+    _fillColor = fillColor;
+    [self setNeedsDisplay];
+}
+
+- (void)setBorderColor:(UIColor *)borderColor {
+    _borderColor = borderColor;
+    [self setNeedsDisplay];
+}
+
 - (void)drawRect:(CGRect)rect {
 	CGFloat stroke = 1.0;
 	CGFloat radius = 7.0;
@@ -510,11 +522,11 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 	CGPathCloseSubpath(path);
 	
 	// fill callout bubble and add shadow
-	color = [[UIColor blackColor] colorWithAlphaComponent:[self opacity]];
+	color = [[self fillColor] colorWithAlphaComponent:[self opacity]];
 	[color setFill];
 	CGContextAddPath(context, path);
 	CGContextSaveGState(context);
-	CGContextSetShadowWithColor(context, CGSizeMake(0, yShadowOffset), 6, [UIColor colorWithWhite:0 alpha:.5].CGColor);
+	CGContextSetShadowWithColor(context, CGSizeMake(0, yShadowOffset), 6, [[self borderColor] colorWithAlphaComponent:0.5].CGColor);
 	CGContextFillPath(context);
 	CGContextRestoreGState(context);
 	
