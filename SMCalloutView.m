@@ -133,7 +133,9 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 		height = self.contentView.$height + TITLE_TOP * 2;
 		// account for anchor that's also part of the view
 		height += ANCHOR_HEIGHT + BOTTOM_ANCHOR_MARGIN;
-	}
+	} else if ([self subtitleViewOrDefault].$height > SUBTITLE_HEIGHT) {
+        height = [self subtitleViewOrDefault].$height + SUBTITLE_TOP + ANCHOR_HEIGHT + BOTTOM_ANCHOR_MARGIN;
+    }
 	return height;
 }
 
