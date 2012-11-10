@@ -18,11 +18,12 @@ enum {
 typedef NSUInteger SMCalloutArrowDirection;
 
 // options for the callout present/dismiss animation
-typedef NS_ENUM(NSInteger, SMCalloutAnimation) {
+enum {
     SMCalloutAnimationBounce, // the "bounce" animation we all know and love from UIAlertView
     SMCalloutAnimationFade, // a simple fade in or out
     SMCalloutAnimationStretch // grow or shrink linearly, like in the iPad Calendar app
 };
+typedef NSInteger SMCalloutAnimation;
 
 // when delaying our popup in order to scroll content into view, you can use this amount to match the
 // animation duration of UIScrollView when using -setContentOffset:animated.
