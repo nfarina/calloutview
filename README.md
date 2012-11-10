@@ -14,6 +14,14 @@ The comments in `SMCalloutView.h` do a lot of explaining on how to use the class
 
 You can study the included project's `AppDelegate.m` for a working example.
 
+### Customization
+
+SMCalloutView now supports greater customization.
+
+- Instead of using a title and subtitle, these views can be replaced by setting the `contentView`.
+- The callout view will resize to fit both the `contentView` and a custom `subtitleView`.
+- Set the `opacity`, `fillColor`, or `borderColor` to match the look you want.
+
 ### More Info
 
 You can read more info if you wish in the [blog post][].
