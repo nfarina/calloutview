@@ -33,7 +33,6 @@
     //
     // Fill top half with a custom view (image) inside a scroll view along with a custom pin view that triggers our custom MTCalloutView.
     //
-    
     scrollView = [[UIScrollView alloc] initWithFrame:half];
     scrollView.backgroundColor = [UIColor grayColor];
     
@@ -56,14 +55,9 @@
     calloutView = [SMCalloutView new];
     calloutView.delegate = self;
     calloutView.title = @"Curiosity";
+	calloutView.subtitle = @"Some subtitle";
     calloutView.rightAccessoryView = topDisclosure;
     calloutView.calloutOffset = topPin.calloutOffset;
-	
-	// custom view to be used in our callout
-	UIView *customView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
-	customView.backgroundColor = [UIColor colorWithRed:200.0/255.0 green:0.0/255.0 blue:0.0/255.0 alpha:.6];
-	// if you provide a custom view for the callout content, the title and subtitle will not be displayed
-	calloutView.contentView = customView;
 	
     //
     // Fill the bottom half of our window with a standard MKMapView with pin+callout for comparison
@@ -113,7 +107,6 @@
 
 - (void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKAnnotationView *)view {
     // dismiss out callout if it's already shown but on a different parent view
-	NSLog(@"window=%@", calloutView.window);
     if (calloutView.window)
 		[calloutView dismissCalloutAnimated:NO];
 	
@@ -132,17 +125,14 @@
 
 - (void)popupCalloutView {
 	
-	// custom view to be used in our callout
-	UIView *customView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
-	customView.backgroundColor = [UIColor colorWithRed:200.0/255.0 green:0.0/255.0 blue:0.0/255.0 alpha:.6];
-	// if you provide a custom view for the callout content, the title and subtitle will not be displayed
-	calloutView.contentView = customView;
+	// clear any custom view that was set by another pin
+	calloutView.contentView = nil;
 	
 	// This does all the magic.
     [calloutView presentCalloutFromRect:topPin.frame
                                  inView:marsView
                       constrainedToView:scrollView
-               permittedArrowDirections:SMCalloutArrowDirectionUp
+               permittedArrowDirections:SMCalloutArrowDirectionDown
                                animated:YES];
     
     // Here's an alternate method that adds the callout *inside* the pin view. This may seem strange, but it's how MKMapView
