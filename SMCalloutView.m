@@ -386,14 +386,14 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 	CGContextRef context = UIGraphicsGetCurrentContext();
 	
 	// Color Declarations
-	UIColor* fillBlack = [UIColor colorWithRed: 0.185 green: 0.185 blue: 0.185 alpha: 1];
+	UIColor* fillBlack = [UIColor colorWithRed: 0.11 green: 0.11 blue: 0.11 alpha: 1];
 	UIColor* shadowBlack = [UIColor colorWithRed: 0 green: 0 blue: 0 alpha: 0.47];
 	UIColor* glossBottom = [UIColor colorWithRed: 1 green: 1 blue: 1 alpha: 0.2];
 	UIColor* glossTop = [UIColor colorWithRed: 1 green: 1 blue: 1 alpha: 0.85];
 	UIColor* strokeColor = [UIColor colorWithRed: 0.199 green: 0.199 blue: 0.199 alpha: 1];
 	UIColor* innerShadowColor = [UIColor colorWithRed: 1 green: 1 blue: 1 alpha: 0.4];
 	UIColor* innerStrokeColor = [UIColor colorWithRed: 0.821 green: 0.821 blue: 0.821 alpha: 0.04];
-	UIColor* outerStrokeColor = [UIColor colorWithRed: 0.143 green: 0.143 blue: 0.143 alpha: 0.30];
+	UIColor* outerStrokeColor = [UIColor colorWithRed: 0 green: 0 blue: 0 alpha: 0.35];
 	
 	// Gradient Declarations
 	NSArray* glossFillColors = [NSArray arrayWithObjects:
@@ -410,19 +410,18 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 	CGSize innerShadowOffset = CGSizeMake(0.1, 1.1);
 	CGFloat innerShadowBlurRadius = 1;
 	
-	CGFloat coreGroupAlpha = 0.9;
 	CGFloat backgroundStrokeWidth = 1;
 	CGFloat outerStrokeStrokeWidth = 1;
 	
 	// Frames
 	CGRect frame = rect;
 	CGRect innerFrame = CGRectMake(frame.origin.x + backgroundStrokeWidth, frame.origin.y + backgroundStrokeWidth, frame.size.width - backgroundStrokeWidth * 2, frame.size.height - backgroundStrokeWidth * 2);
-	CGRect glossFrame = CGRectMake(frame.origin.x - backgroundStrokeWidth / 2, frame.origin.y - backgroundStrokeWidth / 2, frame.size.width + backgroundStrokeWidth, roundf(frame.size.height / 2) + backgroundStrokeWidth);
+	CGRect glossFrame = CGRectMake(frame.origin.x - backgroundStrokeWidth / 2, frame.origin.y - backgroundStrokeWidth / 2, frame.size.width + backgroundStrokeWidth, frame.size.height / 2 + backgroundStrokeWidth);
 	
 	//// CoreGroup ////
 	{
 		CGContextSaveGState(context);
-		CGContextSetAlpha(context, coreGroupAlpha);
+		CGContextSetAlpha(context, 0.83);
 		CGContextBeginTransparencyLayer(context, NULL);
 		
 		// Background Drawing
@@ -538,15 +537,17 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 			CGContextSetAlpha(context, 0.45);
 			CGContextBeginTransparencyLayer(context, NULL);
 			
+			CGFloat glossRadius = radius + 0.5;
+			
 			// Gloss Drawing
 			UIBezierPath* glossPath = [UIBezierPath bezierPath];
 			[glossPath moveToPoint:CGPointMake(CGRectGetMinX(glossFrame), CGRectGetMinY(glossFrame))];
-			[glossPath addLineToPoint:CGPointMake(CGRectGetMinX(glossFrame), CGRectGetMaxY(glossFrame) - radius)]; // left
-			[glossPath addArcWithCenter:CGPointMake(CGRectGetMinX(glossFrame) + radius, CGRectGetMaxY(glossFrame) - radius) radius:radius startAngle:M_PI endAngle:M_PI / 2 clockwise:NO]; // bottom-left corner
-			[glossPath addLineToPoint:CGPointMake(CGRectGetMaxX(glossFrame) - radius, CGRectGetMaxY(glossFrame))]; // bottom
-			[glossPath addArcWithCenter:CGPointMake(CGRectGetMaxX(glossFrame) - radius, CGRectGetMaxY(glossFrame) - radius) radius:radius startAngle:M_PI / 2 endAngle:0.0f clockwise:NO]; // bottom-right corner
-			[glossPath addLineToPoint: CGPointMake(CGRectGetMaxX(glossFrame), CGRectGetMinY(glossFrame) - radius)]; // right
-			[glossPath addArcWithCenter:CGPointMake(CGRectGetMaxX(glossFrame) - radius, CGRectGetMinY(glossFrame) + radius) radius:radius startAngle:0.0f endAngle:-M_PI / 2 clockwise:NO]; // top-right corner
+			[glossPath addLineToPoint:CGPointMake(CGRectGetMinX(glossFrame), CGRectGetMaxY(glossFrame) - glossRadius)]; // left
+			[glossPath addArcWithCenter:CGPointMake(CGRectGetMinX(glossFrame) + glossRadius, CGRectGetMaxY(glossFrame) - glossRadius) radius:glossRadius startAngle:M_PI endAngle:M_PI / 2 clockwise:NO]; // bottom-left corner
+			[glossPath addLineToPoint:CGPointMake(CGRectGetMaxX(glossFrame) - glossRadius, CGRectGetMaxY(glossFrame))]; // bottom
+			[glossPath addArcWithCenter:CGPointMake(CGRectGetMaxX(glossFrame) - glossRadius, CGRectGetMaxY(glossFrame) - glossRadius) radius:glossRadius startAngle:M_PI / 2 endAngle:0.0f clockwise:NO]; // bottom-right corner
+			[glossPath addLineToPoint: CGPointMake(CGRectGetMaxX(glossFrame), CGRectGetMinY(glossFrame) - glossRadius)]; // right
+			[glossPath addArcWithCenter:CGPointMake(CGRectGetMaxX(glossFrame) - glossRadius, CGRectGetMinY(glossFrame) + glossRadius) radius:glossRadius startAngle:0.0f endAngle:-M_PI / 2 clockwise:NO]; // top-right corner
 			
 			// pointer up
 			if (arrowDirection == SMCalloutArrowDirectionUp) {
@@ -555,8 +556,8 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 				[glossPath addLineToPoint:CGPointMake(CGRectGetMinX(anchorRect), CGRectGetMinY(glossFrame))];
 			}
 			
-			[glossPath addLineToPoint:CGPointMake(CGRectGetMinX(glossFrame) + radius, CGRectGetMinY(glossFrame))]; // top
-			[glossPath addArcWithCenter:CGPointMake(CGRectGetMinX(glossFrame) + radius, CGRectGetMinY(glossFrame) + radius) radius:radius startAngle:-M_PI / 2 endAngle:M_PI clockwise:NO]; // top-left corner
+			[glossPath addLineToPoint:CGPointMake(CGRectGetMinX(glossFrame) + glossRadius, CGRectGetMinY(glossFrame))]; // top
+			[glossPath addArcWithCenter:CGPointMake(CGRectGetMinX(glossFrame) + glossRadius, CGRectGetMinY(glossFrame) + glossRadius) radius:glossRadius startAngle:-M_PI / 2 endAngle:M_PI clockwise:NO]; // top-left corner
 			[glossPath closePath];
 			
 			CGContextSaveGState(context);
