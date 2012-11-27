@@ -456,13 +456,21 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 }
 
 - (void)drawRect:(CGRect)rect {
+    
+    // AMAZING CoreGraphics-based replica of the system callout graphics by Nicholas Shipes: https://github.com/u10int
+    
+    // We used to embed the system callout graphics as base64-encoded PNGs directly in this file, which was neat, but
+    // that limited our control the same way as the system callout - i.e. the height was always fixed. Now we can draw
+    // the callout at whatever size we want!
 	
 	CGSize anchorSize = CGSizeMake(27, ANCHOR_HEIGHT);
 	CGFloat anchorX = roundf(self.layer.anchorPoint.x * self.$width - anchorSize.width / 2);
 	CGRect anchorRect = CGRectMake(anchorX, 0, anchorSize.width, anchorSize.height);
+
 	// make sure the anchor is not too close to the end caps
 	if (anchorRect.origin.x < ANCHOR_MARGIN_MIN)
 		anchorRect.origin.x = ANCHOR_MARGIN_MIN;
+    
 	else if (anchorRect.origin.x + anchorRect.size.width > self.$width - ANCHOR_MARGIN_MIN)
 		anchorRect.origin.x = self.$width - anchorRect.size.width - ANCHOR_MARGIN_MIN;
 	
@@ -512,7 +520,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 	// Frames
 	CGRect frame = rect;
 	CGRect innerFrame = CGRectMake(frame.origin.x + backgroundStrokeWidth, frame.origin.y + backgroundStrokeWidth, frame.size.width - backgroundStrokeWidth * 2, frame.size.height - backgroundStrokeWidth * 2);
-	CGRect glossFrame = CGRectMake(frame.origin.x - backgroundStrokeWidth / 2, frame.origin.y - backgroundStrokeWidth / 2, frame.size.width + backgroundStrokeWidth, frame.size.height / 2 + backgroundStrokeWidth);
+	CGRect glossFrame = CGRectMake(frame.origin.x - backgroundStrokeWidth / 2, frame.origin.y - backgroundStrokeWidth / 2, frame.size.width + backgroundStrokeWidth, frame.size.height / 2 + backgroundStrokeWidth + 0.5);
 	
 	//// CoreGroup ////
 	{

@@ -73,10 +73,10 @@
 }
 
 - (void)topPinTapped {
+    
     // dismiss out callout if it's already shown but on a different parent view
     if (calloutView.window)
 		bottomPin.selected = NO;
-		//[calloutView dismissCalloutAnimated:NO];
 	
 	// now in this example we're going to introduce an artificial delay in order to make our popup feel identical to MKMapView.
     // MKMapView has a delay after tapping so that it can intercept a double-tap for zooming. We don't need that delay but we'll
