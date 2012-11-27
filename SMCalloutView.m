@@ -159,15 +159,14 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     CGSize preferredSubtitleSize = [self.subtitleViewOrDefault sizeThatFits:CGSizeMake(availableWidthForText, SUBTITLE_HEIGHT)];
     
     // total width we'd like
-    CGFloat preferredWidth = fmaxf(preferredTitleSize.width, preferredSubtitleSize.width) + margin;
+    CGFloat preferredWidth;
     
-    if (self.contentView)
+    if (self.contentView) {
+        
+        // if we have a content view, then take our preferred size directly from that
         preferredWidth = self.contentView.$width + margin;
-    
-    // ensure we're big enough to fit our graphics!
-    //preferredWidth = fmaxf(preferredWidth, CALLOUT_MIN_WIDTH);
-    
-    if (preferredTitleSize.width >= 0.000001 || preferredSubtitleSize.width >= 0.000001) {
+    }
+    else if (preferredTitleSize.width >= 0.000001 || preferredSubtitleSize.width >= 0.000001) {
         
         // if we have a title or subtitle, then our assumed margins are valid, and we can apply them
         preferredWidth = fmaxf(preferredTitleSize.width, preferredSubtitleSize.width) + margin;

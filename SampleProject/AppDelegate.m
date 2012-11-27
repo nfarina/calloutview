@@ -75,8 +75,7 @@
 - (void)topPinTapped {
     
     // dismiss out callout if it's already shown but on a different parent view
-    if (calloutView.window)
-        bottomPin.selected = NO;
+    [bottomMapView deselectAnnotation:bottomPin.annotation animated:NO];
     
     // now in this example we're going to introduce an artificial delay in order to make our popup feel identical to MKMapView.
     // MKMapView has a delay after tapping so that it can intercept a double-tap for zooming. We don't need that delay but we'll
@@ -135,7 +134,10 @@
     
     // custom view to be used in our callout
     UIView *customView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 50)];
-    customView.backgroundColor = [UIColor colorWithRed:0.0/255.0 green:0.0/255.0 blue:200.0/255.0 alpha:.6];
+    customView.backgroundColor = [UIColor colorWithWhite:1 alpha:0.5];
+    customView.layer.borderColor = [UIColor colorWithWhite:0 alpha:0.6].CGColor;
+    customView.layer.borderWidth = 1;
+    customView.layer.cornerRadius = 4;
 
     // if you provide a custom view for the callout content, the title and subtitle will not be displayed
     calloutView.contentView = customView;
