@@ -334,17 +334,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     }
     else if (!presenting) {
         
-        // removing a layer from a superlayer causes an implicit fade-out animation that we wish to disable.
-        [CATransaction begin];
-        [CATransaction setDisableActions:YES];
-        
-        if (self.superview)
-            [self removeFromSuperview];
-        else
-            [self.layer removeFromSuperlayer];
-        
-        [CATransaction commit];
-
+        [self removeFromParent];
         [self.layer removeAnimationForKey:@"dismiss"];
 
         if ([_delegate respondsToSelector:@selector(calloutViewDidDisappear:)])
@@ -371,17 +361,18 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         animation.delegate = self;
         [self.layer addAnimation:animation forKey:@"dismiss"];
     }
+    else [self removeFromParent];
+}
+
+- (void)removeFromParent {
+    if (self.superview)
+        [self removeFromSuperview];
     else {
-        if (self.superview)
-            [self removeFromSuperview];
-        else {
-            [CATransaction begin];
-            [CATransaction setDisableActions:YES];
-
-            [self.layer removeFromSuperlayer];
-
-            [CATransaction commit];
-        }
+        // removing a layer from a superlayer causes an implicit fade-out animation that we wish to disable.
+        [CATransaction begin];
+        [CATransaction setDisableActions:YES];
+        [self.layer removeFromSuperlayer];
+        [CATransaction commit];
     }
 }
 
