@@ -477,7 +477,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     
     // determine size
     CGFloat stroke = 1.0;
-    CGFloat radius = 6.0;
+    CGFloat radius = [UIScreen mainScreen].scale == 1 ? 4.5 : 6.0;
     
     rect = CGRectMake(self.bounds.origin.x, self.bounds.origin.y + TOP_SHADOW_BUFFER, self.bounds.size.width, self.bounds.size.height - ANCHOR_HEIGHT);
     rect.size.width -= stroke + 14;
