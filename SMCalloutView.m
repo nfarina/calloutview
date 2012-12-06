@@ -357,7 +357,18 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         animation.delegate = self;
         [self.layer addAnimation:animation forKey:@"dismiss"];
     }
-    else [self removeFromSuperview];
+    else {
+        if (self.superview)
+            [self removeFromSuperview];
+        else {
+            [CATransaction begin];
+            [CATransaction setDisableActions:YES];
+
+            [self.layer removeFromSuperlayer];
+
+            [CATransaction commit];
+        }
+    }
 }
 
 - (CAAnimation *)animationWithType:(SMCalloutAnimation)type presenting:(BOOL)presenting {
