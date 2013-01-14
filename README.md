@@ -20,6 +20,13 @@ You can read more info if you wish in the [blog post][].
 
   [blog post]: http://nfarina.com/post/29883229869/callout-view
 
+### Adjustable-Height Version
+
+Check out the [custom_drawn_bg][] branch for a version of SMCalloutView that draws its background dynamically and supports flexible heights. This will be unified with the master branch in the future, but in the meantime I'd love any feedback on it. Thanks to [u10int][] for contributing this code!
+
+  [custom_drawn_bg]: https://github.com/nfarina/calloutview/tree/custom_drawn_bg
+  [u10int]: https://github.com/u10int
+
 ### ARC Support
 
 This class requires LLVM 4.0 with [Automatic Reference Counting (ARC)](http://clang.llvm.org/docs/AutomaticReferenceCounting.html), enabled by default in modern Xcode projects.
