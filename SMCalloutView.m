@@ -37,6 +37,10 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 #define BOTTOM_ANCHOR_MARGIN 10 // if using a bottom anchor, we'll need to account for the shadow below the "tip"
 #define CONTENT_MARGIN 10 // when we try to reposition content to be visible, we'll consider this margin around your target rect
 
+@interface SMCalloutView ()
+@property (nonatomic, readwrite) SMCalloutArrowDirection currentArrowDirection;
+@end
+
 @implementation SMCalloutView {
     UILabel *titleLabel, *subtitleLabel;
     UIImageView *leftCap, *rightCap, *topAnchor, *bottomAnchor, *leftBackground, *rightBackground;
@@ -256,6 +260,8 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         .x = calloutX + adjustX,
         .y = bestDirection == SMCalloutArrowDirectionDown ? (anchorY - CALLOUT_HEIGHT + BOTTOM_ANCHOR_MARGIN) : anchorY
     };
+    
+    self.currentArrowDirection = bestDirection;
     
     self.$origin = calloutOrigin;
     
