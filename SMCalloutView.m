@@ -43,6 +43,10 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 #define ANCHOR_HEIGHT 14 // height to use for the anchor
 #define ANCHOR_MARGIN_MIN 24 // the smallest possible distance from the edge of our control to the edge of the anchor, from either left or right
 
+@interface SMCalloutView ()
+@property (nonatomic, readwrite) SMCalloutArrowDirection currentArrowDirection;
+@end
+
 @implementation SMCalloutView {
     UILabel *titleLabel, *subtitleLabel;
     UIImageView *leftCap, *rightCap, *topAnchor, *bottomAnchor, *leftBackground, *rightBackground;
@@ -267,6 +271,8 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         .x = calloutX + adjustX,
         .y = bestDirection == SMCalloutArrowDirectionDown ? (anchorY - self.calloutHeight + BOTTOM_ANCHOR_MARGIN) : anchorY
     };
+    
+    self.currentArrowDirection = bestDirection;
     
     self.$origin = calloutOrigin;
     
