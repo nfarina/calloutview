@@ -35,7 +35,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 #define ANCHOR_MARGIN 37 // the smallest possible distance from the edge of our control to the "tip" of the anchor, from either left or right
 #define TOP_ANCHOR_MARGIN 13 // all the above measurements assume a bottom anchor! if we're pointing "up" we'll need to add this top margin to everything.
 #define BOTTOM_ANCHOR_MARGIN 10 // if using a bottom anchor, we'll need to account for the shadow below the "tip"
-#define CONTENT_MARGIN 10 // when we try to reposition content to be visible, we'll consider this margin around your target rect
+#define REPOSITION_MARGIN 10 // when we try to reposition content to be visible, we'll consider this margin around your target rect
 
 #define TOP_SHADOW_BUFFER 2 // height offset buffer to account for top shadow
 #define BOTTOM_SHADOW_BUFFER 5 // height offset buffer to account for bottom shadow
@@ -130,13 +130,10 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 }
 
 - (CGFloat)calloutHeight {
-    CGFloat height = CALLOUT_HEIGHT;
-    if (self.contentView) {
-        height = self.contentView.$height + TITLE_TOP * 2;
-        // account for anchor that's also part of the view
-        height += ANCHOR_HEIGHT + BOTTOM_ANCHOR_MARGIN;
-    }
-    return height;
+    if (self.contentView)
+        return self.contentView.$height + TITLE_TOP*2 + ANCHOR_HEIGHT + BOTTOM_ANCHOR_MARGIN;
+    else
+        return CALLOUT_HEIGHT;
 }
 
 - (CGSize)sizeThatFits:(CGSize)size {
@@ -220,7 +217,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     subtitleLabel.text = self.subtitle;
     
     // size the callout to fit the width constraint as best as possible
-    self.$size = [self sizeThatFits:CGSizeMake(constrainedRect.size.width, self.calloutHeight + 10)];
+    self.$size = [self sizeThatFits:CGSizeMake(constrainedRect.size.width, self.calloutHeight)];
     
     // how much room do we have in the constraint box, both above and below our target rect?
     CGFloat topSpace = CGRectGetMinY(rect) - CGRectGetMinY(constrainedRect);
@@ -288,7 +285,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     
     // if we're outside the bounds of our constraint rect, we'll give our delegate an opportunity to shift us into position.
     // consider both our size and the size of our target rect (which we'll assume to be the size of the content you want to scroll into view.
-    CGRect contentRect = CGRectUnion(self.frame, CGRectInset(rect, -10, -10));
+    CGRect contentRect = CGRectUnion(self.frame, CGRectInset(rect, -REPOSITION_MARGIN, -REPOSITION_MARGIN));
     CGSize offset = [self offsetToContainRect:contentRect inRect:constrainedRect];
     
     NSTimeInterval delay = 0;
