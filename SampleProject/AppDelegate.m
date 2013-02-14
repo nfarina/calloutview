@@ -112,12 +112,13 @@
     
     // clear any custom view that was set by another pin
     calloutView.contentView = nil;
+    calloutView.backgroundView = [SMCalloutBackgroundView systemBackgroundView]; // reset background view
     
     // This does all the magic.
     [calloutView presentCalloutFromRect:topPin.frame
                                  inView:marsView
                       constrainedToView:scrollView
-               permittedArrowDirections:SMCalloutArrowDirectionDown
+               permittedArrowDirections:SMCalloutArrowDirectionAny
                                animated:YES];
     
     // Here's an alternate method that adds the callout *inside* the pin view. This may seem strange, but it's how MKMapView
@@ -141,6 +142,7 @@
 
     // if you provide a custom view for the callout content, the title and subtitle will not be displayed
     calloutView.contentView = customView;
+    calloutView.backgroundView = [SMCalloutDrawnBackgroundView new]; // use the custom-drawn background class so the height is flexible
     
     ((CustomPinAnnotationView *)bottomPin).calloutView = calloutView;
     [calloutView presentCalloutFromRect:bottomPin.bounds

@@ -30,6 +30,7 @@ typedef NSInteger SMCalloutAnimation;
 extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 
 @protocol SMCalloutViewDelegate;
+@class SMCalloutBackgroundView;
 
 //
 // Callout view.
@@ -41,6 +42,7 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 @property (nonatomic, copy) NSString *title, *subtitle; // title/titleView relationship mimics UINavigationBar.
 @property (nonatomic, retain) UIView *leftAccessoryView, *rightAccessoryView;
 @property (nonatomic, readonly) SMCalloutArrowDirection currentArrowDirection;
+@property (nonatomic, retain) SMCalloutBackgroundView *backgroundView; // default is [SMCalloutBackgroundView systemBackgroundView]
 
 // Custom title/subtitle views. if these are set, the respective title/subtitle properties will be ignored.
 // Keep in mind that SMCalloutView calls -sizeThatFits on titleView/subtitleView if defined, so your view
@@ -68,6 +70,29 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 - (void)dismissCalloutAnimated:(BOOL)animated;
 
 @end
+
+//
+// Classes responsible for drawing the background graphic with the pointy arrow.
+//
+
+// Abstract base class. Added to the SMCalloutView hierarchy as the lowest view.
+@interface SMCalloutBackgroundView : UIView
+@property (nonatomic, assign) CGPoint arrowPoint; // indicates where the tip of the arrow should be drawn, as a pixel offset
++ (SMCalloutBackgroundView *)systemBackgroundView; // returns the standard system background composed of prerendered images
+@end
+
+// Draws a background composed of stretched prerendered images that you can customize.
+@interface SMCalloutImageBackgroundView : SMCalloutBackgroundView
+@property (nonatomic, retain) UIImage *leftCapImage, *rightCapImage, *topAnchorImage, *bottomAnchorImage, *backgroundImage;
+@end
+
+// Draws a custom background matching the system background but can grow in height.
+@interface SMCalloutDrawnBackgroundView : SMCalloutBackgroundView
+@end
+
+//
+// Delegate methods
+//
 
 @protocol SMCalloutViewDelegate <NSObject>
 @optional
