@@ -1,12 +1,16 @@
-![](http://cl.ly/image/2a2j1p3U243P/Image%202012.09.02%2010:04:58%20AM.png)
+![Example Screenshot](http://cl.ly/image/2a2j1p3U243P/Image%202012.09.02%2010:04:58%20AM.png)
 
-### Overview
+
+Overview
+========
 
 SMCalloutView aims to be an exact replica of the private UICalloutView system control.
 
 We all love those "bubbles" you get when clicking pins in MKMapView. But sadly, it's impossible to present this bubble-style "Callout" UI anywhere outside MKMapView. Phooey! So this class _painstakingly_ recreates this handy control for your pleasure.
 
-### Usage
+
+Usage
+=====
 
 To use SMCalloutView in your own projects, simply copy the files `SMCalloutView.h` and `SMCalloutView.m`.
 
@@ -14,12 +18,36 @@ The comments in `SMCalloutView.h` do a lot of explaining on how to use the class
 
 You can study the included project's `AppDelegate.m` for a working example.
 
-### More Info
+
+Questions
+=========
+
+#### How do I change the height of the callout?
+
+If you use only the `title/titleView/subtitle/subtitleView` properties, the callout will always be the "system standard" height. If you assign the `contentView` property however, then the callout will size to fit the `contentView` and the other properties are ignored.
+
+**IMPORTANT**: When using `contentView`, you should consider settings the `backgroundView` property to a subclass of `SMCalloutBackgroundView` that can render at the size you want. For example, `SMCalloutDrawnBackgroundView` supports drawing at almost any size. See `AppDelegate.m` for an example. [More discussion on this topic][#29]
+
+  [#29]: https://github.com/nfarina/calloutview/issues/29
+
+
+#### Can I use the callout with the Google Maps iOS SDK?
+
+Check out [ryanmaxwell's demo proejct][googlemaps] for an example of one way to do this. [More discussion on this topic][#25]
+
+  [googlemaps]: https://github.com/ryanmaxwell/GoogleMapsCalloutView
+  [#25]: https://github.com/nfarina/calloutview/issues/25
+
+
+More Info
+=========
 
 You can read more info if you wish in the [blog post][].
 
   [blog post]: http://nfarina.com/post/29883229869/callout-view
 
-### ARC Support
+
+ARC Support
+===========
 
 This class requires LLVM 4.0 with [Automatic Reference Counting (ARC)](http://clang.llvm.org/docs/AutomaticReferenceCounting.html), enabled by default in modern Xcode projects.
