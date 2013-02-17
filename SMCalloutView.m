@@ -101,7 +101,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 - (SMCalloutBackgroundView *)backgroundView {
     // create our default background on first access only if it's nil, since you might have set your own background anyway.
-    return _backgroundView ?: (_backgroundView = [SMCalloutBackgroundView systemBackgroundView]);
+    return _backgroundView ?: (_backgroundView = [SMCalloutDrawnBackgroundView new]);
 }
 
 - (void)rebuildSubviews {

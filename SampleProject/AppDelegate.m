@@ -112,7 +112,7 @@
     
     // clear any custom view that was set by another pin
     calloutView.contentView = nil;
-    calloutView.backgroundView = [SMCalloutBackgroundView systemBackgroundView]; // reset background view
+    calloutView.backgroundView = [SMCalloutBackgroundView systemBackgroundView]; // use the system graphics
     
     // This does all the magic.
     [calloutView presentCalloutFromRect:topPin.frame
@@ -142,7 +142,7 @@
 
     // if you provide a custom view for the callout content, the title and subtitle will not be displayed
     calloutView.contentView = customView;
-    calloutView.backgroundView = [SMCalloutDrawnBackgroundView new]; // use the custom-drawn background class so the height is flexible
+    calloutView.backgroundView = nil; // reset background view to the default SMCalloutDrawnBackgroundView
     
     ((CustomPinAnnotationView *)bottomPin).calloutView = calloutView;
     [calloutView presentCalloutFromRect:bottomPin.bounds

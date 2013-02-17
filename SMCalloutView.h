@@ -42,7 +42,7 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 @property (nonatomic, copy) NSString *title, *subtitle; // title/titleView relationship mimics UINavigationBar.
 @property (nonatomic, retain) UIView *leftAccessoryView, *rightAccessoryView;
 @property (nonatomic, readonly) SMCalloutArrowDirection currentArrowDirection;
-@property (nonatomic, retain) SMCalloutBackgroundView *backgroundView; // default is [SMCalloutBackgroundView systemBackgroundView]
+@property (nonatomic, retain) SMCalloutBackgroundView *backgroundView; // default is [SMCalloutDrawnBackgroundView new]
 
 // Custom title/subtitle views. if these are set, the respective title/subtitle properties will be ignored.
 // Keep in mind that SMCalloutView calls -sizeThatFits on titleView/subtitleView if defined, so your view

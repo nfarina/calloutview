@@ -26,8 +26,6 @@ Questions
 
 If you use only the `title/titleView/subtitle/subtitleView` properties, the callout will always be the "system standard" height. If you assign the `contentView` property however, then the callout will size to fit the `contentView` and the other properties are ignored.
 
-**IMPORTANT**: When using `contentView`, you should consider settings the `backgroundView` property to a subclass of `SMCalloutBackgroundView` that can render at the size you want. For example, `SMCalloutDrawnBackgroundView` supports drawing at almost any size. See `AppDelegate.m` for an example. [More discussion on this topic][#29]
-
   [#29]: https://github.com/nfarina/calloutview/issues/29
 
 
