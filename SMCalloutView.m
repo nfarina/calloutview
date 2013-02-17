@@ -626,6 +626,12 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     return self;
 }
 
+// Make sure we relayout our images when our arrow point changes!
+- (void)setArrowPoint:(CGPoint)arrowPoint {
+    [super setArrowPoint:arrowPoint];
+    [self setNeedsLayout];
+}
+
 - (void)layoutSubviews {
     
     // apply our background graphics
@@ -681,11 +687,18 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     return self;
 }
 
+// Make sure we redraw our graphics when the arrow point changes!
+- (void)setArrowPoint:(CGPoint)arrowPoint {
+    [super setArrowPoint:arrowPoint];
+    [self setNeedsDisplay];
+}
+
 - (void)drawRect:(CGRect)rect {
 
     BOOL pointingUp = self.arrowPoint.y < self.$height/2;
     CGSize anchorSize = CGSizeMake(27, ANCHOR_HEIGHT);
-    CGRect anchorRect = CGRectMake(self.arrowPoint.x, 0, anchorSize.width, anchorSize.height);
+    CGFloat anchorX = roundf(self.arrowPoint.x - anchorSize.width / 2);
+    CGRect anchorRect = CGRectMake(anchorX, 0, anchorSize.width, anchorSize.height);
     
     // make sure the anchor is not too close to the end caps
     if (anchorRect.origin.x < ANCHOR_MARGIN_MIN)
