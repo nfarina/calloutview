@@ -37,6 +37,11 @@ Check out [ryanmaxwell's demo proejct][googlemaps] for an example of one way to 
   [#25]: https://github.com/nfarina/calloutview/issues/25
 
 
+#### Have you recreated more of MapKit? 
+
+No, but you might be interested in [MapBox's iOS SDK](https://github.com/mapbox/mapbox-ios-sdk), which uses SMCalloutView as part of its custom open source variation of MapKit. 
+
+
 More Info
 =========
 
