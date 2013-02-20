@@ -31,7 +31,7 @@ If you use only the `title/titleView/subtitle/subtitleView` properties, the call
 
 #### Can I use the callout with the Google Maps iOS SDK?
 
-Check out [ryanmaxwell's demo proejct][googlemaps] for an example of one way to do this. [More discussion on this topic][#25]
+Check out [ryanmaxwell's demo project][googlemaps] for an example of one way to do this. ([More discussion on this topic][#25])
 
   [googlemaps]: https://github.com/ryanmaxwell/GoogleMapsCalloutView
   [#25]: https://github.com/nfarina/calloutview/issues/25
