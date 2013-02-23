@@ -29,6 +29,14 @@ If you use only the `title/titleView/subtitle/subtitleView` properties, the call
   [#29]: https://github.com/nfarina/calloutview/issues/29
 
 
+#### Can I customize the background graphics?
+
+Yes, the callout background is an instance of `SMCalloutBackgroundView`. You can set your own custom `View` subclass to be the background, or you can use one of the built-in subclasses:
+
+ - `SMCalloutImageBackgroundView` lets you specify each of the image "fragments" that make up a horizontally-stretchable background.
+ - `SMCalloutDrawnBackgroundView` draws the background at any size using CoreGraphics methods. You can copy the `-drawRect` method and change the parameters to suit your needs.
+
+
 #### Can I use the callout with the Google Maps iOS SDK?
 
 Check out [ryanmaxwell's demo project][googlemaps] for an example of one way to do this. ([More discussion on this topic][#25])
