@@ -358,8 +358,9 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     return
         [self.leftAccessoryView pointInside:[self.leftAccessoryView convertPoint:point fromView:self] withEvent:nil] ||
         [self.rightAccessoryView pointInside:[self.rightAccessoryView convertPoint:point fromView:self] withEvent:nil] ||
-        [self.titleView pointInside:[self.titleView convertPoint:point fromView:self] withEvent:nil] ||
-        [self.subtitleView pointInside:[self.subtitleView convertPoint:point fromView:self] withEvent:nil];
+        [self.contentView pointInside:[self.contentView convertPoint:point fromView:self] withEvent:nil] ||
+        (!self.contentView && [self.titleView pointInside:[self.titleView convertPoint:point fromView:self] withEvent:nil]) ||
+        (!self.contentView && [self.subtitleView pointInside:[self.subtitleView convertPoint:point fromView:self] withEvent:nil]);
 }
 
 - (void)dismissCalloutAnimated:(BOOL)animated {
