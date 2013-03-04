@@ -47,8 +47,13 @@ Check out [ryanmaxwell's demo project][googlemaps] for an example of one way to 
 
 #### Have you recreated more of MapKit? 
 
-Nope, but you might be interested in [MapBox's iOS SDK][mapbox], which uses `SMCalloutView` as part of its custom open-source variation of MapKit.
+Nope, but other intrepid coders have!
 
+- For an awesome replacement of the pulsing blue "Current Location" dot, check out [Sam Vermette's SVPulsingAnnotationView][dot].
+
+- And for the outdoor map data and tiles themselves, check out [MapBox's iOS SDK][mapbox], a complete open-source solution for custom maps. They even use `SMCalloutView` out of the box!
+
+  [dot]: https://github.com/samvermette/SVPulsingAnnotationView
   [mapbox]: https://github.com/mapbox/mapbox-ios-sdk
 
 
