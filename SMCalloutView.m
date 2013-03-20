@@ -18,8 +18,8 @@
 
 NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
-#define CALLOUT_MIN_WIDTH 75 // our background graphics limit us to this minimum width...
-#define CALLOUT_HEIGHT 70 // ...and allow only for this exact height.
+#define CALLOUT_DEFAULT_MIN_WIDTH 75 // our image-based background graphics limit us to this minimum width...
+#define CALLOUT_DEFAULT_HEIGHT 70 // ...and allow only for this exact height.
 #define CALLOUT_DEFAULT_WIDTH 153 // default "I give up" width when we are asked to present in a space less than our min width
 #define TITLE_MARGIN 17 // the title view's normal horizontal margin from the edges of our callout view
 #define TITLE_TOP 11 // the top of the title view when no subtitle is present
@@ -140,13 +140,13 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     if (self.contentView)
         return self.contentView.$height + TITLE_TOP*2 + ANCHOR_HEIGHT + BOTTOM_ANCHOR_MARGIN;
     else
-        return CALLOUT_HEIGHT;
+        return CALLOUT_DEFAULT_HEIGHT;
 }
 
 - (CGSize)sizeThatFits:(CGSize)size {
     
     // odd behavior, but mimicking the system callout view
-    if (size.width < CALLOUT_MIN_WIDTH)
+    if (size.width < CALLOUT_DEFAULT_MIN_WIDTH)
         return CGSizeMake(CALLOUT_DEFAULT_WIDTH, self.calloutHeight);
     
     // calculate how much non-negotiable space we need to reserve for margin and accessories
@@ -185,7 +185,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     }
     
     // ensure we're big enough to fit our graphics!
-    preferredWidth = fmaxf(preferredWidth, CALLOUT_MIN_WIDTH);
+    preferredWidth = fmaxf(preferredWidth, CALLOUT_DEFAULT_MIN_WIDTH);
     
     // ask to be smaller if we have space, otherwise we'll fit into what we have by truncating the title/subtitle.
     return CGSizeMake(fminf(preferredWidth, size.width), self.calloutHeight);
@@ -479,11 +479,11 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 + (SMCalloutBackgroundView *)systemBackgroundView {
     SMCalloutImageBackgroundView *background = [SMCalloutImageBackgroundView new];
-    background.leftCapImage = [self embeddedImageNamed:@"SMCalloutViewLeftCap"];
-    background.rightCapImage = [self embeddedImageNamed:@"SMCalloutViewRightCap"];
-    background.topAnchorImage = [self embeddedImageNamed:@"SMCalloutViewTopAnchor"];
-    background.bottomAnchorImage = [self embeddedImageNamed:@"SMCalloutViewBottomAnchor"];
-    background.backgroundImage = [self embeddedImageNamed:@"SMCalloutViewBackground"];
+    background.leftCapImage = [[self embeddedImageNamed:@"SMCalloutViewLeftCap"] stretchableImageWithLeftCapWidth:16 topCapHeight:20];
+    background.rightCapImage = [[self embeddedImageNamed:@"SMCalloutViewRightCap"] stretchableImageWithLeftCapWidth:0 topCapHeight:20];
+    background.topAnchorImage = [[self embeddedImageNamed:@"SMCalloutViewTopAnchor"] stretchableImageWithLeftCapWidth:0 topCapHeight:33];
+    background.bottomAnchorImage = [[self embeddedImageNamed:@"SMCalloutViewBottomAnchor"] stretchableImageWithLeftCapWidth:0 topCapHeight:20];
+    background.backgroundImage = [[self embeddedImageNamed:@"SMCalloutViewBackground"] stretchableImageWithLeftCapWidth:0 topCapHeight:20];
     return background;
 }
 
@@ -642,6 +642,15 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     bottomAnchor.image = self.bottomAnchorImage;
     leftBackground.image = self.backgroundImage;
     rightBackground.image = self.backgroundImage;
+    
+    // stretch the images to fill our vertical space. The system background images aren't really stretchable,
+    // but that's OK because you'll probably be using title/subtitle rather than contentView if you're using the
+    // system images, and in that case the height will match the system background heights exactly and no stretching
+    // will occur. However, if you wish to define your own custom background using prerendered images, you could
+    // define stretchable images using -stretchableImageWithLeftCapWidth:TopCapHeight and they'd get stretched
+    // properly here if necessary.
+    leftCap.$height = rightCap.$height = leftBackground.$height = rightBackground.$height = self.$height - 13;
+    topAnchor.$height = bottomAnchor.$height = self.$height;
 
     BOOL pointingUp = self.arrowPoint.y < self.$height/2;
 
@@ -650,7 +659,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     bottomAnchor.hidden = pointingUp;
 
     // if we're pointing up, we'll need to push almost everything down a bit
-    CGFloat dy = !topAnchor.hidden ? TOP_ANCHOR_MARGIN : 0;
+    CGFloat dy = pointingUp ? TOP_ANCHOR_MARGIN : 0;
     leftCap.$y = rightCap.$y = leftBackground.$y = rightBackground.$y = dy;
     
     leftCap.$x = 0;
