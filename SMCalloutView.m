@@ -293,6 +293,9 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     // setting the anchor point moves the view a bit, so we need to reset
     self.$origin = calloutOrigin;
     
+    // make sure our frame is not on half-pixels or else we may be blurry!
+    self.frame = CGRectIntegral(self.frame);
+
     // layout now so we can immediately start animating to the final position if needed
     [self setNeedsLayout];
     [self layoutIfNeeded];
