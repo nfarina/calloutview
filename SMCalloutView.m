@@ -334,9 +334,17 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 - (void)animationDidStart:(CAAnimation *)anim {
     BOOL presenting = [[anim valueForKey:@"presenting"] boolValue];
 
-    if (presenting)
+    if (presenting) {
+        if ([_delegate respondsToSelector:@selector(calloutViewWillAppear:)])
+            [_delegate calloutViewWillAppear:self];
+        
         // ok, animation is on, let's make ourselves visible!
         self.hidden = NO;
+    }
+    else if (!presenting) {
+        if ([_delegate respondsToSelector:@selector(calloutViewWillDisappear:)])
+            [_delegate calloutViewWillDisappear:self];
+    }
 }
 
 - (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)finished {
