@@ -106,8 +106,14 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 // calling [UIScrollView setContentOffset:animated:].
 - (NSTimeInterval)calloutView:(SMCalloutView *)calloutView delayForRepositionWithSize:(CGSize)offset;
 
+// Called before the callout view appears on screen, or before the appearance animation will start.
+- (void)calloutViewWillAppear:(SMCalloutView*)calloutView;
+
 // Called after the callout view appears on screen, or after the appearance animation is complete.
 - (void)calloutViewDidAppear:(SMCalloutView *)calloutView;
+
+// Called before the callout view is removed from the screen, or before the disappearance animation is complete.
+- (void)calloutViewWillDisappear:(SMCalloutView*)calloutView;
 
 // Called after the callout view is removed from the screen, or after the disappearance animation is complete.
 - (void)calloutViewDidDisappear:(SMCalloutView *)calloutView;
