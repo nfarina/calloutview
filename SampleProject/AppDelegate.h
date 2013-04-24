@@ -15,12 +15,7 @@
 @property (nonatomic, assign) CLLocationCoordinate2D coordinate;
 @end
 
-// We need a custom MKAnnotationView implementation to override -hitTest:withEvent: so we can intercept touches
-// in our annotation's callout view.
-@interface CustomPinAnnotationView : MKPinAnnotationView
-@property (strong, nonatomic) SMCalloutView *calloutView;
-@end
-
-// We need a custom subclass of MKMapView in order to prevent touches on UIControls in our callout view.
+// We need a custom subclass of MKMapView in order to allow touches on UIControls in our callout view.
 @interface CustomMapView : MKMapView
+@property (strong, nonatomic) SMCalloutView *calloutView;
 @end

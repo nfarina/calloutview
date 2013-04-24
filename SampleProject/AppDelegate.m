@@ -6,7 +6,7 @@
     UIImageView *marsView;
     MKPinAnnotationView *topPin;
     SMCalloutView *calloutView;
-    MKMapView *bottomMapView;
+    CustomMapView *bottomMapView;
     MKPinAnnotationView *bottomPin;
 }
 
@@ -56,9 +56,10 @@
     UIButton *bottomDisclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
     [bottomDisclosure addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(disclosureTapped)]];
     
-    bottomPin = [[CustomPinAnnotationView alloc] initWithAnnotation:capeCanaveral reuseIdentifier:@""];
+    bottomPin = [[MKPinAnnotationView alloc] initWithAnnotation:capeCanaveral reuseIdentifier:@""];
     
     bottomMapView = [[CustomMapView alloc] initWithFrame:CGRectOffset(half, 0, half.size.height)];
+    bottomMapView.calloutView = calloutView;
     bottomMapView.delegate = self;
     [bottomMapView addAnnotation:capeCanaveral];
     
@@ -151,7 +152,8 @@
     calloutView.contentView = customView;
     calloutView.backgroundView = nil; // reset background view to the default SMCalloutDrawnBackgroundView
     
-    ((CustomPinAnnotationView *)bottomPin).calloutView = calloutView;
+    // just to mix things up, we'll present the callout in a Layer instead of a View. This will require us to override
+    // -hitTest:withEvent: in our CustomMapView subclass.
     [calloutView presentCalloutFromRect:bottomPin.bounds
                                  inView:bottomPin
                       constrainedToView:bottomMapView
@@ -212,16 +214,6 @@
 
 @implementation MapAnnotation @end
 
-@implementation CustomPinAnnotationView
-
-// See this for more information: https://github.com/nfarina/calloutview/pull/9
-- (UIView *) hitTest:(CGPoint)point withEvent:(UIEvent *)event {
-    UIView *calloutMaybe = [self.calloutView hitTest:[self.calloutView convertPoint:point fromView:self] withEvent:event];
-    return calloutMaybe ?: [super hitTest:point withEvent:event];
-}
-
-@end
-
 @interface MKMapView (UIGestureRecognizer)
 
 // this tells the compiler that MKMapView actually implements this method
@@ -238,6 +230,16 @@
         return NO;
     else
         return [super gestureRecognizer:gestureRecognizer shouldReceiveTouch:touch];
+}
+
+// Allow touches to be sent to our calloutview.
+// See this for some discussion of why we need to override this: https://github.com/nfarina/calloutview/pull/9
+- (UIView *) hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+    
+    UIView *calloutMaybe = [self.calloutView hitTest:[self.calloutView convertPoint:point fromView:self] withEvent:event];
+    if (calloutMaybe) return calloutMaybe;
+    
+    return [super hitTest:point withEvent:event];
 }
 
 @end
