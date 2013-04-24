@@ -444,7 +444,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 }
 
 - (CGFloat)centeredPositionOfView:(UIView *)view relativeToView:(UIView *)parentView {
-    return (parentView.$height - view.$height) / 2;
+    return roundf((parentView.$height - view.$height) / 2);
 }
 
 - (void)layoutSubviews {
