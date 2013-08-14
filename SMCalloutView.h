@@ -1,4 +1,5 @@
 #import <UIKit/UIKit.h>
+#import <QuartzCore/QuartzCore.h>
 
 /*
 
@@ -68,6 +69,8 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 - (void)presentCalloutFromRect:(CGRect)rect inLayer:(CALayer *)layer constrainedToLayer:(CALayer *)constrainedLayer permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated;
 
 - (void)dismissCalloutAnimated:(BOOL)animated;
+
+- (CAAnimation *)animationWithType:(SMCalloutAnimation)type presenting:(BOOL)presenting;
 
 @end
 
