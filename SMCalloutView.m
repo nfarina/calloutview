@@ -1,53 +1,71 @@
 #import "SMCalloutView.h"
 #import <QuartzCore/QuartzCore.h>
 
-//
-// UIView frame helpers - we do a lot of UIView frame fiddling in this class; these functions help keep things readable.
-//
 
+#pragma mark - Categories
+
+/**
+ * UIView frame helpers - we do a lot of UIView frame fiddling in this class; these functions help keep things readable.
+ */
 @interface UIView (SMFrameAdditions)
+
 @property (nonatomic, assign) CGPoint $origin;
 @property (nonatomic, assign) CGSize $size;
 @property (nonatomic, assign) CGFloat $x, $y, $width, $height; // normal rect properties
 @property (nonatomic, assign) CGFloat $left, $top, $right, $bottom; // these will stretch/shrink the rect
+
 @end
 
-//
-// Callout View.
-//
+
+#pragma mark
+
+@interface SMCalloutBackgroundView()
+
+@property (nonatomic, assign) BOOL shouldDrawiOS7UserInterface;
+
+/**
+ * Returns the appropriate corner radius to use for the device's screen scale and interface style.
+ */
++ (CGFloat)cornerRadiusUsingiOS7Style:(BOOL)shouldDrawiOS7UserInterface;
+
+@end
+
+
+#pragma mark - Constants
 
 NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 #define CALLOUT_DEFAULT_MIN_WIDTH 75 // our image-based background graphics limit us to this minimum width...
-#define CALLOUT_DEFAULT_HEIGHT 70 // ...and allow only for this exact height.
 #define CALLOUT_DEFAULT_WIDTH 153 // default "I give up" width when we are asked to present in a space less than our min width
-#define TITLE_MARGIN 17 // the title view's normal horizontal margin from the edges of our callout view
 #define TITLE_TOP 11 // the top of the title view when no subtitle is present
 #define TITLE_SUB_TOP 3 // the top of the title view when a subtitle IS present
 #define TITLE_HEIGHT 22 // title height, fixed
 #define SUBTITLE_TOP 25 // the top of the subtitle, when present
 #define SUBTITLE_HEIGHT 16 // subtitle height, fixed
-#define TITLE_ACCESSORY_MARGIN 6 // the margin between the title and an accessory if one is present (on either side)
-#define ACCESSORY_MARGIN 14 // the accessory's margin from the edges of our callout view
-#define ACCESSORY_TOP 8 // the top of the accessory "area" in which accessory views are placed
 #define ACCESSORY_HEIGHT 32 // the "suggested" maximum height of an accessory view. shorter accessories will be vertically centered
 #define BETWEEN_ACCESSORIES_MARGIN 7 // if we have no title or subtitle, but have two accessory views, then this is the space between them
-#define ANCHOR_MARGIN 37 // the smallest possible distance from the edge of our control to the "tip" of the anchor, from either left or right
 #define TOP_ANCHOR_MARGIN 13 // all the above measurements assume a bottom anchor! if we're pointing "up" we'll need to add this top margin to everything.
-#define BOTTOM_ANCHOR_MARGIN 10 // if using a bottom anchor, we'll need to account for the shadow below the "tip"
 #define REPOSITION_MARGIN 10 // when we try to reposition content to be visible, we'll consider this margin around your target rect
 
-#define TOP_SHADOW_BUFFER 2 // height offset buffer to account for top shadow
-#define BOTTOM_SHADOW_BUFFER 5 // height offset buffer to account for bottom shadow
 #define OFFSET_FROM_ORIGIN 5 // distance to offset vertically from the rect origin of the callout
 #define ANCHOR_HEIGHT 14 // height to use for the anchor
 #define ANCHOR_MARGIN_MIN 24 // the smallest possible distance from the edge of our control to the edge of the anchor, from either left or right
+
+
+
+#pragma mark
+
+@interface SMCalloutView() <UIGestureRecognizerDelegate>
+@end
 
 @implementation SMCalloutView {
     UILabel *titleLabel, *subtitleLabel;
     UIImageView *leftCap, *rightCap, *topAnchor, *bottomAnchor, *leftBackground, *rightBackground;
     SMCalloutArrowDirection arrowDirection;
     BOOL popupCancelled;
+	
+	UIView *clippedView;
+	UILongPressGestureRecognizer *pressRecognizer;
 }
 
 - (id)initWithFrame:(CGRect)frame {
@@ -55,15 +73,22 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         _presentAnimation = SMCalloutAnimationBounce;
         _dismissAnimation = SMCalloutAnimationFade;
         self.backgroundColor = [UIColor clearColor];
+		self.shouldDrawiOS7UserInterface = [[UIView class] instancesRespondToSelector:@selector(tintColor)];
+		
+		if (self.shouldDrawiOS7UserInterface) {
+			self.shouldHightlightOnTouch = YES;
+		}
     }
+	
     return self;
 }
 
 - (UIView *)titleViewOrDefault {
-    if (self.titleView)
+    if (self.titleView) {
         // if you have a custom title view defined, return that.
         return self.titleView;
-    else {
+		
+	} else {
         if (!titleLabel) {
             // create a default titleView
             titleLabel = [UILabel new];
@@ -74,16 +99,26 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
             titleLabel.textColor = [UIColor whiteColor];
             titleLabel.shadowColor = [UIColor colorWithWhite:0 alpha:0.5];
             titleLabel.shadowOffset = CGSizeMake(0, -1);
+			
+			// set iOS 7 specific styles
+			if (self.shouldDrawiOS7UserInterface) {
+				titleLabel.textColor = [UIColor darkTextColor];
+				titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+				titleLabel.shadowColor = nil;
+				titleLabel.shadowOffset = CGSizeZero;
+			}
         }
+		
         return titleLabel;
     }
 }
 
 - (UIView *)subtitleViewOrDefault {
-    if (self.subtitleView)
+    if (self.subtitleView) {
         // if you have a custom subtitle view defined, return that.
         return self.subtitleView;
-    else {
+		
+    } else {
         if (!subtitleLabel) {
             // create a default subtitleView
             subtitleLabel = [UILabel new];
@@ -94,124 +129,155 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
             subtitleLabel.textColor = [UIColor whiteColor];
             subtitleLabel.shadowColor = [UIColor colorWithWhite:0 alpha:0.5];
             subtitleLabel.shadowOffset = CGSizeMake(0, -1);
+			
+			// set iOS 7 specific styles
+			if (self.shouldDrawiOS7UserInterface) {
+				subtitleLabel.textColor = [UIColor darkTextColor];
+				subtitleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleCaption1];
+				subtitleLabel.shadowColor = nil;
+				subtitleLabel.shadowOffset = CGSizeZero;
+			}
         }
+		
         return subtitleLabel;
     }
 }
 
 - (SMCalloutBackgroundView *)backgroundView {
     // create our default background on first access only if it's nil, since you might have set your own background anyway.
-    return _backgroundView ?: (_backgroundView = [SMCalloutDrawnBackgroundView new]);
+	
+	if (_backgroundView) {
+		return _backgroundView;
+	}
+	
+	if (self.shouldDrawiOS7UserInterface) {
+		_backgroundView = [[SMCalloutDrawnBackgroundView alloc] init];
+	
+	} else {
+		_backgroundView = [[SMCalloutDrawniOS6BackgroundView alloc] init];
+	}
+	
+	_backgroundView.shouldDrawiOS7UserInterface = self.shouldDrawiOS7UserInterface;
+	
+    return _backgroundView;
 }
 
-- (void)rebuildSubviews {
-    // remove and re-add our appropriate subviews in the appropriate order
-    [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    [self setNeedsDisplay];
-    
-    [self addSubview:self.backgroundView];
-    
-    if (self.contentView) {
-        [self addSubview:self.contentView];
-    }
-    else {
-        if (self.titleViewOrDefault) [self addSubview:self.titleViewOrDefault];
-        if (self.subtitleViewOrDefault) [self addSubview:self.subtitleViewOrDefault];
-    }
-    if (self.leftAccessoryView) [self addSubview:self.leftAccessoryView];
-    if (self.rightAccessoryView) [self addSubview:self.rightAccessoryView];
+- (UIView*)clippedViewOrDefault {
+	if (self.shouldDrawiOS7UserInterface) {
+		if (!clippedView) {
+			clippedView = [[UIView alloc] init];
+			
+			clippedView.layer.cornerRadius = [SMCalloutBackgroundView cornerRadiusUsingiOS7Style:self.shouldDrawiOS7UserInterface];
+			clippedView.clipsToBounds = YES;
+		}
+		
+		return clippedView;
+	}
+	
+	return self;
 }
 
-- (CGFloat)innerContentMarginLeft {
-    if (self.leftAccessoryView)
-        return ACCESSORY_MARGIN + self.leftAccessoryView.$width + TITLE_ACCESSORY_MARGIN;
-    else
-        return TITLE_MARGIN;
+- (void)setShouldHightlightOnTouch:(BOOL)shouldHightlightOnTouch {
+	if (_shouldHightlightOnTouch != shouldHightlightOnTouch) {
+		_shouldHightlightOnTouch = shouldHightlightOnTouch;
+		
+		if (shouldHightlightOnTouch) {
+			pressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(pressRecognized:)];
+			pressRecognizer.minimumPressDuration = 0;
+			pressRecognizer.allowableMovement = 44;
+			pressRecognizer.delegate = self;
+			
+			[self addGestureRecognizer:pressRecognizer];
+		
+		} else {
+			[self removeGestureRecognizer:pressRecognizer];
+		}
+	}
 }
 
-- (CGFloat)innerContentMarginRight {
-    if (self.rightAccessoryView)
-        return ACCESSORY_MARGIN + self.rightAccessoryView.$width + TITLE_ACCESSORY_MARGIN;
-    else
-        return TITLE_MARGIN;
+#pragma mark Presentation
+
+- (void)presentCalloutFromRect:(CGRect)rect
+						inView:(UIView *)view
+			 constrainedToView:(UIView *)constrainedView
+	  permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections
+					  animated:(BOOL)animated {
+	
+	[self presentCalloutFromRect:rect
+						  inView:view
+			   constrainedToView:constrainedView
+					  withInsets:UIEdgeInsetsMake(-REPOSITION_MARGIN, -REPOSITION_MARGIN, -REPOSITION_MARGIN, -REPOSITION_MARGIN)
+		permittedArrowDirections:arrowDirections
+						animated:animated];
 }
 
-- (CGFloat)calloutHeight {
-    if (self.contentView)
-        return self.contentView.$height + TITLE_TOP*2 + ANCHOR_HEIGHT + BOTTOM_ANCHOR_MARGIN;
-    else
-        return CALLOUT_DEFAULT_HEIGHT;
+- (void)presentCalloutFromRect:(CGRect)rect
+						inView:(UIView *)view
+			 constrainedToView:(UIView *)constrainedView
+					withInsets:(UIEdgeInsets)constrainedInsets
+	  permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections
+					  animated:(BOOL)animated {
+	
+	[self presentCalloutFromRect:rect
+						 inLayer:view.layer
+						  ofView:view
+			  constrainedToLayer:constrainedView.layer
+					  withInsets:constrainedInsets
+		permittedArrowDirections:arrowDirections
+						animated:animated];
 }
 
-- (CGSize)sizeThatFits:(CGSize)size {
-    
-    // odd behavior, but mimicking the system callout view
-    if (size.width < CALLOUT_DEFAULT_MIN_WIDTH)
-        return CGSizeMake(CALLOUT_DEFAULT_WIDTH, self.calloutHeight);
-    
-    // calculate how much non-negotiable space we need to reserve for margin and accessories
-    CGFloat margin = self.innerContentMarginLeft + self.innerContentMarginRight;
-    
-    // how much room is left for text?
-    CGFloat availableWidthForText = size.width - margin;
+- (void)presentCalloutFromRect:(CGRect)rect
+					   inLayer:(CALayer *)layer
+			constrainedToLayer:(CALayer *)constrainedLayer
+	  permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections
+					  animated:(BOOL)animated {
 
-    // no room for text? then we'll have to squeeze into the given size somehow.
-    if (availableWidthForText < 0)
-        availableWidthForText = 0;
-
-    CGSize preferredTitleSize = [self.titleViewOrDefault sizeThatFits:CGSizeMake(availableWidthForText, TITLE_HEIGHT)];
-    CGSize preferredSubtitleSize = [self.subtitleViewOrDefault sizeThatFits:CGSizeMake(availableWidthForText, SUBTITLE_HEIGHT)];
-    
-    // total width we'd like
-    CGFloat preferredWidth;
-    
-    if (self.contentView) {
-        
-        // if we have a content view, then take our preferred size directly from that
-        preferredWidth = self.contentView.$width + margin;
-    }
-    else if (preferredTitleSize.width >= 0.000001 || preferredSubtitleSize.width >= 0.000001) {
-        
-        // if we have a title or subtitle, then our assumed margins are valid, and we can apply them
-        preferredWidth = fmaxf(preferredTitleSize.width, preferredSubtitleSize.width) + margin;
-    }
-    else {
-        // ok we have no title or subtitle to speak of. In this case, the system callout would actually not display
-        // at all! But we can handle it.
-        preferredWidth = self.leftAccessoryView.$width + self.rightAccessoryView.$width + ACCESSORY_MARGIN*2;
-        
-        if (self.leftAccessoryView && self.rightAccessoryView)
-            preferredWidth += BETWEEN_ACCESSORIES_MARGIN;
-    }
-    
-    // ensure we're big enough to fit our graphics!
-    preferredWidth = fmaxf(preferredWidth, CALLOUT_DEFAULT_MIN_WIDTH);
-    
-    // ask to be smaller if we have space, otherwise we'll fit into what we have by truncating the title/subtitle.
-    return CGSizeMake(fminf(preferredWidth, size.width), self.calloutHeight);
+	[self presentCalloutFromRect:rect
+						 inLayer:layer
+			  constrainedToLayer:constrainedLayer
+					  withInsets:UIEdgeInsetsMake(-REPOSITION_MARGIN, -REPOSITION_MARGIN, -REPOSITION_MARGIN, -REPOSITION_MARGIN)
+		permittedArrowDirections:arrowDirections
+						animated:animated];
 }
 
-- (CGSize)offsetToContainRect:(CGRect)innerRect inRect:(CGRect)outerRect {
-    CGFloat nudgeRight = fmaxf(0, CGRectGetMinX(outerRect) - CGRectGetMinX(innerRect));
-    CGFloat nudgeLeft = fminf(0, CGRectGetMaxX(outerRect) - CGRectGetMaxX(innerRect));
-    CGFloat nudgeTop = fmaxf(0, CGRectGetMinY(outerRect) - CGRectGetMinY(innerRect));
-    CGFloat nudgeBottom = fminf(0, CGRectGetMaxY(outerRect) - CGRectGetMaxY(innerRect));
-    return CGSizeMake(nudgeLeft ?: nudgeRight, nudgeTop ?: nudgeBottom);
-}
-
-- (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToView:(UIView *)constrainedView permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
-    [self presentCalloutFromRect:rect inLayer:view.layer ofView:view constrainedToLayer:constrainedView.layer permittedArrowDirections:arrowDirections animated:animated];
-}
-
-- (void)presentCalloutFromRect:(CGRect)rect inLayer:(CALayer *)layer constrainedToLayer:(CALayer *)constrainedLayer permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
-    [self presentCalloutFromRect:rect inLayer:layer ofView:nil constrainedToLayer:constrainedLayer permittedArrowDirections:arrowDirections animated:animated];
+- (void)presentCalloutFromRect:(CGRect)rect
+					   inLayer:(CALayer *)layer
+			constrainedToLayer:(CALayer *)constrainedLayer
+					withInsets:(UIEdgeInsets)constrainedInsets
+	  permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections
+					  animated:(BOOL)animated {
+	
+	[self presentCalloutFromRect:rect
+						 inLayer:layer
+						  ofView:nil
+			  constrainedToLayer:constrainedLayer
+					  withInsets:constrainedInsets
+		permittedArrowDirections:arrowDirections
+						animated:animated];
 }
 
 // this private method handles both CALayer and UIView parents depending on what's passed.
-- (void)presentCalloutFromRect:(CGRect)rect inLayer:(CALayer *)layer ofView:(UIView *)view constrainedToLayer:(CALayer *)constrainedLayer permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
+- (void)presentCalloutFromRect:(CGRect)rect
+					   inLayer:(CALayer *)layer
+						ofView:(UIView *)view
+			constrainedToLayer:(CALayer *)constrainedLayer
+					withInsets:(UIEdgeInsets)constrainedInsets
+	  permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections
+					  animated:(BOOL)animated {
     
     // Sanity check: dismiss this callout immediately if it's displayed somewhere
     if (self.layer.superlayer) [self dismissCalloutAnimated:NO];
+	
+	
+	// a quick hack to make sure iOS 7 doesn't draw the arrow under a left accessory
+	// this makes sure we don't have to deal with extending a view with a background color into the arrow
+	if (self.shouldDrawiOS7UserInterface) {
+		constrainedInsets = UIEdgeInsetsMake(constrainedInsets.top,
+											 MIN(-ANCHOR_MARGIN_MIN - CGRectGetWidth(self.leftAccessoryView.bounds), constrainedInsets.left),
+											 constrainedInsets.bottom,
+											 constrainedInsets.right);
+	}
     
     // figure out the constrained view's rect in our popup view's coordinate system
     CGRect constrainedRect = [constrainedLayer convertRect:constrainedLayer.bounds toLayer:layer];
@@ -256,8 +322,8 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     CGFloat calloutX = roundf(CGRectGetMidX(constrainedRect) - self.$width / 2);
     
     // what's the farthest to the left and right that we could point to, given our background image constraints?
-    CGFloat minPointX = calloutX + ANCHOR_MARGIN;
-    CGFloat maxPointX = calloutX + self.$width - ANCHOR_MARGIN;
+    CGFloat minPointX = calloutX + [self layoutLeftAnchorMargin];
+    CGFloat maxPointX = calloutX + self.$width - [self layoutRightAnchorMargin];
     
     // we may need to scoot over to the left or right to point at the correct spot
     CGFloat adjustX = 0;
@@ -272,7 +338,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     
     CGPoint calloutOrigin = {
         .x = calloutX + adjustX,
-        .y = bestDirection == SMCalloutArrowDirectionDown ? (anchorY - self.calloutHeight + BOTTOM_ANCHOR_MARGIN) : anchorY
+        .y = bestDirection == SMCalloutArrowDirectionDown ? (anchorY - self.calloutHeight + [self layoutBottomAnchorMargin]) : anchorY
     };
     
     _currentArrowDirection = bestDirection;
@@ -302,9 +368,10 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     
     // if we're outside the bounds of our constraint rect, we'll give our delegate an opportunity to shift us into position.
     // consider both our size and the size of our target rect (which we'll assume to be the size of the content you want to scroll into view.
-    CGRect contentRect = CGRectUnion(self.frame, CGRectInset(rect, -REPOSITION_MARGIN, -REPOSITION_MARGIN));
+	CGRect contentRect = CGRectUnion(self.frame, UIEdgeInsetsInsetRect(rect, constrainedInsets));
+
     CGSize offset = [self offsetToContainRect:contentRect inRect:constrainedRect];
-    
+    	
     NSTimeInterval delay = 0;
     popupCancelled = NO; // reset this before calling our delegate below
     
@@ -330,6 +397,9 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     
     [self.layer addAnimation:animation forKey:@"present"];
 }
+
+
+#pragma mark Animation
 
 - (void)animationDidStart:(CAAnimation *)anim {
     BOOL presenting = [[anim valueForKey:@"presenting"] boolValue];
@@ -364,16 +434,6 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     }
 }
 
-- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
-    // we want to match the system callout view, which doesn't "capture" touches outside the accessory areas. This way you can click on other pins and things *behind* a translucent callout.
-    return
-        [self.leftAccessoryView pointInside:[self.leftAccessoryView convertPoint:point fromView:self] withEvent:nil] ||
-        [self.rightAccessoryView pointInside:[self.rightAccessoryView convertPoint:point fromView:self] withEvent:nil] ||
-        [self.contentView pointInside:[self.contentView convertPoint:point fromView:self] withEvent:nil] ||
-        (!self.contentView && [self.titleView pointInside:[self.titleView convertPoint:point fromView:self] withEvent:nil]) ||
-        (!self.contentView && [self.subtitleView pointInside:[self.subtitleView convertPoint:point fromView:self] withEvent:nil]);
-}
-
 - (void)dismissCalloutAnimated:(BOOL)animated {
     [self.layer removeAnimationForKey:@"present"];
     
@@ -385,18 +445,6 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         [self.layer addAnimation:animation forKey:@"dismiss"];
     }
     else [self removeFromParent];
-}
-
-- (void)removeFromParent {
-    if (self.superview)
-        [self removeFromSuperview];
-    else {
-        // removing a layer from a superlayer causes an implicit fade-out animation that we wish to disable.
-        [CATransaction begin];
-        [CATransaction setDisableActions:YES];
-        [self.layer removeFromSuperlayer];
-        [CATransaction commit];
-    }
 }
 
 - (CAAnimation *)animationWithType:(SMCalloutAnimation)type presenting:(BOOL)presenting {
@@ -439,6 +487,17 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     return animation;
 }
 
+
+#pragma mark Helpers
+
+- (CGSize)offsetToContainRect:(CGRect)innerRect inRect:(CGRect)outerRect {
+    CGFloat nudgeRight = fmaxf(0, CGRectGetMinX(outerRect) - CGRectGetMinX(innerRect));
+    CGFloat nudgeLeft = fminf(0, CGRectGetMaxX(outerRect) - CGRectGetMaxX(innerRect));
+    CGFloat nudgeTop = fmaxf(0, CGRectGetMinY(outerRect) - CGRectGetMinY(innerRect));
+    CGFloat nudgeBottom = fminf(0, CGRectGetMaxY(outerRect) - CGRectGetMaxY(innerRect));
+    return CGSizeMake(nudgeLeft ?: nudgeRight, nudgeTop ?: nudgeBottom);
+}
+
 - (CGFloat)centeredPositionOfView:(UIView *)view ifSmallerThan:(CGFloat)height {
     return view.$height < height ? floorf(height/2 - view.$height/2) : 0;
 }
@@ -447,45 +506,373 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     return roundf((parentView.$height - view.$height) / 2);
 }
 
-- (void)layoutSubviews {
+- (void)removeFromParent {
+    if (self.superview)
+        [self removeFromSuperview];
+    else {
+        // removing a layer from a superlayer causes an implicit fade-out animation that we wish to disable.
+        [CATransaction begin];
+        [CATransaction setDisableActions:YES];
+        [self.layer removeFromSuperlayer];
+        [CATransaction commit];
+    }
+}
+
+
+#pragma mark Layout
+
+- (void)rebuildSubviews {
+    // remove and re-add our appropriate subviews in the appropriate order
+    [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    [self setNeedsDisplay];
     
+    [self addSubview:self.backgroundView];
+    
+	if ([self clippedViewOrDefault] != self) {
+		[self addSubview:[self clippedViewOrDefault]];
+	}
+	
+    if (self.contentView) {
+        [[self clippedViewOrDefault] addSubview:self.contentView];
+		
+    } else {
+        if (self.titleViewOrDefault) [[self clippedViewOrDefault] addSubview:self.titleViewOrDefault];
+        if (self.subtitleViewOrDefault) [[self clippedViewOrDefault] addSubview:self.subtitleViewOrDefault];
+    }
+	
+    if (self.leftAccessoryView) [[self clippedViewOrDefault] addSubview:self.leftAccessoryView];
+    if (self.rightAccessoryView) [[self clippedViewOrDefault] addSubview:self.rightAccessoryView];
+}
+
+- (CGFloat)calloutHeight {
+    if (self.contentView) {
+        return self.contentView.$height + TITLE_TOP*2 + ANCHOR_HEIGHT + [self layoutBottomAnchorMargin];
+		
+    } else {
+        return [self layoutDefaultHeight];
+	}
+}
+
+- (CGSize)sizeThatFits:(CGSize)size {
+    
+    // odd behavior, but mimicking the system callout view
+    if (size.width < CALLOUT_DEFAULT_MIN_WIDTH)
+        return CGSizeMake(CALLOUT_DEFAULT_WIDTH, self.calloutHeight);
+    
+    // calculate how much non-negotiable space we need to reserve for margin and accessories
+    CGFloat margin = self.layoutInnerContentMarginLeft + self.layoutInnerContentMarginRight;
+    
+    // how much room is left for text?
+    CGFloat availableWidthForText = size.width - margin;
+	
+    // no room for text? then we'll have to squeeze into the given size somehow.
+    if (availableWidthForText < 0)
+        availableWidthForText = 0;
+	
+    CGSize preferredTitleSize = [self.titleViewOrDefault sizeThatFits:CGSizeMake(availableWidthForText, TITLE_HEIGHT)];
+    CGSize preferredSubtitleSize = [self.subtitleViewOrDefault sizeThatFits:CGSizeMake(availableWidthForText, SUBTITLE_HEIGHT)];
+    
+    // total width we'd like
+    CGFloat preferredWidth;
+    
+    if (self.contentView) {
+        
+        // if we have a content view, then take our preferred size directly from that
+        preferredWidth = self.contentView.$width + margin;
+    }
+    else if (preferredTitleSize.width >= 0.000001 || preferredSubtitleSize.width >= 0.000001) {
+        
+        // if we have a title or subtitle, then our assumed margins are valid, and we can apply them
+        preferredWidth = fmaxf(preferredTitleSize.width, preferredSubtitleSize.width) + margin;
+    }
+    else {
+        // ok we have no title or subtitle to speak of. In this case, the system callout would actually not display
+        // at all! But we can handle it.
+        preferredWidth = self.leftAccessoryView.$width + self.rightAccessoryView.$width + [self layoutLeftAccessoryMarginWidth] + [self layoutRightAccessoryMarginWidth];
+        
+        if (self.leftAccessoryView && self.rightAccessoryView)
+            preferredWidth += BETWEEN_ACCESSORIES_MARGIN;
+    }
+    
+    // ensure we're big enough to fit our graphics!
+    preferredWidth = fmaxf(preferredWidth, CALLOUT_DEFAULT_MIN_WIDTH);
+    
+    // ask to be smaller if we have space, otherwise we'll fit into what we have by truncating the title/subtitle.
+    return CGSizeMake(fminf(preferredWidth, size.width), self.calloutHeight);
+}
+
+- (void)layoutSubviews {
     self.backgroundView.frame = self.bounds;
     
     // if we're pointing up, we'll need to push almost everything down a bit
     CGFloat dy = arrowDirection == SMCalloutArrowDirectionUp ? TOP_ANCHOR_MARGIN : 0;
+	
+	if (self.shouldDrawiOS7UserInterface) {
+		clippedView.frame = CGRectMake(0,
+									   dy,
+									   CGRectGetWidth(self.bounds),
+									   CGRectGetHeight(self.bounds) - ANCHOR_HEIGHT - [self layoutBottomAnchorMargin] - OFFSET_FROM_ORIGIN);
+		
+		self.leftAccessoryView.$height = CGRectGetHeight(clippedView.bounds);
+		self.rightAccessoryView.$height = CGRectGetHeight(clippedView.bounds);
+	}
     
-    self.titleViewOrDefault.$x = self.innerContentMarginLeft;
+    self.titleViewOrDefault.$x = self.layoutInnerContentMarginLeft;
     self.titleViewOrDefault.$y = (self.subtitleView || self.subtitle.length ? TITLE_SUB_TOP : TITLE_TOP) + dy;
-    self.titleViewOrDefault.$width = self.$width - self.innerContentMarginLeft - self.innerContentMarginRight;
+    self.titleViewOrDefault.$width = self.$width - self.layoutInnerContentMarginLeft - self.layoutInnerContentMarginRight;
     
     self.subtitleViewOrDefault.$x = self.titleViewOrDefault.$x;
     self.subtitleViewOrDefault.$y = SUBTITLE_TOP + dy;
     self.subtitleViewOrDefault.$width = self.titleViewOrDefault.$width;
-    
-    self.leftAccessoryView.$x = ACCESSORY_MARGIN;
+	   
+    self.leftAccessoryView.$x = [self layoutLeftAccessoryMarginWidth];
     if (self.contentView)
         self.leftAccessoryView.$y = TITLE_TOP + [self centeredPositionOfView:self.leftAccessoryView relativeToView:self.contentView] + dy;
     else
-        self.leftAccessoryView.$y = ACCESSORY_TOP + [self centeredPositionOfView:self.leftAccessoryView ifSmallerThan:ACCESSORY_HEIGHT] + dy;
+        self.leftAccessoryView.$y = [self layoutAccessoryYOrigin] + [self centeredPositionOfView:self.leftAccessoryView ifSmallerThan:ACCESSORY_HEIGHT] + dy;
     
-    self.rightAccessoryView.$x = self.$width-ACCESSORY_MARGIN-self.rightAccessoryView.$width;
+    self.rightAccessoryView.$x = self.$width-[self layoutRightAccessoryMarginWidth]-self.rightAccessoryView.$width;
     if (self.contentView)
         self.rightAccessoryView.$y = TITLE_TOP + [self centeredPositionOfView:self.rightAccessoryView relativeToView:self.contentView] + dy;
     else
-        self.rightAccessoryView.$y = ACCESSORY_TOP + [self centeredPositionOfView:self.rightAccessoryView ifSmallerThan:ACCESSORY_HEIGHT] + dy;
+        self.rightAccessoryView.$y = [self layoutAccessoryYOrigin] + [self centeredPositionOfView:self.rightAccessoryView ifSmallerThan:ACCESSORY_HEIGHT] + dy;
     
     
     if (self.contentView) {
-        self.contentView.$x = self.innerContentMarginLeft;
+        self.contentView.$x = self.layoutInnerContentMarginLeft;
         self.contentView.$y = TITLE_TOP + dy;
     }
 }
 
+
+#pragma mark Layout constants
+
+/**
+ * The smallest possible distance from the edge of our control to the "tip" of the anchor from the left.
+ */
+- (CGFloat)layoutLeftAnchorMargin {
+	CGFloat margin = 37.0f;
+	
+	if (self.shouldDrawiOS7UserInterface) {
+		// adding the left accessory width ensures we won't display the arrow where the background color of the accessory should be
+		margin = MAX(CGRectGetWidth(self.leftAccessoryView.bounds) + 20, margin);
+	}
+
+	return margin;
+}
+
+/**
+ * The smallest possible distance from the edge of our control to the "tip" of the anchor from the right.
+ */
+- (CGFloat)layoutRightAnchorMargin {
+	return 37.0f;
+}
+
+- (CGFloat)layoutDefaultHeight {
+	if (self.shouldDrawiOS7UserInterface) {
+		return 62;
+	}
+	
+	return 70;
+}
+
+- (CGFloat)layoutInnerContentMarginLeft {
+    if (self.leftAccessoryView) {
+        return [self layoutLeftAccessoryMarginWidth] + self.leftAccessoryView.$width + [self layoutTitleAccessoryMargin];
+		
+    } else {
+        return [self layoutTitleMargin];
+	}
+}
+
+- (CGFloat)layoutInnerContentMarginRight {
+    if (self.rightAccessoryView) {
+        return [self layoutRightAccessoryMarginWidth] + self.rightAccessoryView.$width + [self layoutTitleAccessoryMargin];
+		
+    } else {
+        return [self layoutTitleMargin];
+	}
+}
+
+/**
+ * The margin between the title and an accessory if one is present (on either side).
+ */
+- (CGFloat)layoutTitleAccessoryMargin {
+	if (self.shouldDrawiOS7UserInterface) {
+		return 12.0f;
+	}
+	
+	return 6.0f;
+}
+
+/**
+ * The accessory's margin from the edges of our callout view.
+ *
+ * Note: this value changes between iOS 6 and 7 styles.
+ *
+ * @return the margin width for the current style
+ */
+- (CGFloat)layoutLeftAccessoryMarginWidth {
+	if (self.shouldDrawiOS7UserInterface) {
+		return 0.0f;
+	}
+	
+	return 14.0f;
+}
+
+/**
+ * The accessory's margin from the edges of our callout view.
+ *
+ * @return the margin width for the current style
+ */
+- (CGFloat)layoutRightAccessoryMarginWidth {
+	return 14.0f;
+}
+
+/**
+ * The top of the accessory "area" in which accessory views are placed.
+ *
+ * Note: this value changes between iOS 6 and 7 styles.
+ *
+ * @return the margin width for the current style
+ */
+- (CGFloat)layoutAccessoryYOrigin {
+	if (self.shouldDrawiOS7UserInterface) {
+		return 0.0f;
+	}
+	
+	return 8.0f;
+}
+
+/**
+ * If using a bottom anchor, we'll need to account for the shadow below the "tip".
+ */
+- (CGFloat)layoutBottomAnchorMargin {
+	if (self.shouldDrawiOS7UserInterface) {
+		return 5.0f;
+	}
+
+	return 10.0f;
+}
+
+/**
+ * The title view's normal horizontal margin from the edges of our callout view.
+ */
+- (CGFloat)layoutTitleMargin {
+	if (self.shouldDrawiOS7UserInterface) {
+		return 12.0f;
+	}
+	
+	return 17.0f;
+}
+
+
+#pragma mark Hit testing
+
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
+	/*
+	 * On iOS 7, the user is allowed to touch the callout but we'll ignore touches inside accessories that inheirit from UIControl.
+	 */
+	if (self.shouldDrawiOS7UserInterface) {
+		
+		if ([self.leftAccessoryView isKindOfClass:[UIControl class]] &&
+			[self.leftAccessoryView pointInside:[self.leftAccessoryView convertPoint:point fromView:self] withEvent:nil]) {
+			
+			return YES;
+		}
+		
+		if ([self.rightAccessoryView isKindOfClass:[UIControl class]] &&
+			[self.rightAccessoryView pointInside:[self.rightAccessoryView convertPoint:point fromView:self] withEvent:nil]) {
+			
+			return YES;
+		}
+		
+		return [super pointInside:point withEvent:event];
+	}
+	
+    /*
+	 * On iOS 6, we want to match the system callout view, which doesn't "capture" touches outside the accessory areas.
+	 * This way you can click on other pins and things *behind* a translucent callout.
+	 */
+    return	[self.leftAccessoryView pointInside:[self.leftAccessoryView convertPoint:point fromView:self] withEvent:nil] ||
+			[self.rightAccessoryView pointInside:[self.rightAccessoryView convertPoint:point fromView:self] withEvent:nil] ||
+			[self.contentView pointInside:[self.contentView convertPoint:point fromView:self] withEvent:nil] ||
+			(!self.contentView && [self.titleView pointInside:[self.titleView convertPoint:point fromView:self] withEvent:nil]) ||
+			(!self.contentView && [self.subtitleView pointInside:[self.subtitleView convertPoint:point fromView:self] withEvent:nil]);
+}
+
+
+#pragma mark UIGestureRecognizerDelegate
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+	return (gestureRecognizer != pressRecognizer && otherGestureRecognizer != pressRecognizer);
+}
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
+	if (gestureRecognizer == pressRecognizer) {
+		
+		if (([self.leftAccessoryView isKindOfClass:[UIControl class]] && CGRectContainsPoint(self.leftAccessoryView.frame, [touch locationInView:self])) ||
+			([self.rightAccessoryView isKindOfClass:[UIControl class]] && CGRectContainsPoint(self.rightAccessoryView.frame, [touch locationInView:self]))) {
+			
+			return NO;
+		}
+	}
+	
+	return YES;
+}
+
+- (void)pressRecognized:(UILongPressGestureRecognizer*)recognizer {
+	switch (recognizer.state) {
+		case UIGestureRecognizerStateBegan:
+			self.backgroundView.selected = YES;
+			break;
+			
+		case UIGestureRecognizerStateCancelled:
+		case UIGestureRecognizerStateFailed:
+			self.backgroundView.selected = NO;
+			break;
+			
+		case UIGestureRecognizerStateEnded:
+			self.backgroundView.selected = NO;
+
+			// only trigger the delegate if we ended without our bounds
+			if (CGRectContainsPoint(CGRectInset(self.bounds, -44, -44), [recognizer locationInView:self])) {
+				if ([self.delegate respondsToSelector:@selector(calloutViewWasSelected:)]) {
+					[self.delegate calloutViewWasSelected:self];
+				}
+			}
+			
+			break;
+			
+		case UIGestureRecognizerStateChanged: {
+			// see if the user's finger has moved more than 44px away
+			if (CGRectContainsPoint(CGRectInset(self.bounds, -44, -44), [recognizer locationInView:self])) {
+				
+				if (self.backgroundView.selected == NO) {
+					self.backgroundView.selected = YES;
+				}
+			
+			} else {
+				
+				if (self.backgroundView.selected == YES) {
+					self.backgroundView.selected = NO;
+				}
+				
+			}
+		}
+			
+			
+		default:
+			break;
+	}
+}
+
 @end
 
-//
-// Callout background base class, includes graphics for +systemBackgroundView
-//
+
+
+#pragma mark
+
 @implementation SMCalloutBackgroundView
 
 + (SMCalloutBackgroundView *)systemBackgroundView {
@@ -496,6 +883,14 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     background.bottomAnchorImage = [[self embeddedImageNamed:@"SMCalloutViewBottomAnchor"] stretchableImageWithLeftCapWidth:0 topCapHeight:20];
     background.backgroundImage = [[self embeddedImageNamed:@"SMCalloutViewBackground"] stretchableImageWithLeftCapWidth:0 topCapHeight:20];
     return background;
+}
+
++ (CGFloat)cornerRadiusUsingiOS7Style:(BOOL)shouldDrawiOS7UserInterface {
+	if (shouldDrawiOS7UserInterface) {
+		return 7.5;
+	}
+	
+	return [UIScreen mainScreen].scale == 1 ? 4.5 : 6.0;
 }
 
 + (NSData *)dataWithBase64EncodedString:(NSString *)string {
@@ -575,6 +970,9 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     return outputLength? outputData: nil;
 }
 
+
+#pragma mark Images
+
 + (UIImage *)embeddedImageNamed:(NSString *)name {
     if ([UIScreen mainScreen].scale == 2)
         name = [name stringByAppendingString:@"$2x"];
@@ -611,11 +1009,46 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 + (NSString *)SMCalloutViewTopAnchor { return @"iVBORw0KGgoAAAANSUhEUgAAACkAAABGCAYAAABRwr15AAAAHGlET1QAAAACAAAAAAAAACMAAAAoAAAAIwAAACMAAAQYDCloiwAAA+RJREFUaAXMVslKHFEUfSaaaPIFunDaulJj2/QQBxxwVtCFC9GFCxVRUHHAARVx1pWf9QKVNCGb5FvMPUWf5vazqu0qFVwc7nTuvaeedr0yj4+P5qUwxlQoVCq/4qWz0R9boBLyQXwfzc3N31paWn7CMpe3/kPEFRxLZF4gxX2UuLKpqSkxOTn56/T09DcsYuQFqJMb62Qji5SFOBUs9cWJ/dTY2JiEsPv7e+/s7OwHLGLkURdosZGFRhIpyygQS6sE1Q0NDampqakchMkpWgIx8qiDl+ejDw8YSWjZIjE4vwCLcDrV9fX1aQi5u7vzBZ6cnBREQiyFggd+vi+y0LJEynBXYI0szsif1BcIccfHx0+APB4APPBlTk0coc+KDBM4MTGRu7299SDk6OgoFKiDB35coSVFhgkcGxvLXV1deRB3eHhoDw4OiixyGjjlm5sbD31xhIaKDBM4Ojqau7y89AXu7+/bvb09C/sc8EDoQ39UoYEiwwQODw/nLi4uPJzc7u5uZKAP/SMjI5GEPhEZJnBoaCh3fn7uQdzW1pbd3t72resjZg4cgnn0Yw7mlXuiRSKDBNbV1WUwUF4p3s7Ojt3Y2CjC5uamH8NqHzzmXIs5mIe5mC97S/7qpV64svQt8lnyX2pra7MDAwO+QCxaW1vzsb6+bgk3FxSTqy3myS/fw3zswT4B9uI9qq9S6PJvDtweeEGDhKf6Ko3f+/v7c/LL9DB8dXX11YG5mI892Ie9+f3QAT3QVWV6enr+uejt7f07PT39R14j3srKil1aWirC8vJyUezW3bgUH/OxB/uw19WC2Dw8PNggXF9f+0IWFxftWwMPhX1BOpAzCwsL1sX8/LwFmKdPyzxsGJecoB7Wwix7aM3c3Jx97zCzs7P2vcPMzMxY+ae1sHERpd/lunGQBiOfUVa+CS2si7C85mlOmB+2o1y+GR8ft4Bc/EXWzSOWz60iDnuCuMwFWfbBBvnoYR6+kY8GqyGXvx/D0medsVuT660wgxy3h7Fr2cs+WvJQN3It2cHBQR/wCZ2DX4rHGnvd2J3lztN13Uue6evrs4C87X0bFjP/mtbdGTYb16Iluru7C36pHGvavqRXz6Gv55lsNmuJrq4uq4E8YteSwz7WycUCnWMeljW3l3zWdY/JZDL2vcOkUikbhGQyWcin0+mCH8SNmtPz6Ot97jzT2dlpCRDpw7qxrr2l7+41iUTCamA5Y/raUhw5sMyR59Y0R9eYD8txXpHIjo4OXyCtbg7K6Tr953il6m6NsWlvb7floq2trWyunhm3jzMMBgShtbXVAlFq5MfpxR7dz73I/QcAAP//R6Pt0AAAASZJREFU7VK7asNAEBwCblKltISkImrUWEhl+tQuU+WT7xfyL94TjNksdzIkZ7yGMwyzj9m9YWWs6xpuYVmWm5rcjhKzmOc55BAfYE/HrO2x1ut4b4Y9rY8x+r4PFl3XhQjWGVtmX/M9ZsGlnnkz2bbtdjkaZU5mPcVWY/PUDGvUWmafjCjQIuY5joO2l6pZTcxTulTNzl5NNk0TiCjKxXaB1sYZndv4r7PQi/VSmiTzAeZkzpBZ1/zf2c0kF+49RE2O7zn7y2TOwKPr1WSpL1AvWS9Z6gKl9tT/ZL1kqQuU2oNhGIJ3YJqm4B0Yx/HHOyC/7ycAvsSkd+AsJr0Dn2LSO/AhJr0DJzHpHXgXk96Bo5j0DryJSe/Aq5j0DhzEpHfgRUy6xgX1iUkAQX47jAAAAABJRU5ErkJggg=="; }
 + (NSString *)SMCalloutViewTopAnchor$2x { return @"iVBORw0KGgoAAAANSUhEUgAAAFIAAACMCAYAAADvGP7EAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo5QUY0RkNERjZENDMxMUUyQTAzNEREMUIxRjIzOEVCNSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo5QUY0RkNFMDZENDMxMUUyQTAzNEREMUIxRjIzOEVCNSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjdFQUM5NTk0NkJGQjExRTJBMDM0REQxQjFGMjM4RUI1IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjlBRjRGQ0RFNkQ0MzExRTJBMDM0REQxQjFGMjM4RUI1Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+zk9a9AAABhtJREFUeNrsnclO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"; }
 
+
+#pragma mark Layout
+
+/**
+ * The height offset buffer to account for top shadow.
+ *
+ * Note: this value is basically ignored on iOS 7 because that style doesn't include a shadow.
+ *
+ * @return the height of the top shadow buffer
+ */
+- (CGFloat)layoutTopShadowBuffer {
+	if (self.shouldDrawiOS7UserInterface) {
+		return 0;
+	}
+	
+	return 2.0f;
+}
+
+/**
+ * The height offset buffer to account for bottom shadow.
+ *
+ * Note: this value is basically ignored on iOS 7 because that style doesn't include a shadow.
+ *
+ * @return the height of the bottom shadow buffer
+ */
+- (CGFloat)layoutBottomShadowBuffer {
+	if (self.shouldDrawiOS7UserInterface) {
+		return 0;
+	}
+	
+	return 5.0f;
+}
+
 @end
 
-//
-// Callout background assembled from predrawn stretched images.
-//
+
+
+#pragma mark
+
+
 @implementation SMCalloutImageBackgroundView {
     UIImageView *leftCap, *rightCap, *topAnchor, *bottomAnchor, *leftBackground, *rightBackground;
 }
@@ -635,6 +1068,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         [self addSubview:leftBackground];
         [self addSubview:rightBackground];
     }
+	
     return self;
 }
 
@@ -694,6 +1128,9 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 @end
 
+
+#pragma mark
+
 //
 // Custom-drawn flexible-height background implementation.
 // Contributed by Nicholas Shipes: https://github.com/u10int
@@ -705,17 +1142,126 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         self.backgroundColor = [UIColor clearColor];
         self.opaque = NO;
     }
+	
     return self;
 }
 
 // Make sure we redraw our graphics when the arrow point changes!
 - (void)setArrowPoint:(CGPoint)arrowPoint {
     [super setArrowPoint:arrowPoint];
+	
     [self setNeedsDisplay];
 }
 
-- (void)drawRect:(CGRect)rect {
+- (void)setSelected:(BOOL)selected {
+	[super setSelected:selected];
+	
+	[self setNeedsDisplay];
+}
 
+- (void)drawRect:(CGRect)rect {
+	BOOL pointingUp = self.arrowPoint.y < self.$height/2;
+    CGSize anchorSize = CGSizeMake(27, ANCHOR_HEIGHT);
+    CGFloat anchorX = roundf(self.arrowPoint.x - anchorSize.width / 2);
+    CGRect anchorRect = CGRectMake(anchorX, 0, anchorSize.width, anchorSize.height);
+    
+    // make sure the anchor is not too close to the end caps
+    if (anchorRect.origin.x < ANCHOR_MARGIN_MIN) {
+        anchorRect.origin.x = ANCHOR_MARGIN_MIN;
+		
+    } else if (anchorRect.origin.x + anchorRect.size.width > self.$width - ANCHOR_MARGIN_MIN) {
+        anchorRect.origin.x = self.$width - anchorRect.size.width - ANCHOR_MARGIN_MIN;
+	}
+    
+    // determine size
+    CGFloat radius = [[self class] cornerRadiusUsingiOS7Style:self.shouldDrawiOS7UserInterface];
+	CGFloat strokeWidth = 1.0f / [UIScreen mainScreen].scale;
+
+    rect = CGRectMake(self.bounds.origin.x + strokeWidth/2,
+					  self.bounds.origin.y + [self layoutTopShadowBuffer],
+					  self.bounds.size.width - strokeWidth,
+					  self.bounds.size.height - ANCHOR_HEIGHT - strokeWidth - [self layoutTopShadowBuffer] - [self layoutBottomShadowBuffer] - OFFSET_FROM_ORIGIN);
+	
+	if (pointingUp) {
+		rect.origin.y += ANCHOR_HEIGHT - strokeWidth / 2.0;
+		
+	} else {
+		rect.origin.y += strokeWidth / 2.0;
+	}
+    
+    
+    // General Declarations
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    UIColor *fillColor = [UIColor whiteColor];
+	UIColor *selectedFillColor = [UIColor colorWithWhite:0.85 alpha:1.0];
+	UIColor *strokeColor = [UIColor colorWithWhite:0 alpha:0.1];
+    CGRect frame = rect;
+    
+    //// CoreGroup ////
+    {
+        CGContextSaveGState(context);
+        CGContextSetAlpha(context, 0.83);
+        CGContextBeginTransparencyLayer(context, NULL);
+        
+        // Background Drawing
+        UIBezierPath* backgroundPath = [UIBezierPath bezierPath];
+        [backgroundPath moveToPoint:CGPointMake(CGRectGetMinX(frame), CGRectGetMinY(frame) + radius)];
+        [backgroundPath addLineToPoint:CGPointMake(CGRectGetMinX(frame), CGRectGetMaxY(frame) - radius)]; // left
+        [backgroundPath addArcWithCenter:CGPointMake(CGRectGetMinX(frame) + radius, CGRectGetMaxY(frame) - radius) radius:radius startAngle:M_PI endAngle:M_PI / 2 clockwise:NO]; // bottom-left corner
+        
+        // pointer down
+        if (!pointingUp) {
+            [backgroundPath addLineToPoint:CGPointMake(CGRectGetMinX(anchorRect), CGRectGetMaxY(frame))];
+            [backgroundPath addLineToPoint:CGPointMake(CGRectGetMinX(anchorRect) + anchorRect.size.width / 2, CGRectGetMaxY(frame) + anchorRect.size.height)];
+            [backgroundPath addLineToPoint:CGPointMake(CGRectGetMaxX(anchorRect), CGRectGetMaxY(frame))];
+        }
+        
+        [backgroundPath addLineToPoint:CGPointMake(CGRectGetMaxX(frame) - radius, CGRectGetMaxY(frame))]; // bottom
+        [backgroundPath addArcWithCenter:CGPointMake(CGRectGetMaxX(frame) - radius, CGRectGetMaxY(frame) - radius) radius:radius startAngle:M_PI / 2 endAngle:0.0f clockwise:NO]; // bottom-right corner
+        [backgroundPath addLineToPoint: CGPointMake(CGRectGetMaxX(frame), CGRectGetMinY(frame) + radius)]; // right
+        [backgroundPath addArcWithCenter:CGPointMake(CGRectGetMaxX(frame) - radius, CGRectGetMinY(frame) + radius) radius:radius startAngle:0.0f endAngle:-M_PI / 2 clockwise:NO]; // top-right corner
+        
+        // pointer up
+        if (pointingUp) {
+            [backgroundPath addLineToPoint:CGPointMake(CGRectGetMaxX(anchorRect), CGRectGetMinY(frame))];
+            [backgroundPath addLineToPoint:CGPointMake(CGRectGetMinX(anchorRect) + anchorRect.size.width / 2, CGRectGetMinY(frame) - anchorRect.size.height)];
+            [backgroundPath addLineToPoint:CGPointMake(CGRectGetMinX(anchorRect), CGRectGetMinY(frame))];
+        }
+        
+        [backgroundPath addLineToPoint:CGPointMake(CGRectGetMinX(frame) + radius, CGRectGetMinY(frame))]; // top
+        [backgroundPath addArcWithCenter:CGPointMake(CGRectGetMinX(frame) + radius, CGRectGetMinY(frame) + radius) radius:radius startAngle:-M_PI / 2 endAngle:M_PI clockwise:NO]; // top-left corner
+        [backgroundPath closePath];
+        CGContextSaveGState(context);
+		
+		
+		// determine the appropriate background color
+		if (self.selected) {
+			[selectedFillColor setFill];
+			
+		} else {
+			[fillColor setFill];
+		}
+		
+        [backgroundPath fill];
+		
+		[strokeColor setStroke];
+        backgroundPath.lineWidth = strokeWidth;
+        [backgroundPath stroke];
+        
+        CGContextEndTransparencyLayer(context);
+        CGContextRestoreGState(context);
+    }
+}
+
+@end
+
+
+#pragma mark
+
+@implementation SMCalloutDrawniOS6BackgroundView
+
+- (void)drawRect:(CGRect)rect {
+	
     BOOL pointingUp = self.arrowPoint.y < self.$height/2;
     CGSize anchorSize = CGSizeMake(27, ANCHOR_HEIGHT);
     CGFloat anchorX = roundf(self.arrowPoint.x - anchorSize.width / 2);
@@ -732,9 +1278,9 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     CGFloat stroke = 1.0;
     CGFloat radius = [UIScreen mainScreen].scale == 1 ? 4.5 : 6.0;
     
-    rect = CGRectMake(self.bounds.origin.x, self.bounds.origin.y + TOP_SHADOW_BUFFER, self.bounds.size.width, self.bounds.size.height - ANCHOR_HEIGHT);
+    rect = CGRectMake(self.bounds.origin.x, self.bounds.origin.y + [self layoutTopShadowBuffer], self.bounds.size.width, self.bounds.size.height - ANCHOR_HEIGHT);
     rect.size.width -= stroke + 14;
-    rect.size.height -= stroke * 2 + TOP_SHADOW_BUFFER + BOTTOM_SHADOW_BUFFER + OFFSET_FROM_ORIGIN;
+    rect.size.height -= stroke * 2 + [self layoutTopShadowBuffer] + [self layoutBottomShadowBuffer] + OFFSET_FROM_ORIGIN;
     rect.origin.x += stroke / 2.0 + 7;
     rect.origin.y += pointingUp ? ANCHOR_HEIGHT - stroke / 2.0 : stroke / 2.0;
     
@@ -978,10 +1524,12 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 @end
 
-//
-// Our UIView frame helpers implementation
-//
 
+#pragma mark
+
+/**
+ * Our UIView frame helpers implementation
+ */
 @implementation UIView (SMFrameAdditions)
 
 - (CGPoint)$origin { return self.frame.origin; }
