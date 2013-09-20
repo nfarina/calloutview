@@ -546,7 +546,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     const unsigned char *inputBytes = [inputData bytes];
     
     long long maxOutputLength = (inputLength / 4 + 1) * 3;
-    NSMutableData *outputData = [NSMutableData dataWithLength:maxOutputLength];
+    NSMutableData *outputData = [NSMutableData dataWithLength:(NSUInteger)maxOutputLength];
     unsigned char *outputBytes = (unsigned char *)[outputData mutableBytes];
     
     int accumulator = 0;
