@@ -14,6 +14,7 @@
 		0145C74615D32505007244F3 /* mars.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 0145C74515D32505007244F3 /* mars.jpg */; };
 		017FD73F15D317B1006825B3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 017FD73D15D317A5006825B3 /* AppDelegate.m */; };
 		017FD74015D317B1006825B3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 017FD73C15D3162C006825B3 /* main.m */; };
+		01A1575918AAFFA900A93F0E /* MapKitComparisonController.m in Sources */ = {isa = PBXBuildFile; fileRef = 01A1575818AAFFA900A93F0E /* MapKitComparisonController.m */; };
 		01A1D514161129080021F8DD /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 01A1D513161129080021F8DD /* Default-568h@2x.png */; };
 		01A6EE6515D49BD500E895D6 /* SMCalloutView.m in Sources */ = {isa = PBXBuildFile; fileRef = 01A6EE6415D49BD500E895D6 /* SMCalloutView.m */; };
 		01A6EE7915D572C300E895D6 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01A6EE7815D572C300E895D6 /* QuartzCore.framework */; };
@@ -31,6 +32,8 @@
 		017FD73C15D3162C006825B3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = SOURCE_ROOT; };
 		017FD73D15D317A5006825B3 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = SOURCE_ROOT; };
 		017FD73E15D317A5006825B3 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = SOURCE_ROOT; };
+		01A1575718AAFFA900A93F0E /* MapKitComparisonController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapKitComparisonController.h; sourceTree = SOURCE_ROOT; };
+		01A1575818AAFFA900A93F0E /* MapKitComparisonController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MapKitComparisonController.m; sourceTree = SOURCE_ROOT; };
 		01A1D513161129080021F8DD /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = SOURCE_ROOT; };
 		01A6EE6315D49BD500E895D6 /* SMCalloutView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMCalloutView.h; path = ../SMCalloutView.h; sourceTree = "<group>"; };
 		01A6EE6415D49BD500E895D6 /* SMCalloutView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMCalloutView.m; path = ../SMCalloutView.m; sourceTree = "<group>"; };
@@ -88,6 +91,8 @@
 			children = (
 				017FD73E15D317A5006825B3 /* AppDelegate.h */,
 				017FD73D15D317A5006825B3 /* AppDelegate.m */,
+				01A1575718AAFFA900A93F0E /* MapKitComparisonController.h */,
+				01A1575818AAFFA900A93F0E /* MapKitComparisonController.m */,
 				017FD73915D31618006825B3 /* Supporting Files */,
 			);
 			name = Samples;
@@ -177,6 +182,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				01A1575918AAFFA900A93F0E /* MapKitComparisonController.m in Sources */,
 				01A6EE6515D49BD500E895D6 /* SMCalloutView.m in Sources */,
 				017FD73F15D317B1006825B3 /* AppDelegate.m in Sources */,
 				017FD74015D317B1006825B3 /* main.m in Sources */,
