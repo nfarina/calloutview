@@ -5,7 +5,8 @@
     UIScrollView *scrollView;
     UIImageView *marsView;
     MKPinAnnotationView *topPin;
-    SMCalloutView *calloutView;
+    SMCalloutView *scrollCalloutView;
+	SMCalloutView *mapCalloutView;
     CustomMapView *bottomMapView;
     MKPinAnnotationView *bottomPin;
 }
@@ -37,29 +38,35 @@
     
     UIButton *topDisclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
     [topDisclosure addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(disclosureTapped)]];
+	
+    scrollCalloutView = [[SMCalloutView alloc] init];
+    scrollCalloutView.delegate = self;
+    scrollCalloutView.title = @"Curiosity";
+    scrollCalloutView.subtitle = @"Mars Rover";
+    scrollCalloutView.rightAccessoryView = topDisclosure;
+    scrollCalloutView.calloutOffset = topPin.calloutOffset;
+	scrollCalloutView.shouldDrawiOS7UserInterface = NO; // NO because this uses pre-baked images
     
-    calloutView = [SMCalloutView new];
-    calloutView.delegate = self;
-    calloutView.title = @"Curiosity";
-    calloutView.subtitle = @"Mars Rover";
-    calloutView.rightAccessoryView = topDisclosure;
-    calloutView.calloutOffset = topPin.calloutOffset;
-    
+	
     //
     // Fill the bottom half of our window with a standard MKMapView with pin+callout for comparison
     //
+	UIButton *bottomDisclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+    [bottomDisclosure addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(disclosureTapped)]];
+	
+	mapCalloutView = [[SMCalloutView alloc] init];
+    mapCalloutView.delegate = self;
+    mapCalloutView.rightAccessoryView = bottomDisclosure;
+    mapCalloutView.calloutOffset = topPin.calloutOffset;
     
     MapAnnotation *capeCanaveral = [MapAnnotation new];
     capeCanaveral.coordinate = (CLLocationCoordinate2D){28.388154, -80.604200};
     capeCanaveral.title = @"Cape Canaveral";
     
-    UIButton *bottomDisclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-    [bottomDisclosure addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(disclosureTapped)]];
-    
     bottomPin = [[MKPinAnnotationView alloc] initWithAnnotation:capeCanaveral reuseIdentifier:@""];
     
     bottomMapView = [[CustomMapView alloc] initWithFrame:CGRectOffset(half, 0, half.size.height)];
-    bottomMapView.calloutView = calloutView;
+    bottomMapView.calloutView = mapCalloutView;
     bottomMapView.delegate = self;
     [bottomMapView addAnnotation:capeCanaveral];
     
@@ -93,8 +100,8 @@
 
 - (void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKAnnotationView *)view {
     // dismiss out callout if it's already shown but on a different parent view
-    if (calloutView.window)
-        [calloutView dismissCalloutAnimated:NO];
+    if (mapCalloutView.window)
+        [mapCalloutView dismissCalloutAnimated:NO];
     
     // now in this example we're going to introduce an artificial delay in order to make our popup feel identical to MKMapView.
     // MKMapView has a delay after tapping so that it can intercept a double-tap for zooming. We don't need that delay but we'll
@@ -104,7 +111,7 @@
 
 - (void)mapView:(MKMapView *)mapView didDeselectAnnotationView:(MKAnnotationView *)view {
     // again, we'll introduce an artifical delay to feel more like MKMapView for this demonstration.
-    [calloutView performSelector:@selector(dismissCalloutAnimated:) withObject:nil afterDelay:1.0/3.0];
+    [mapCalloutView performSelector:@selector(dismissCalloutAnimated:) withObject:nil afterDelay:1.0/3.0];
 }
 
 #pragma mark - SMCalloutView
@@ -112,24 +119,25 @@
 - (void)popupCalloutView {
     
     // clear any custom view that was set by another pin
-    calloutView.contentView = nil;
-    calloutView.backgroundView = [SMCalloutBackgroundView systemBackgroundView]; // use the system graphics
+    scrollCalloutView.contentView = nil;
+    scrollCalloutView.backgroundView = [SMCalloutBackgroundView systemBackgroundView]; // use the system graphics
+	scrollCalloutView.shouldDrawiOS7UserInterface = NO;
     
     // This does all the magic.
-    [calloutView presentCalloutFromRect:topPin.frame
-                                 inView:marsView
-                      constrainedToView:scrollView
-               permittedArrowDirections:SMCalloutArrowDirectionAny
-                               animated:YES];
+    [scrollCalloutView presentCalloutFromRect:topPin.frame
+									   inView:marsView
+							constrainedToView:scrollView
+					 permittedArrowDirections:SMCalloutArrowDirectionAny
+									 animated:YES];
     
     // Here's an alternate method that adds the callout *inside* the pin view. This may seem strange, but it's how MKMapView
     // does it. It brings the selected pin to the front, then pops up the callout inside the pin's view. This way, the callout
     // is "anchored" to the pin itself. Visually, there's no difference; the callout still looks like it's floating outside the pin.
-//    [calloutView presentCalloutFromRect:topPin.bounds
-//                                 inView:topPin
-//                      constrainedToView:scrollView
-//               permittedArrowDirections:SMCalloutArrowDirectionDown
-//                               animated:YES];
+	//    [scrollCalloutView presentCalloutFromRect:topPin.bounds
+	//									   inView:topPin
+	//							constrainedToView:scrollView
+	//					 permittedArrowDirections:SMCalloutArrowDirectionDown
+	//									 animated:YES];
 }
 
 - (void)popupMapCalloutView {
@@ -140,25 +148,25 @@
     customView.layer.borderColor = [UIColor colorWithWhite:0 alpha:0.6].CGColor;
     customView.layer.borderWidth = 1;
     customView.layer.cornerRadius = 4;
-
+	
     // Uncomment this to demonstrate how you can embed editable controls inside the callout when
     // used on a MKMapView. It's important that you use our CustomMapView subclass for this to
     // work on iOS 6 and better.
-//    UITextField *textField = [[UITextField alloc] initWithFrame:CGRectMake(10, 10, 80, 30)];
-//    textField.text = @"Edit Me!";
-//    [customView addSubview:textField];
-
+	//    UITextField *textField = [[UITextField alloc] initWithFrame:CGRectMake(10, 10, 80, 30)];
+	//    textField.text = @"Edit Me!";
+	//    [customView addSubview:textField];
+	
     // if you provide a custom view for the callout content, the title and subtitle will not be displayed
-    calloutView.contentView = customView;
-    calloutView.backgroundView = nil; // reset background view to the default SMCalloutDrawnBackgroundView
+    mapCalloutView.contentView = customView;
+    mapCalloutView.backgroundView = nil; // reset background view to the default SMCalloutDrawnBackgroundView
     
     // just to mix things up, we'll present the callout in a Layer instead of a View. This will require us to override
     // -hitTest:withEvent: in our CustomMapView subclass.
-    [calloutView presentCalloutFromRect:bottomPin.bounds
-                                 inView:bottomPin
-                      constrainedToView:bottomMapView
-               permittedArrowDirections:SMCalloutArrowDirectionAny
-                               animated:YES];
+    [mapCalloutView presentCalloutFromRect:bottomPin.bounds
+									inView:bottomPin
+						 constrainedToView:bottomMapView
+				  permittedArrowDirections:SMCalloutArrowDirectionAny
+								  animated:YES];
 }
 
 - (NSTimeInterval)calloutView:(SMCalloutView *)theCalloutView delayForRepositionWithSize:(CGSize)offset {
@@ -168,13 +176,13 @@
     
     // if annotation view is coming from MKMapView, it's contained within a MKAnnotationContainerView instance
     // so we need to adjust the map position so that the callout will be completely visible when displayed
-    if ([NSStringFromClass([calloutView.superview.superview class]) isEqualToString:@"MKAnnotationContainerView"]) {
+    if ([NSStringFromClass([mapCalloutView.superview.superview class]) isEqualToString:@"MKAnnotationContainerView"]) {
         CGFloat pixelsPerDegreeLat = bottomMapView.frame.size.height / bottomMapView.region.span.latitudeDelta;
         CGFloat pixelsPerDegreeLon = bottomMapView.frame.size.width / bottomMapView.region.span.longitudeDelta;
-
+		
         CLLocationDegrees latitudinalShift = offset.height / pixelsPerDegreeLat;
         CLLocationDegrees longitudinalShift = -(offset.width / pixelsPerDegreeLon);
-
+		
         CGFloat lat = bottomMapView.region.center.latitude + latitudinalShift;
         CGFloat lon = bottomMapView.region.center.longitude + longitudinalShift;
         CLLocationCoordinate2D newCenterCoordinate = (CLLocationCoordinate2D){lat, lon};
@@ -189,6 +197,14 @@
     return kSMCalloutViewRepositionDelayForUIScrollView;
 }
 
+- (void)calloutViewWasSelected:(SMCalloutView *)calloutView {
+	[[[UIAlertView alloc] initWithTitle:@"Selected"
+								message:@"You selected the callout."
+							   delegate:nil
+					  cancelButtonTitle:@"OK"
+					  otherButtonTitles:nil] show];
+}
+
 - (void)disclosureTapped {
     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Tap!" message:@"You tapped the disclosure button."
                                                    delegate:nil cancelButtonTitle:nil otherButtonTitles:@"Whatevs",nil];
@@ -197,11 +213,11 @@
 
 - (void)marsTapped {
     // again, we'll introduce an artifical delay to feel more like MKMapView for this demonstration.
-    [self performSelector:@selector(dismissCallout) withObject:nil afterDelay:1.0/3.0];
+    [self performSelector:@selector(dismissScrollCallout) withObject:nil afterDelay:1.0/3.0];
 }
 
-- (void)dismissCallout {
-    [calloutView dismissCalloutAnimated:NO];
+- (void)dismissScrollCallout {
+	[scrollCalloutView dismissCalloutAnimated:NO];
 }
 
 @end
