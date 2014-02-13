@@ -26,38 +26,3 @@
 }
 
 @end
-
-
-// Automatically loads the Reveal dynamic library if it exists and if we're running in the simulator in debug mode.
-
-#if DEBUG && TARGET_IPHONE_SIMULATOR
-
-#import <dlfcn.h>
-
-// We only bother wrapping our load method in a "class" so we can implement the magic +load method that
-// the Cocoa runtime calls on every class that exists in a binary.
-
-@interface IARRevealAutoLoader : NSObject
-@end
-
-@implementation IARRevealAutoLoader
-
-+ (void)load {
-    NSString *dyLibPath = @"/Applications/Reveal.app/Contents/SharedSupport/iOS-Libraries/libReveal.dylib";
-    
-    if ([[NSFileManager defaultManager] fileExistsAtPath:dyLibPath]) {
-        
-        NSLog(@"Loading dynamic library: %@", dyLibPath);
-        
-        void *revealLib = dlopen([dyLibPath cStringUsingEncoding:NSUTF8StringEncoding], RTLD_NOW);
-        
-        if (revealLib == NULL) {
-            char *error = dlerror();
-            NSLog(@"dlopen error: %s", error);
-        }
-    }
-}
-
-@end
-
-#endif
