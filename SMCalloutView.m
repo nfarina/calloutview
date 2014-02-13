@@ -28,7 +28,7 @@
 #define CONTENT_VIEW_MARGIN 13 // margin around content view when present
 #define ANCHOR_MARGIN 27 // the smallest possible distance from the edge of our control to the "tip" of the anchor, from either left or right
 #define ANCHOR_HEIGHT 13 // effective height of the anchor
-#define TOP_ANCHOR_MARGIN 26 // all the above measurements assume a bottom anchor! if we're pointing "up" we'll need to add this top margin to everything.
+#define TOP_ANCHOR_MARGIN 13 // all the above measurements assume a bottom anchor! if we're pointing "up" we'll need to add this top margin to everything.
 #define COMFORTABLE_MARGIN 10 // when we try to reposition content to be visible, we'll consider this margin around your target rect
 
 NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
@@ -508,15 +508,22 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         self.containerBorderView.layer.borderWidth = 0.5;
         self.containerBorderView.layer.cornerRadius = 8.5;
         
-        UIImage *arrowImage = [SMCalloutBackgroundView embeddedImageNamed:@"CalloutArrow"];
+        static UIImage *blackArrowImage = nil, *whiteArrowImage = nil;
         
-        self.arrowView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, arrowImage.size.width, arrowImage.size.height)];
-        self.arrowImageView = [[UIImageView alloc] initWithImage:arrowImage];
-        self.arrowBorderView = [[UIImageView alloc] initWithImage:arrowImage];
+        if (!blackArrowImage) {
+            blackArrowImage = [SMCalloutBackgroundView embeddedImageNamed:@"CalloutArrow"];
+            whiteArrowImage = [self whiteVersionOfImage:blackArrowImage];
+        }
+        
+        self.arrowView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, blackArrowImage.size.width, blackArrowImage.size.height)];
+        self.arrowView.alpha = 0.96;
+        self.arrowImageView = [[UIImageView alloc] initWithImage:whiteArrowImage];
+        self.arrowBorderView = [[UIImageView alloc] initWithImage:blackArrowImage];
+        self.arrowBorderView.alpha = 0.1;
         
         [self addSubview:self.containerView];
         [self.containerView addSubview:self.containerBorderView];
-        //[self addSubview:self.arrowView];
+        [self addSubview:self.arrowView];
         [self.arrowView addSubview:self.arrowBorderView];
         [self.arrowView addSubview:self.arrowImageView];
     }
@@ -529,14 +536,41 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     [self setNeedsLayout];
 }
 
+- (UIImage *)whiteVersionOfImage:(UIImage *)image {
+    
+    UIGraphicsBeginImageContextWithOptions(image.size, NO, 0);
+    CGRect imageRect = (CGRect){.size=image.size};
+    CGContextRef c = UIGraphicsGetCurrentContext();
+    CGContextTranslateCTM(c, 0, image.size.height);
+    CGContextScaleCTM(c, 1, -1);
+    CGContextClipToMask(c, imageRect, image.CGImage);
+    [[UIColor whiteColor] setFill];
+    CGContextFillRect(c, imageRect);
+    UIImage *whiteImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return whiteImage;
+}
+
 - (void)layoutSubviews {
     
-    self.containerView.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height - self.arrowView.frame.size.height + 0.5);
-    self.containerBorderView.frame = CGRectInset(self.containerView.bounds, -0.5, -0.5);
-    
-    //BOOL pointingUp = self.arrowPoint.y < self.$height/2;
+    BOOL pointingUp = self.arrowPoint.y < self.$height/2;
 
-    //self.arrowView =
+    // if we're pointing up, we'll need to push almost everything down a bit
+    CGFloat dy = pointingUp ? TOP_ANCHOR_MARGIN : 0;
+
+    self.containerView.frame = CGRectMake(0, dy, self.$width, self.$height - self.arrowView.$height + 0.5);
+    self.containerBorderView.frame = CGRectInset(self.containerView.bounds, -0.5, -0.5);
+
+    self.arrowView.$x = roundf(self.arrowPoint.x - self.arrowView.$width / 2);
+    
+    if (pointingUp) {
+        self.arrowView.$y = 1;
+        self.arrowBorderView.$y = -0.5;
+    }
+    else {
+        self.arrowView.$y = self.containerView.$height - 0.5;
+        self.arrowBorderView.$y = 0.5;
+    }
 }
 
 + (NSData *)dataWithBase64EncodedString:(NSString *)string {
