@@ -536,6 +536,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         self.arrowImageView = [[UIImageView alloc] initWithImage:whiteArrowImage];
         self.arrowBorderView = [[UIImageView alloc] initWithImage:blackArrowImage];
         self.arrowBorderView.alpha = 0.1;
+        self.arrowBorderView.$y = 0.5;
         
         [self addSubview:self.containerView];
         [self.containerView addSubview:self.containerBorderView];
@@ -581,11 +582,11 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     
     if (pointingUp) {
         self.arrowView.$y = 1;
-        self.arrowBorderView.$y = -0.5;
+        self.arrowView.transform = CGAffineTransformMakeRotation(M_PI);
     }
     else {
         self.arrowView.$y = self.containerView.$height - 0.5;
-        self.arrowBorderView.$y = 0.5;
+        self.arrowView.transform = CGAffineTransformIdentity;
     }
 }
 
