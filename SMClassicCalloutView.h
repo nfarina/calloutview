@@ -1,42 +1,23 @@
 #import <UIKit/UIKit.h>
+#import "SMCalloutView.h"
 
 /*
-
-SMCalloutView
--------------
-Created by Nick Farina (nfarina@gmail.com)
-Version 1.1
-
-*/
-
-// options for which directions the callout is allowed to "point" in.
-enum {
-    SMCalloutArrowDirectionUp = 1UL << 0,
-    SMCalloutArrowDirectionDown = 1UL << 1,
-    SMCalloutArrowDirectionAny = SMCalloutArrowDirectionUp | SMCalloutArrowDirectionDown
-};
-typedef NSUInteger SMCalloutArrowDirection;
-
-// options for the callout present/dismiss animation
-enum {
-    SMCalloutAnimationBounce, // the "bounce" animation we all know and love from UIAlertView
-    SMCalloutAnimationFade, // a simple fade in or out
-    SMCalloutAnimationStretch // grow or shrink linearly, like in the iPad Calendar app
-};
-typedef NSInteger SMCalloutAnimation;
-
-// when delaying our popup in order to scroll content into view, you can use this amount to match the
-// animation duration of UIScrollView when using -setContentOffset:animated.
-extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
+ 
+ SMClassicCalloutView
+ --------------------
+ Created by Nick Farina (nfarina@gmail.com)
+ Version 1.1
+ 
+ */
 
 @protocol SMCalloutViewDelegate;
 @class SMCalloutBackgroundView;
 
 //
-// Callout view.
+// Classic Callout view.
 //
 
-@interface SMCalloutView : UIView
+@interface SMClassicCalloutView : UIView
 
 @property (nonatomic, unsafe_unretained) id<SMCalloutViewDelegate> delegate;
 @property (nonatomic, copy) NSString *title, *subtitle; // title/titleView relationship mimics UINavigationBar.
@@ -75,10 +56,8 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 // Classes responsible for drawing the background graphic with the pointy arrow.
 //
 
-// Abstract base class. Added to the SMCalloutView hierarchy as the lowest view.
-@interface SMCalloutBackgroundView : UIView
-@property (nonatomic, assign) CGPoint arrowPoint; // indicates where the tip of the arrow should be drawn, as a pixel offset
-+ (SMCalloutBackgroundView *)systemBackgroundView; // returns the standard system background composed of prerendered images
+@interface SMCalloutBackgroundView (SMClassicCalloutView)
++ (SMCalloutBackgroundView *)systemBackgroundView; // returns the standard pre-iOS 7 system background composed of prerendered images
 @end
 
 // Draws a background composed of stretched prerendered images that you can customize.
@@ -90,32 +69,3 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 @interface SMCalloutDrawnBackgroundView : SMCalloutBackgroundView
 @end
 
-//
-// Delegate methods
-//
-
-@protocol SMCalloutViewDelegate <NSObject>
-@optional
-
-// Called when the callout view detects that it will be outside the constrained view when it appears,
-// or if the target rect was already outside the constrained view. You can implement this selector to
-// respond to this situation by repositioning your content first in order to make everything visible. The
-// CGSize passed is the calculated offset necessary to make everything visible (plus a nice margin).
-// It expects you to return the amount of time you need to reposition things so the popup can be delayed.
-// Typically you would return kSMCalloutViewRepositionDelayForUIScrollView if you're repositioning by
-// calling [UIScrollView setContentOffset:animated:].
-- (NSTimeInterval)calloutView:(SMCalloutView *)calloutView delayForRepositionWithSize:(CGSize)offset;
-
-// Called before the callout view appears on screen, or before the appearance animation will start.
-- (void)calloutViewWillAppear:(SMCalloutView*)calloutView;
-
-// Called after the callout view appears on screen, or after the appearance animation is complete.
-- (void)calloutViewDidAppear:(SMCalloutView *)calloutView;
-
-// Called before the callout view is removed from the screen, or before the disappearance animation is complete.
-- (void)calloutViewWillDisappear:(SMCalloutView*)calloutView;
-
-// Called after the callout view is removed from the screen, or after the disappearance animation is complete.
-- (void)calloutViewDidDisappear:(SMCalloutView *)calloutView;
-
-@end

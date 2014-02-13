@@ -1,4 +1,4 @@
-#import "SMCalloutView.h"
+#import "SMClassicCalloutView.h"
 #import <QuartzCore/QuartzCore.h>
 
 //
@@ -16,8 +16,6 @@
 // Callout View.
 //
 
-NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
-
 #define CALLOUT_DEFAULT_MIN_WIDTH 75 // our image-based background graphics limit us to this minimum width...
 #define CALLOUT_DEFAULT_HEIGHT 70 // ...and allow only for this exact height.
 #define CALLOUT_DEFAULT_WIDTH 153 // default "I give up" width when we are asked to present in a space less than our min width
@@ -32,7 +30,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 #define ACCESSORY_TOP 8 // the top of the accessory "area" in which accessory views are placed
 #define ACCESSORY_HEIGHT 32 // the "suggested" maximum height of an accessory view. shorter accessories will be vertically centered
 #define BETWEEN_ACCESSORIES_MARGIN 7 // if we have no title or subtitle, but have two accessory views, then this is the space between them
-#define ANCHOR_MARGIN 37 // the smallest possible distance from the edge of our control to the "tip" of the anchor, from either left or right
+#define ANCHOR_MARGIN 38 // the smallest possible distance from the edge of our control to the "tip" of the anchor, from either left or right
 #define TOP_ANCHOR_MARGIN 13 // all the above measurements assume a bottom anchor! if we're pointing "up" we'll need to add this top margin to everything.
 #define BOTTOM_ANCHOR_MARGIN 10 // if using a bottom anchor, we'll need to account for the shadow below the "tip"
 #define REPOSITION_MARGIN 10 // when we try to reposition content to be visible, we'll consider this margin around your target rect
@@ -43,7 +41,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 #define ANCHOR_HEIGHT 14 // height to use for the anchor
 #define ANCHOR_MARGIN_MIN 24 // the smallest possible distance from the edge of our control to the edge of the anchor, from either left or right
 
-@implementation SMCalloutView {
+@implementation SMClassicCalloutView {
     UILabel *titleLabel, *subtitleLabel;
     UIImageView *leftCap, *rightCap, *topAnchor, *bottomAnchor, *leftBackground, *rightBackground;
     SMCalloutArrowDirection arrowDirection;
@@ -154,11 +152,11 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     
     // how much room is left for text?
     CGFloat availableWidthForText = size.width - margin;
-
+    
     // no room for text? then we'll have to squeeze into the given size somehow.
     if (availableWidthForText < 0)
         availableWidthForText = 0;
-
+    
     CGSize preferredTitleSize = [self.titleViewOrDefault sizeThatFits:CGSizeMake(availableWidthForText, TITLE_HEIGHT)];
     CGSize preferredSubtitleSize = [self.subtitleViewOrDefault sizeThatFits:CGSizeMake(availableWidthForText, SUBTITLE_HEIGHT)];
     
@@ -284,7 +282,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     
     // pass on the anchor point to our background view so it knows where to draw the arrow
     self.backgroundView.arrowPoint = anchorPoint;
-
+    
     // adjust it to unit coordinates for the actual layer.anchorPoint property
     anchorPoint.x /= self.$width;
     anchorPoint.y /= self.$height;
@@ -295,7 +293,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     
     // make sure our frame is not on half-pixels or else we may be blurry!
     self.frame = CGRectIntegral(self.frame);
-
+    
     // layout now so we can immediately start animating to the final position if needed
     [self setNeedsLayout];
     [self layoutIfNeeded];
@@ -309,7 +307,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     popupCancelled = NO; // reset this before calling our delegate below
     
     if ([self.delegate respondsToSelector:@selector(calloutView:delayForRepositionWithSize:)] && !CGSizeEqualToSize(offset, CGSizeZero))
-        delay = [self.delegate calloutView:self delayForRepositionWithSize:offset];
+        delay = [self.delegate calloutView:(id)self delayForRepositionWithSize:offset];
     
     // there's a chance that user code in the delegate method may have called -dismissCalloutAnimated to cancel things; if that
     // happened then we need to bail!
@@ -333,17 +331,17 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 - (void)animationDidStart:(CAAnimation *)anim {
     BOOL presenting = [[anim valueForKey:@"presenting"] boolValue];
-
+    
     if (presenting) {
         if ([_delegate respondsToSelector:@selector(calloutViewWillAppear:)])
-            [_delegate calloutViewWillAppear:self];
+            [_delegate calloutViewWillAppear:(id)self];
         
         // ok, animation is on, let's make ourselves visible!
         self.hidden = NO;
     }
     else if (!presenting) {
         if ([_delegate respondsToSelector:@selector(calloutViewWillDisappear:)])
-            [_delegate calloutViewWillDisappear:self];
+            [_delegate calloutViewWillDisappear:(id)self];
     }
 }
 
@@ -352,26 +350,26 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     
     if (presenting) {
         if ([_delegate respondsToSelector:@selector(calloutViewDidAppear:)])
-            [_delegate calloutViewDidAppear:self];
+            [_delegate calloutViewDidAppear:(id)self];
     }
     else if (!presenting) {
         
         [self removeFromParent];
         [self.layer removeAnimationForKey:@"dismiss"];
-
+        
         if ([_delegate respondsToSelector:@selector(calloutViewDidDisappear:)])
-            [_delegate calloutViewDidDisappear:self];
+            [_delegate calloutViewDidDisappear:(id)self];
     }
 }
 
 - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
     // we want to match the system callout view, which doesn't "capture" touches outside the accessory areas. This way you can click on other pins and things *behind* a translucent callout.
     return
-        [self.leftAccessoryView pointInside:[self.leftAccessoryView convertPoint:point fromView:self] withEvent:nil] ||
-        [self.rightAccessoryView pointInside:[self.rightAccessoryView convertPoint:point fromView:self] withEvent:nil] ||
-        [self.contentView pointInside:[self.contentView convertPoint:point fromView:self] withEvent:nil] ||
-        (!self.contentView && [self.titleView pointInside:[self.titleView convertPoint:point fromView:self] withEvent:nil]) ||
-        (!self.contentView && [self.subtitleView pointInside:[self.subtitleView convertPoint:point fromView:self] withEvent:nil]);
+    [self.leftAccessoryView pointInside:[self.leftAccessoryView convertPoint:point fromView:self] withEvent:nil] ||
+    [self.rightAccessoryView pointInside:[self.rightAccessoryView convertPoint:point fromView:self] withEvent:nil] ||
+    [self.contentView pointInside:[self.contentView convertPoint:point fromView:self] withEvent:nil] ||
+    (!self.contentView && [self.titleView pointInside:[self.titleView convertPoint:point fromView:self] withEvent:nil]) ||
+    (!self.contentView && [self.subtitleView pointInside:[self.subtitleView convertPoint:point fromView:self] withEvent:nil]);
 }
 
 - (void)dismissCalloutAnimated:(BOOL)animated {
@@ -483,10 +481,15 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 @end
 
+// import this known "private API" from SMCalloutView.m
+@interface SMCalloutBackgroundView (EmbeddedImages)
++ (UIImage *)embeddedImageNamed:(NSString *)name;
+@end
+
 //
 // Callout background base class, includes graphics for +systemBackgroundView
 //
-@implementation SMCalloutBackgroundView
+@implementation SMCalloutBackgroundView (SMClassicCalloutView)
 
 + (SMCalloutBackgroundView *)systemBackgroundView {
     SMCalloutImageBackgroundView *background = [SMCalloutImageBackgroundView new];
@@ -496,104 +499,6 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     background.bottomAnchorImage = [[self embeddedImageNamed:@"SMCalloutViewBottomAnchor"] stretchableImageWithLeftCapWidth:0 topCapHeight:20];
     background.backgroundImage = [[self embeddedImageNamed:@"SMCalloutViewBackground"] stretchableImageWithLeftCapWidth:0 topCapHeight:20];
     return background;
-}
-
-+ (NSData *)dataWithBase64EncodedString:(NSString *)string {
-    //
-    //  NSData+Base64.m
-    //
-    //  Version 1.0.2
-    //
-    //  Created by Nick Lockwood on 12/01/2012.
-    //  Copyright (C) 2012 Charcoal Design
-    //
-    //  Distributed under the permissive zlib License
-    //  Get the latest version from here:
-    //
-    //  https://github.com/nicklockwood/Base64
-    //
-    //  This software is provided 'as-is', without any express or implied
-    //  warranty.  In no event will the authors be held liable for any damages
-    //  arising from the use of this software.
-    //
-    //  Permission is granted to anyone to use this software for any purpose,
-    //  including commercial applications, and to alter it and redistribute it
-    //  freely, subject to the following restrictions:
-    //
-    //  1. The origin of this software must not be misrepresented; you must not
-    //  claim that you wrote the original software. If you use this software
-    //  in a product, an acknowledgment in the product documentation would be
-    //  appreciated but is not required.
-    //
-    //  2. Altered source versions must be plainly marked as such, and must not be
-    //  misrepresented as being the original software.
-    //
-    //  3. This notice may not be removed or altered from any source distribution.
-    //
-    const char lookup[] = {
-        99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
-        99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
-        99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 62, 99, 99, 99, 63,
-        52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 99, 99, 99, 99, 99, 99,
-        99,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
-        15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 99, 99, 99, 99, 99,
-        99, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-        41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 99, 99, 99, 99, 99
-    };
-    
-    NSData *inputData = [string dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
-    long long inputLength = [inputData length];
-    const unsigned char *inputBytes = [inputData bytes];
-    
-    long long maxOutputLength = (inputLength / 4 + 1) * 3;
-    NSMutableData *outputData = [NSMutableData dataWithLength:(NSUInteger)maxOutputLength];
-    unsigned char *outputBytes = (unsigned char *)[outputData mutableBytes];
-    
-    int accumulator = 0;
-    long long outputLength = 0;
-    unsigned char accumulated[] = {0, 0, 0, 0};
-    for (long long i = 0; i < inputLength; i++) {
-        unsigned char decoded = lookup[inputBytes[i] & 0x7F];
-        if (decoded != 99) {
-            accumulated[accumulator] = decoded;
-            if (accumulator == 3) {
-                outputBytes[outputLength++] = (accumulated[0] << 2) | (accumulated[1] >> 4);
-                outputBytes[outputLength++] = (accumulated[1] << 4) | (accumulated[2] >> 2);
-                outputBytes[outputLength++] = (accumulated[2] << 6) | accumulated[3];
-            }
-            accumulator = (accumulator + 1) % 4;
-        }
-    }
-    
-    //handle left-over data
-    if (accumulator > 0) outputBytes[outputLength] = (accumulated[0] << 2) | (accumulated[1] >> 4);
-    if (accumulator > 1) outputBytes[++outputLength] = (accumulated[1] << 4) | (accumulated[2] >> 2);
-    if (accumulator > 2) outputLength++;
-    
-    //truncate data to match actual output length
-    outputData.length = outputLength;
-    return outputLength? outputData: nil;
-}
-
-+ (UIImage *)embeddedImageNamed:(NSString *)name {
-    if ([UIScreen mainScreen].scale == 2)
-        name = [name stringByAppendingString:@"$2x"];
-    
-    SEL selector = NSSelectorFromString(name);
-    
-    if (![(id)self respondsToSelector:selector]) {
-        NSLog(@"Could not find an embedded image. Ensure that you've added a category method to UIImage named +%@", name);
-        return nil;
-    }
-    
-    // We need to hush the compiler here - but we know what we're doing!
-    #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-    NSString *base64String = [(id)self performSelector:selector];
-    #pragma clang diagnostic pop
-    
-    UIImage *rawImage = [UIImage imageWithData:[self dataWithBase64EncodedString:base64String]];
-    return [UIImage imageWithCGImage:rawImage.CGImage scale:[UIScreen mainScreen].scale orientation:UIImageOrientationUp];
 }
 
 //
@@ -662,13 +567,13 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     // properly here if necessary.
     leftCap.$height = rightCap.$height = leftBackground.$height = rightBackground.$height = self.$height - 13;
     topAnchor.$height = bottomAnchor.$height = self.$height;
-
+    
     BOOL pointingUp = self.arrowPoint.y < self.$height/2;
-
+    
     // show the correct anchor based on our direction
     topAnchor.hidden = !pointingUp;
     bottomAnchor.hidden = pointingUp;
-
+    
     // if we're pointing up, we'll need to push almost everything down a bit
     CGFloat dy = pointingUp ? TOP_ANCHOR_MARGIN : 0;
     leftCap.$y = rightCap.$y = leftBackground.$y = rightBackground.$y = dy;
@@ -715,7 +620,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 }
 
 - (void)drawRect:(CGRect)rect {
-
+    
     BOOL pointingUp = self.arrowPoint.y < self.$height/2;
     CGSize anchorSize = CGSizeMake(27, ANCHOR_HEIGHT);
     CGFloat anchorX = roundf(self.arrowPoint.x - anchorSize.width / 2);
@@ -975,43 +880,5 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     CGGradientRelease(glossFill);
     CGColorSpaceRelease(colorSpace);
 }
-
-@end
-
-//
-// Our UIView frame helpers implementation
-//
-
-@implementation UIView (SMFrameAdditions)
-
-- (CGPoint)$origin { return self.frame.origin; }
-- (void)set$origin:(CGPoint)origin { self.frame = (CGRect){ .origin=origin, .size=self.frame.size }; }
-
-- (CGFloat)$x { return self.frame.origin.x; }
-- (void)set$x:(CGFloat)x { self.frame = (CGRect){ .origin.x=x, .origin.y=self.frame.origin.y, .size=self.frame.size }; }
-
-- (CGFloat)$y { return self.frame.origin.y; }
-- (void)set$y:(CGFloat)y { self.frame = (CGRect){ .origin.x=self.frame.origin.x, .origin.y=y, .size=self.frame.size }; }
-
-- (CGSize)$size { return self.frame.size; }
-- (void)set$size:(CGSize)size { self.frame = (CGRect){ .origin=self.frame.origin, .size=size }; }
-
-- (CGFloat)$width { return self.frame.size.width; }
-- (void)set$width:(CGFloat)width { self.frame = (CGRect){ .origin=self.frame.origin, .size.width=width, .size.height=self.frame.size.height }; }
-
-- (CGFloat)$height { return self.frame.size.height; }
-- (void)set$height:(CGFloat)height { self.frame = (CGRect){ .origin=self.frame.origin, .size.width=self.frame.size.width, .size.height=height }; }
-
-- (CGFloat)$left { return self.frame.origin.x; }
-- (void)set$left:(CGFloat)left { self.frame = (CGRect){ .origin.x=left, .origin.y=self.frame.origin.y, .size.width=fmaxf(self.frame.origin.x+self.frame.size.width-left,0), .size.height=self.frame.size.height }; }
-
-- (CGFloat)$top { return self.frame.origin.y; }
-- (void)set$top:(CGFloat)top { self.frame = (CGRect){ .origin.x=self.frame.origin.x, .origin.y=top, .size.width=self.frame.size.width, .size.height=fmaxf(self.frame.origin.y+self.frame.size.height-top,0) }; }
-
-- (CGFloat)$right { return self.frame.origin.x + self.frame.size.width; }
-- (void)set$right:(CGFloat)right { self.frame = (CGRect){ .origin=self.frame.origin, .size.width=fmaxf(right-self.frame.origin.x,0), .size.height=self.frame.size.height }; }
-
-- (CGFloat)$bottom { return self.frame.origin.y + self.frame.size.height; }
-- (void)set$bottom:(CGFloat)bottom { self.frame = (CGRect){ .origin=self.frame.origin, .size.width=self.frame.size.width, .size.height=fmaxf(bottom-self.frame.origin.y,0) }; }
 
 @end
