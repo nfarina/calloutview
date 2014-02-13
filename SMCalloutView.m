@@ -417,32 +417,38 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     CAAnimation *animation = nil;
     
     if (type == SMCalloutAnimationBounce) {
-        CAKeyframeAnimation *bounceAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
-        CAMediaTimingFunction *easeInOut = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
         
-        bounceAnimation.values = @[@0.05, @1.11245, @0.951807, @1.0];
-        bounceAnimation.keyTimes = @[@0, @(4.0/9.0), @(4.0/9.0+5.0/18.0), @1.0];
-        bounceAnimation.duration = 1.0/3.0; // the official bounce animation duration adds up to 0.3 seconds; but there is a bit of delay introduced by Apple using a sequence of callback-based CABasicAnimations rather than a single CAKeyframeAnimation. So we bump it up to 0.33333 to make it feel identical on the device
-        bounceAnimation.timingFunctions = @[easeInOut, easeInOut, easeInOut, easeInOut];
+        CABasicAnimation *fade = [CABasicAnimation animationWithKeyPath:@"opacity"];
+        fade.duration = 0.23;
+        fade.fromValue = presenting ? @0.0 : @1.0;
+        fade.toValue = presenting ? @1.0 : @0.0;
+        fade.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
         
-        if (!presenting)
-            bounceAnimation.values = [[bounceAnimation.values reverseObjectEnumerator] allObjects]; // reverse values
-        
-        animation = bounceAnimation;
+        CABasicAnimation *bounce = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
+        bounce.duration = 0.23;
+        bounce.fromValue = presenting ? @0.7 : @1.0;
+        bounce.toValue = presenting ? @1.0 : @0.7;
+        bounce.timingFunction = [CAMediaTimingFunction functionWithControlPoints:0.59367:0.12066:0.18878:1.5814];
+
+        CAAnimationGroup *group = [CAAnimationGroup animation];
+        group.animations = @[fade, bounce];
+        group.duration = 0.23;
+
+        animation = group;
     }
     else if (type == SMCalloutAnimationFade) {
-        CABasicAnimation *fadeAnimation = [CABasicAnimation animationWithKeyPath:@"opacity"];
-        fadeAnimation.duration = 1.0/3.0;
-        fadeAnimation.fromValue = presenting ? @0.0 : @1.0;
-        fadeAnimation.toValue = presenting ? @1.0 : @0.0;
-        animation = fadeAnimation;
+        CABasicAnimation *fade = [CABasicAnimation animationWithKeyPath:@"opacity"];
+        fade.duration = 1.0/3.0;
+        fade.fromValue = presenting ? @0.0 : @1.0;
+        fade.toValue = presenting ? @1.0 : @0.0;
+        animation = fade;
     }
     else if (type == SMCalloutAnimationStretch) {
-        CABasicAnimation *stretchAnimation = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
-        stretchAnimation.duration = 0.1;
-        stretchAnimation.fromValue = presenting ? @0.0 : @1.0;
-        stretchAnimation.toValue = presenting ? @1.0 : @0.0;
-        animation = stretchAnimation;
+        CABasicAnimation *stretch = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
+        stretch.duration = 0.1;
+        stretch.fromValue = presenting ? @0.0 : @1.0;
+        stretch.toValue = presenting ? @1.0 : @0.0;
+        animation = stretch;
     }
     
     // CAAnimation is KVC compliant, so we can store whether we're presenting for lookup in our delegate methods
@@ -496,6 +502,9 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 - (id)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
 
+        // Here we're mimicking the very particular (and odd) structure of the system callout view.
+        // The hierarchy and view/layer values were discovered by inspecting map kit using Reveal.app
+        
         self.containerView = [UIView new];
         self.containerView.backgroundColor = [UIColor whiteColor];
         self.containerView.alpha = 0.96;

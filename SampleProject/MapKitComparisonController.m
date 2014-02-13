@@ -99,6 +99,11 @@
     }
 }
 
+- (void)mapView:(MKMapView *)mapView didDeselectAnnotationView:(MKAnnotationView *)view {
+    
+    [self.calloutView dismissCalloutAnimated:YES];
+}
+
 - (void)mapKitDisclosureTapped {
     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Tap!" message:@"You tapped the disclosure button."
                                                    delegate:nil cancelButtonTitle:nil otherButtonTitles:@"OK",nil];
