@@ -19,6 +19,7 @@
     if (self = [super initWithNibName:nil bundle:nil]) {
         
         self.title = @"ScrollView";
+        self.tabBarItem.image = [UIImage imageNamed:@"first"];
     }
     return self;
 }
@@ -51,10 +52,13 @@
     if ([self.calloutView.backgroundView isKindOfClass:[SMCalloutMaskedBackgroundView class]]) {
 
         // wrap it in a blue background on iOS 7+
-        UIView *blueView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 44, 44+30)];
+        UIButton *blueView = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 44, 44+30)];
         blueView.backgroundColor = [UIColor colorWithRed:0 green:0.5 blue:1 alpha:1];
+        [blueView addTarget:self action:@selector(carClicked) forControlEvents:UIControlEventTouchUpInside];
+        
         carView.frame = CGRectMake(11, 14, carView.image.size.width, carView.image.size.height);
         [blueView addSubview:carView];
+        
         self.calloutView.leftAccessoryView = blueView;
 
         // create a little disclosure indicator since our callout is tappable
@@ -119,15 +123,18 @@
 }
 
 - (void)disclosureTapped {
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Tap!" message:@"You tapped the disclosure button."
-                                                   delegate:nil cancelButtonTitle:nil otherButtonTitles:@"OK",nil];
-    [alert show];
+    [[[UIAlertView alloc] initWithTitle:@"Tap!" message:@"You tapped the disclosure button."
+                               delegate:nil cancelButtonTitle:nil otherButtonTitles:@"OK",nil] show];
+}
+
+- (void)carClicked {
+    [[[UIAlertView alloc] initWithTitle:@"Tap!" message:@"You tapped the car button."
+                               delegate:nil cancelButtonTitle:nil otherButtonTitles:@"Vroom Vroom!",nil] show];
 }
 
 - (void)calloutViewClicked:(SMCalloutView *)calloutView {
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Tap!" message:@"You tapped the callout view."
-                                                   delegate:nil cancelButtonTitle:nil otherButtonTitles:@"OK",nil];
-    [alert show];
+    [[[UIAlertView alloc] initWithTitle:@"Tap!" message:@"You tapped the callout view."
+                               delegate:nil cancelButtonTitle:nil otherButtonTitles:@"OK",nil] show];
 }
 
 @end

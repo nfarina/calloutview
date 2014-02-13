@@ -16,6 +16,8 @@
 		0148A58718AD390D00463FE9 /* mars@2x.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 0148A58618AD390D00463FE9 /* mars@2x.jpg */; };
 		0148A58B18AD44F300463FE9 /* Driving@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0148A58A18AD44F300463FE9 /* Driving@2x.png */; };
 		0148A58D18AD5F5600463FE9 /* UITableNext@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0148A58C18AD5F5600463FE9 /* UITableNext@2x.png */; };
+		0148A59018AD615800463FE9 /* first@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0148A58E18AD615800463FE9 /* first@2x.png */; };
+		0148A59118AD615800463FE9 /* second@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0148A58F18AD615800463FE9 /* second@2x.png */; };
 		017FD73F15D317B1006825B3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 017FD73D15D317A5006825B3 /* AppDelegate.m */; };
 		017FD74015D317B1006825B3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 017FD73C15D3162C006825B3 /* main.m */; };
 		01A1575918AAFFA900A93F0E /* MapKitComparisonController.m in Sources */ = {isa = PBXBuildFile; fileRef = 01A1575818AAFFA900A93F0E /* MapKitComparisonController.m */; };
@@ -37,6 +39,8 @@
 		0148A58618AD390D00463FE9 /* mars@2x.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "mars@2x.jpg"; sourceTree = SOURCE_ROOT; };
 		0148A58A18AD44F300463FE9 /* Driving@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Driving@2x.png"; sourceTree = SOURCE_ROOT; };
 		0148A58C18AD5F5600463FE9 /* UITableNext@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "UITableNext@2x.png"; sourceTree = SOURCE_ROOT; };
+		0148A58E18AD615800463FE9 /* first@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "first@2x.png"; sourceTree = SOURCE_ROOT; };
+		0148A58F18AD615800463FE9 /* second@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "second@2x.png"; sourceTree = SOURCE_ROOT; };
 		017FD73A15D3162C006825B3 /* CalloutViewSamples-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "CalloutViewSamples-Info.plist"; sourceTree = SOURCE_ROOT; };
 		017FD73B15D3162C006825B3 /* CalloutViewSamples-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CalloutViewSamples-Prefix.pch"; sourceTree = SOURCE_ROOT; };
 		017FD73C15D3162C006825B3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = SOURCE_ROOT; };
@@ -131,6 +135,8 @@
 				0148A58618AD390D00463FE9 /* mars@2x.jpg */,
 				0148A58A18AD44F300463FE9 /* Driving@2x.png */,
 				0148A58C18AD5F5600463FE9 /* UITableNext@2x.png */,
+				0148A58E18AD615800463FE9 /* first@2x.png */,
+				0148A58F18AD615800463FE9 /* second@2x.png */,
 				01A1D513161129080021F8DD /* Default-568h@2x.png */,
 			);
 			name = "Supporting Files";
@@ -189,6 +195,8 @@
 				0148A58D18AD5F5600463FE9 /* UITableNext@2x.png in Resources */,
 				0148A58718AD390D00463FE9 /* mars@2x.jpg in Resources */,
 				0148A58B18AD44F300463FE9 /* Driving@2x.png in Resources */,
+				0148A59018AD615800463FE9 /* first@2x.png in Resources */,
+				0148A59118AD615800463FE9 /* second@2x.png in Resources */,
 				01A1D514161129080021F8DD /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -11,6 +11,7 @@
     if (self = [super initWithNibName:nil bundle:nil]) {
         
         self.title = @"MapKit";
+        self.tabBarItem.image = [UIImage imageNamed:@"second"];
         
         // create a segmented control to switch between MapKit and our custom map image
         self.segmentedControl = [[UISegmentedControl alloc] initWithItems:@[@"SMCalloutView", @"UICalloutView"]];
