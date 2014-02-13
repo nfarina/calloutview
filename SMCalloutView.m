@@ -34,7 +34,7 @@
 NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 @interface SMCalloutView ()
-@property (nonatomic, strong) UIView *containerView; // just for masking
+@property (nonatomic, strong) UIButton *containerView; // for masking and interaction
 @property (nonatomic, strong) UILabel *titleLabel, *subtitleLabel;
 @property (nonatomic, assign) SMCalloutArrowDirection currentArrowDirection;
 @property (nonatomic, assign) BOOL popupCancelled;
@@ -61,9 +61,21 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         self.presentAnimation = SMCalloutAnimationBounce;
         self.dismissAnimation = SMCalloutAnimationFade;
         self.backgroundColor = [UIColor clearColor];
-        self.containerView = [UIView new];
+        self.containerView = [UIButton new];
+
+        [self.containerView addTarget:self action:@selector(shouldHighlight) forControlEvents:UIControlEventTouchDown | UIControlEventTouchDragInside];
+        [self.containerView addTarget:self action:@selector(shouldNotHighlight) forControlEvents:UIControlEventTouchDragOutside | UIControlEventTouchCancel | UIControlEventTouchUpOutside | UIControlEventTouchUpInside];
+        [self.containerView addTarget:self action:@selector(calloutClicked) forControlEvents:UIControlEventTouchUpInside];
     }
     return self;
+}
+
+- (void)shouldHighlight { if ([self.delegate respondsToSelector:@selector(calloutViewClicked:)]) self.backgroundView.highlighted = YES; }
+- (void)shouldNotHighlight { if ([self.delegate respondsToSelector:@selector(calloutViewClicked:)]) self.backgroundView.highlighted = NO; }
+
+- (void)calloutClicked {
+    if ([self.delegate respondsToSelector:@selector(calloutViewClicked:)])
+        [self.delegate calloutViewClicked:self];
 }
 
 - (UIView *)titleViewOrDefault {
@@ -279,7 +291,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     CGFloat anchorY = self.calloutOffset.y + (bestDirection == SMCalloutArrowDirectionDown ? CGRectGetMinY(rect) : CGRectGetMaxY(rect));
     
     // we prefer to sit centered directly above our anchor
-    CGFloat calloutX = roundf(-self.$width / 2);
+    CGFloat calloutX = roundf(anchorX - self.$width / 2);
     
     // but not if it's going to get too close to the edge of our constraints
     if (calloutX < constrainedRect.origin.x)
@@ -512,8 +524,10 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 @interface SMCalloutMaskedBackgroundView ()
 @property (nonatomic, strong) UIView *containerView, *containerBorderView, *arrowView;
-@property (nonatomic, strong) UIImageView *arrowImageView, *arrowBorderView;
+@property (nonatomic, strong) UIImageView *arrowImageView, *arrowHighlightedImageView, *arrowBorderView;
 @end
+
+static UIImage *blackArrowImage = nil, *whiteArrowImage = nil, *grayArrowImage = nil;
 
 @implementation SMCalloutMaskedBackgroundView
 
@@ -535,16 +549,17 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         self.containerBorderView.layer.borderWidth = 0.5;
         self.containerBorderView.layer.cornerRadius = 8.5;
         
-        static UIImage *blackArrowImage = nil, *whiteArrowImage = nil;
-        
         if (!blackArrowImage) {
             blackArrowImage = [SMCalloutBackgroundView embeddedImageNamed:@"CalloutArrow"];
-            whiteArrowImage = [self whiteVersionOfImage:blackArrowImage];
+            whiteArrowImage = [self image:blackArrowImage withColor:[UIColor whiteColor]];
+            grayArrowImage = [self image:blackArrowImage withColor:[UIColor colorWithWhite:0.85 alpha:1]];
         }
         
         self.arrowView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, blackArrowImage.size.width, blackArrowImage.size.height)];
         self.arrowView.alpha = 0.96;
         self.arrowImageView = [[UIImageView alloc] initWithImage:whiteArrowImage];
+        self.arrowHighlightedImageView = [[UIImageView alloc] initWithImage:grayArrowImage];
+        self.arrowHighlightedImageView.hidden = YES;
         self.arrowBorderView = [[UIImageView alloc] initWithImage:blackArrowImage];
         self.arrowBorderView.alpha = 0.1;
         self.arrowBorderView.$y = 0.5;
@@ -554,6 +569,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         [self addSubview:self.arrowView];
         [self.arrowView addSubview:self.arrowBorderView];
         [self.arrowView addSubview:self.arrowImageView];
+        [self.arrowView addSubview:self.arrowHighlightedImageView];
     }
     return self;
 }
@@ -564,7 +580,14 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     [self setNeedsLayout];
 }
 
-- (UIImage *)whiteVersionOfImage:(UIImage *)image {
+- (void)setHighlighted:(BOOL)highlighted {
+    [super setHighlighted:highlighted];
+    self.containerView.backgroundColor = highlighted ? [UIColor colorWithWhite:0.85 alpha:1] : [UIColor whiteColor];
+    self.arrowImageView.hidden = highlighted;
+    self.arrowHighlightedImageView.hidden = !highlighted;
+}
+
+- (UIImage *)image:(UIImage *)image withColor:(UIColor *)color {
     
     UIGraphicsBeginImageContextWithOptions(image.size, NO, 0);
     CGRect imageRect = (CGRect){.size=image.size};
@@ -572,7 +595,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     CGContextTranslateCTM(c, 0, image.size.height);
     CGContextScaleCTM(c, 1, -1);
     CGContextClipToMask(c, imageRect, image.CGImage);
-    [[UIColor whiteColor] setFill];
+    [color setFill];
     CGContextFillRect(c, imageRect);
     UIImage *whiteImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();

@@ -84,6 +84,7 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 // Abstract base class
 @interface SMCalloutBackgroundView : UIView
 @property (nonatomic, assign) CGPoint arrowPoint; // indicates where the tip of the arrow should be drawn, as a pixel offset
+@property (nonatomic, assign) BOOL highlighted; // will be set by the callout when the callout is in a highlighted state
 @property (nonatomic, assign) CALayer *contentMask; // returns an optional layer whose contents should mask the callout view's contents (not honored by SMClassicCalloutView)
 @end
 
@@ -98,6 +99,10 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 
 @protocol SMCalloutViewDelegate <NSObject>
 @optional
+
+// Implementing this method allows the callout to be "clicked" like a button, with highlight state. default YES.
+// Not honored by SMClassicCalloutView.
+- (void)calloutViewClicked:(SMCalloutView *)calloutView;
 
 // Called when the callout view detects that it will be outside the constrained view when it appears,
 // or if the target rect was already outside the constrained view. You can implement this selector to

@@ -2,7 +2,7 @@
 
 // We need a custom subclass of MKMapView in order to allow touches on UIControls in our custom callout view.
 @interface CustomMapView : MKMapView
-@property (strong, nonatomic) SMCalloutView *calloutView;
+@property (nonatomic, strong) SMCalloutView *calloutView;
 @end
 
 @implementation MapKitComparisonController
@@ -26,21 +26,26 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    MKPointAnnotation *annotation = [MKPointAnnotation new];
-    annotation.coordinate = (CLLocationCoordinate2D){28.388154, -80.604200};
-    annotation.title = @"Cape Canaveral";
-    annotation.subtitle = @"Launchpad";
-    
+    self.annotationForSMCalloutView = [MKPointAnnotation new];
+    self.annotationForSMCalloutView.coordinate = (CLLocationCoordinate2D){28.388154, -80.604200};
+    self.annotationForSMCalloutView.title = @"Cape Canaveral";
+    self.annotationForSMCalloutView.subtitle = @"Launchpad";
+
+    self.annotationForUICalloutView = [MKPointAnnotation new];
+    self.annotationForUICalloutView.coordinate = (CLLocationCoordinate2D){28.388154, -80.604200};
+    self.annotationForUICalloutView.title = @"Cape Canaveral";
+    self.annotationForUICalloutView.subtitle = @"Launchpad";
+
     self.mapKitWithSMCalloutView = [[CustomMapView alloc] initWithFrame:self.view.bounds];
     self.mapKitWithSMCalloutView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.mapKitWithSMCalloutView.delegate = self;
-    [self.mapKitWithSMCalloutView addAnnotation:annotation];
+    [self.mapKitWithSMCalloutView addAnnotation:self.annotationForSMCalloutView];
     [self.view addSubview:self.mapKitWithSMCalloutView];
 
     self.mapKitWithUICalloutView = [[MKMapView alloc] initWithFrame:self.view.bounds];
     self.mapKitWithUICalloutView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.mapKitWithUICalloutView.delegate = self;
-    [self.mapKitWithUICalloutView addAnnotation:annotation];
+    [self.mapKitWithUICalloutView addAnnotation:self.annotationForUICalloutView];
     [self.view addSubview:self.mapKitWithUICalloutView];
     
     // create our custom callout view
@@ -75,7 +80,12 @@
     UIButton *disclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
     [disclosure addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(disclosureTapped)]];
     view.rightCalloutAccessoryView = disclosure;
-    view.canShowCallout = YES;
+    
+    // if we're using SMCalloutView, we don't want MKMapView to create its own callout!
+    if (annotation == self.annotationForSMCalloutView)
+        view.canShowCallout = NO;
+    else
+        view.canShowCallout = YES;
     
     return view;
 }
