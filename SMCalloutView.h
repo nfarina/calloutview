@@ -10,20 +10,18 @@ Version 2.0
 */
 
 // options for which directions the callout is allowed to "point" in.
-enum {
+typedef NS_ENUM(NSUInteger, SMCalloutArrowDirection) {
     SMCalloutArrowDirectionUp = 1UL << 0,
     SMCalloutArrowDirectionDown = 1UL << 1,
     SMCalloutArrowDirectionAny = SMCalloutArrowDirectionUp | SMCalloutArrowDirectionDown
 };
-typedef NSUInteger SMCalloutArrowDirection;
 
 // options for the callout present/dismiss animation
-enum {
-    SMCalloutAnimationBounce, // the "bounce" animation we all know and love from UIAlertView (iOS 7 style)
-    SMCalloutAnimationFade, // a simple fade in or out
-    SMCalloutAnimationStretch // grow or shrink linearly, like in the iPad Calendar app
+typedef NS_ENUM(NSInteger, SMCalloutAnimation) {
+    SMCalloutAnimationBounce,	// the "bounce" animation we all know and love from UIAlertView
+    SMCalloutAnimationFade,		// a simple fade in or out
+    SMCalloutAnimationStretch	// grow or shrink linearly, like in the iPad Calendar app
 };
-typedef NSInteger SMCalloutAnimation;
 
 // when delaying our popup in order to scroll content into view, you can use this amount to match the
 // animation duration of UIScrollView when using -setContentOffset:animated.
