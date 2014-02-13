@@ -118,20 +118,26 @@
 
 - (NSTimeInterval)calloutView:(SMCalloutView *)calloutView delayForRepositionWithSize:(CGSize)offset {
     
-    CGFloat pixelsPerDegreeLat = self.mapKitWithSMCalloutView.frame.size.height / self.mapKitWithSMCalloutView.region.span.latitudeDelta;
-    CGFloat pixelsPerDegreeLon = self.mapKitWithSMCalloutView.frame.size.width / self.mapKitWithSMCalloutView.region.span.longitudeDelta;
-    
-    CLLocationDegrees latitudinalShift = offset.height / pixelsPerDegreeLat;
-    CLLocationDegrees longitudinalShift = -(offset.width / pixelsPerDegreeLon);
-    
-    CGFloat lat = self.mapKitWithSMCalloutView.region.center.latitude + latitudinalShift;
-    CGFloat lon = self.mapKitWithSMCalloutView.region.center.longitude + longitudinalShift;
-    
-    CLLocationCoordinate2D newCenterCoordinate = (CLLocationCoordinate2D){lat, lon};
+    // When the callout is being asked to present in a way where it or its target will be partially offscreen, it asks us
+    // if we'd like to reposition our surface first so the callout is completely visible. Here we scroll the map into view,
+    // but it takes some math because we have to deal in lon/lat instead of the given offset in pixels.
 
-    if (fabsf(newCenterCoordinate.latitude) <= 90 && fabsf(newCenterCoordinate.longitude <= 180))
-        [self.mapKitWithSMCalloutView setCenterCoordinate:newCenterCoordinate animated:YES];
+    CLLocationCoordinate2D coordinate = self.mapKitWithSMCalloutView.centerCoordinate;
     
+    // where's the center coordinate in terms of our view?
+    CGPoint center = [self.mapKitWithSMCalloutView convertCoordinate:coordinate toPointToView:self.view];
+    
+    // move it by the requested offset
+    center.x -= offset.width;
+    center.y -= offset.height;
+    
+    // and translate it back into map coordinates
+    coordinate = [self.mapKitWithSMCalloutView convertPoint:center toCoordinateFromView:self.view];
+
+    // move the map!
+    [self.mapKitWithSMCalloutView setCenterCoordinate:coordinate animated:YES];
+    
+    // tell the callout to wait for a while while we scroll (we assume the scroll delay for MKMapView matches UIScrollView)
     return kSMCalloutViewRepositionDelayForUIScrollView;
 }
 
