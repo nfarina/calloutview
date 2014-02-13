@@ -98,11 +98,12 @@
         // Apply the MKAnnotationView's desired calloutOffset (from the top-middle of the view)
         self.calloutView.calloutOffset = view.calloutOffset;
         
+        // iOS 7 only: Apply our view controller's edge insets to the allowable area in which the callout can be displayed.
+        if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1)
+            self.calloutView.constrainedInsets = UIEdgeInsetsMake(self.topLayoutGuide.length, 0, self.bottomLayoutGuide.length, 0);
+        
         // This does all the magic.
-        [self.calloutView presentCalloutFromRect:view.bounds
-                                     inView:view
-                          constrainedToView:self.view
-                                   animated:YES];
+        [self.calloutView presentCalloutFromRect:view.bounds inView:view constrainedToView:self.view animated:YES];
     }
 }
 

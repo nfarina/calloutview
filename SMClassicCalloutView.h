@@ -18,6 +18,10 @@
 //
 
 @interface SMClassicCalloutView : SMCalloutView
+
+// One thing to note about the classic callout is that it will ignore the "constrainedInsets" property. That property is designed for iOS-7
+// style presentation where your target view surface may be operlapped by navigation bars, tab bars, etc.
+
 @end
 
 //

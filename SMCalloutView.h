@@ -43,6 +43,7 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 @property (nonatomic, retain) UIView *leftAccessoryView, *rightAccessoryView;
 @property (nonatomic, assign) SMCalloutArrowDirection permittedArrowDirection; // default SMCalloutArrowDirectionDown
 @property (nonatomic, readonly) SMCalloutArrowDirection currentArrowDirection;
+@property (nonatomic, assign) UIEdgeInsets constrainedInsets; // if the UIView you're constraining to has portions that are overlapped by nav bar, tab bar, etc. you'll need to tell us those insets.
 @property (nonatomic, retain) SMCalloutBackgroundView *backgroundView; // default is [SMCalloutBackgroundView platformBackgroundView], created if necessary
 
 // Custom title/subtitle views. if these are set, the respective title/subtitle properties will be ignored.
