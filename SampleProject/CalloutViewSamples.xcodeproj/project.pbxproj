@@ -12,6 +12,7 @@
 		011CA09215D3144E007DBC54 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 011CA09115D3144E007DBC54 /* CoreGraphics.framework */; };
 		0145C74115D3182F007244F3 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0145C74015D3182F007244F3 /* MapKit.framework */; };
 		0145C74615D32505007244F3 /* mars.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 0145C74515D32505007244F3 /* mars.jpg */; };
+		0148A58218AC303100463FE9 /* SMClassicCalloutView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0148A58118AC303100463FE9 /* SMClassicCalloutView.m */; };
 		017FD73F15D317B1006825B3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 017FD73D15D317A5006825B3 /* AppDelegate.m */; };
 		017FD74015D317B1006825B3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 017FD73C15D3162C006825B3 /* main.m */; };
 		01A1575918AAFFA900A93F0E /* MapKitComparisonController.m in Sources */ = {isa = PBXBuildFile; fileRef = 01A1575818AAFFA900A93F0E /* MapKitComparisonController.m */; };
@@ -27,6 +28,8 @@
 		011CA09115D3144E007DBC54 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		0145C74015D3182F007244F3 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		0145C74515D32505007244F3 /* mars.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = mars.jpg; sourceTree = SOURCE_ROOT; };
+		0148A58018AC303100463FE9 /* SMClassicCalloutView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMClassicCalloutView.h; path = ../SMClassicCalloutView.h; sourceTree = "<group>"; };
+		0148A58118AC303100463FE9 /* SMClassicCalloutView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMClassicCalloutView.m; path = ../SMClassicCalloutView.m; sourceTree = "<group>"; };
 		017FD73A15D3162C006825B3 /* CalloutViewSamples-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "CalloutViewSamples-Info.plist"; sourceTree = SOURCE_ROOT; };
 		017FD73B15D3162C006825B3 /* CalloutViewSamples-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CalloutViewSamples-Prefix.pch"; sourceTree = SOURCE_ROOT; };
 		017FD73C15D3162C006825B3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = SOURCE_ROOT; };
@@ -104,6 +107,8 @@
 			children = (
 				01A6EE6315D49BD500E895D6 /* SMCalloutView.h */,
 				01A6EE6415D49BD500E895D6 /* SMCalloutView.m */,
+				0148A58018AC303100463FE9 /* SMClassicCalloutView.h */,
+				0148A58118AC303100463FE9 /* SMClassicCalloutView.m */,
 			);
 			name = "Callout View";
 			sourceTree = "<group>";
@@ -182,6 +187,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0148A58218AC303100463FE9 /* SMClassicCalloutView.m in Sources */,
 				01A1575918AAFFA900A93F0E /* MapKitComparisonController.m in Sources */,
 				01A6EE6515D49BD500E895D6 /* SMCalloutView.m in Sources */,
 				017FD73F15D317B1006825B3 /* AppDelegate.m in Sources */,

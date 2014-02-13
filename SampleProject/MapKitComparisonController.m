@@ -24,6 +24,7 @@
     MKPointAnnotation *annotation = [MKPointAnnotation new];
     annotation.coordinate = (CLLocationCoordinate2D){28.388154, -80.604200};
     annotation.title = @"Cape Canaveral";
+    //annotation.subtitle = @"A Nice Place";
     
     UIButton *bottomDisclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
     [bottomDisclosure addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(disclosureTapped)]];
@@ -41,13 +42,13 @@
     [self.view addSubview:self.mapKitWithUICalloutView];
     
     // create our custom callout view
-    self.calloutView = [SMCalloutView new];
+    self.calloutView = [SMCalloutView platformCalloutView];
     self.calloutView.delegate = self;
     self.calloutView.title = @"Cape Canaveral";
     
     UIButton *topDisclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
     [topDisclosure addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(disclosureTapped)]];
-    self.calloutView.rightAccessoryView = topDisclosure;
+    //self.calloutView.rightAccessoryView = topDisclosure;
 
     [self segmentedControlChanged];
 }
@@ -70,7 +71,10 @@
     [bottomDisclosure addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(mapKitDisclosureTapped)]];
 
     if (mapView == self.mapKitWithUICalloutView) {
-        view.rightCalloutAccessoryView = bottomDisclosure;
+        //view.rightCalloutAccessoryView = bottomDisclosure;
+        UIView *grayView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 30, 35)];
+        grayView.backgroundColor = [UIColor grayColor];
+        //view.leftCalloutAccessoryView = grayView;
         view.canShowCallout = YES;
     }
     
@@ -89,6 +93,9 @@
                           constrainedToView:self.view
                    permittedArrowDirections:SMCalloutArrowDirectionDown
                                    animated:YES];
+    }
+    else {
+        NSLog(@"Selected mapkit annotation view!");
     }
 }
 
