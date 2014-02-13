@@ -31,9 +31,6 @@
     annotation.title = @"Cape Canaveral";
     annotation.subtitle = @"Launchpad";
     
-    UIButton *bottomDisclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-    [bottomDisclosure addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(disclosureTapped)]];
-    
     self.mapKitWithSMCalloutView = [[CustomMapView alloc] initWithFrame:self.view.bounds];
     self.mapKitWithSMCalloutView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.mapKitWithSMCalloutView.delegate = self;
@@ -50,10 +47,6 @@
     self.calloutView = [SMCalloutView platformCalloutView];
     self.calloutView.delegate = self;
     
-    UIButton *topDisclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-    [topDisclosure addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(disclosureTapped)]];
-    //self.calloutView.rightAccessoryView = topDisclosure;
-
     [self segmentedControlChanged];
 }
 
@@ -75,14 +68,14 @@
     // create a proper annotation view, be lazy and don't use the reuse identifier
     MKPinAnnotationView *view = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:@""];
     
-    UIButton *bottomDisclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-    [bottomDisclosure addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(mapKitDisclosureTapped)]];
+    // create a disclosure button for map kit
+    UIButton *disclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+    [disclosure addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(disclosureTapped)]];
+    view.rightCalloutAccessoryView = disclosure;
 
     if (mapView == self.mapKitWithUICalloutView) {
-        //view.rightCalloutAccessoryView = bottomDisclosure;
         UIView *grayView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 30, 35)];
         grayView.backgroundColor = [UIColor grayColor];
-        //view.leftCalloutAccessoryView = grayView;
         view.canShowCallout = YES;
     }
     
@@ -100,6 +93,11 @@
         // Apply the MKAnnotationView's desired calloutOffset (from the top-middle of the view)
         self.calloutView.calloutOffset = annotationView.calloutOffset;
         
+        // create a disclosure button for comparison
+        UIButton *disclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+        [disclosure addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(disclosureTapped)]];
+        self.calloutView.rightAccessoryView = disclosure;
+
         // iOS 7 only: Apply our view controller's edge insets to the allowable area in which the callout can be displayed.
         if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1)
             self.calloutView.constrainedInsets = UIEdgeInsetsMake(self.topLayoutGuide.length, 0, self.bottomLayoutGuide.length, 0);

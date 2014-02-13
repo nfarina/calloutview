@@ -40,7 +40,7 @@
     self.calloutView.delegate = self;
     self.calloutView.title = @"Curiosity";
     
-    // create a little accessory view to match the little car that Maps.app shows
+    // create a little accessory view to mimic the little car that Maps.app shows
     UIView *blueView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 44, 44+30)];
     blueView.backgroundColor = [UIColor colorWithRed:0 green:0.5 blue:1 alpha:1];
     UIImageView *carView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Driving"]];

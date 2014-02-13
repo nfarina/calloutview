@@ -84,7 +84,7 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 // Abstract base class
 @interface SMCalloutBackgroundView : UIView
 @property (nonatomic, assign) CGPoint arrowPoint; // indicates where the tip of the arrow should be drawn, as a pixel offset
-@property (nonatomic, assign) CALayer *contentMask; // returns an optional layer whose contents should mask the callout view's contents (iOS 7 style)
+@property (nonatomic, assign) CALayer *contentMask; // returns an optional layer whose contents should mask the callout view's contents (not honored by SMClassicCalloutView)
 
 // Returns a new instance of SMCalloutMaskedBackgroundView if running on iOS 7 or better, otherwise SMCalloutDrawnBackgroundView if available.
 + (SMCalloutBackgroundView *)platformBackgroundView;

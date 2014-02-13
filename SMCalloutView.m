@@ -34,6 +34,7 @@
 NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 @interface SMCalloutView ()
+@property (nonatomic, strong) UIView *containerView; // just for masking
 @property (nonatomic, strong) UILabel *titleLabel, *subtitleLabel;
 @property (nonatomic, assign) SMCalloutArrowDirection currentArrowDirection;
 @property (nonatomic, assign) BOOL popupCancelled;
@@ -60,6 +61,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         self.presentAnimation = SMCalloutAnimationBounce;
         self.dismissAnimation = SMCalloutAnimationFade;
         self.backgroundColor = [UIColor clearColor];
+        self.containerView = [UIView new];
     }
     return self;
 }
@@ -111,16 +113,17 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     [self setNeedsDisplay];
     
     [self addSubview:self.backgroundView];
+    [self addSubview:self.containerView];
     
     if (self.contentView) {
-        [self addSubview:self.contentView];
+        [self.containerView addSubview:self.contentView];
     }
     else {
-        if (self.titleViewOrDefault) [self addSubview:self.titleViewOrDefault];
-        if (self.subtitleViewOrDefault) [self addSubview:self.subtitleViewOrDefault];
+        if (self.titleViewOrDefault) [self.containerView addSubview:self.titleViewOrDefault];
+        if (self.subtitleViewOrDefault) [self.containerView addSubview:self.subtitleViewOrDefault];
     }
-    if (self.leftAccessoryView) [self addSubview:self.leftAccessoryView];
-    if (self.rightAccessoryView) [self addSubview:self.rightAccessoryView];
+    if (self.leftAccessoryView) [self.containerView addSubview:self.leftAccessoryView];
+    if (self.rightAccessoryView) [self.containerView addSubview:self.rightAccessoryView];
 }
 
 // margin around the left accessory: left,top,bottom. Accessories are centered vertically when shorter
@@ -342,7 +345,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     if (self.popupCancelled) return;
 
     // now we want to mask our contents to our background view (if requested) to match the iOS 7 style
-    self.layer.mask = self.backgroundView.contentMask;
+    self.containerView.layer.mask = self.backgroundView.contentMask;
 
     // if we need to delay, we don't want to be visible while we're delaying, so hide us in preparation for our popup
     self.hidden = YES;
@@ -466,6 +469,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 - (void)layoutSubviews {
     
+    self.containerView.frame = self.bounds;
     self.backgroundView.frame = self.bounds;
     
     // if we're pointing up, we'll need to push almost everything down a bit
