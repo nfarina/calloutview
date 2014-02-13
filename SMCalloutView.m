@@ -35,7 +35,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 @interface SMCalloutView ()
 @property (nonatomic, strong) UILabel *titleLabel, *subtitleLabel;
-@property (nonatomic, assign) SMCalloutArrowDirection arrowDirection;
+@property (nonatomic, assign) SMCalloutArrowDirection currentArrowDirection;
 @property (nonatomic, assign) BOOL popupCancelled;
 @end
 
@@ -56,6 +56,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 - (id)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
+        self.permittedArrowDirection = SMCalloutArrowDirectionDown;
         self.presentAnimation = SMCalloutAnimationBounce;
         self.dismissAnimation = SMCalloutAnimationFade;
         self.backgroundColor = [UIColor clearColor];
@@ -101,7 +102,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 - (SMCalloutBackgroundView *)backgroundView {
     // create our default background on first access only if it's nil, since you might have set your own background anyway.
-    return _backgroundView ?: (_backgroundView = [SMCalloutBackgroundView new]);
+    return _backgroundView ?: (_backgroundView = [SMCalloutBackgroundView platformBackgroundView]);
 }
 
 - (void)rebuildSubviews {
@@ -215,16 +216,16 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     return CGSizeMake(nudgeLeft ?: nudgeRight, nudgeTop ?: nudgeBottom);
 }
 
-- (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToView:(UIView *)constrainedView permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
-    [self presentCalloutFromRect:rect inLayer:view.layer ofView:view constrainedToLayer:constrainedView.layer permittedArrowDirections:arrowDirections animated:animated];
+- (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToView:(UIView *)constrainedView animated:(BOOL)animated {
+    [self presentCalloutFromRect:rect inLayer:view.layer ofView:view constrainedToLayer:constrainedView.layer animated:animated];
 }
 
-- (void)presentCalloutFromRect:(CGRect)rect inLayer:(CALayer *)layer constrainedToLayer:(CALayer *)constrainedLayer permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
-    [self presentCalloutFromRect:rect inLayer:layer ofView:nil constrainedToLayer:constrainedLayer permittedArrowDirections:arrowDirections animated:animated];
+- (void)presentCalloutFromRect:(CGRect)rect inLayer:(CALayer *)layer constrainedToLayer:(CALayer *)constrainedLayer animated:(BOOL)animated {
+    [self presentCalloutFromRect:rect inLayer:layer ofView:nil constrainedToLayer:constrainedLayer animated:animated];
 }
 
 // this private method handles both CALayer and UIView parents depending on what's passed.
-- (void)presentCalloutFromRect:(CGRect)rect inLayer:(CALayer *)layer ofView:(UIView *)view constrainedToLayer:(CALayer *)constrainedLayer permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated {
+- (void)presentCalloutFromRect:(CGRect)rect inLayer:(CALayer *)layer ofView:(UIView *)view constrainedToLayer:(CALayer *)constrainedLayer animated:(BOOL)animated {
     
     // Sanity check: dismiss this callout immediately if it's displayed somewhere
     if (self.layer.superlayer) [self dismissCalloutAnimated:NO];
@@ -252,15 +253,15 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     SMCalloutArrowDirection bestDirection = SMCalloutArrowDirectionDown;
     
     // we'll point it up though if that's the only option you gave us.
-    if (arrowDirections == SMCalloutArrowDirectionUp)
+    if (self.permittedArrowDirection == SMCalloutArrowDirectionUp)
         bestDirection = SMCalloutArrowDirectionUp;
     
     // or, if we don't have enough space on the top and have more space on the bottom, and you
     // gave us a choice, then pointing up is the better option.
-    if (arrowDirections == SMCalloutArrowDirectionAny && topSpace < self.calloutHeight && bottomSpace > topSpace)
+    if (self.permittedArrowDirection == SMCalloutArrowDirectionAny && topSpace < self.calloutHeight && bottomSpace > topSpace)
         bestDirection = SMCalloutArrowDirectionUp;
     
-    self.arrowDirection = bestDirection;
+    self.currentArrowDirection = bestDirection;
     
     // we want to point directly at the horizontal center of the given rect. calculate our "anchor point" in terms of our
     // target view's coordinate system. make sure to offset the anchor point as requested if necessary.
@@ -297,8 +298,6 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         .y = bestDirection == SMCalloutArrowDirectionDown ? (anchorY - self.calloutHeight) : anchorY
     };
     
-    _currentArrowDirection = bestDirection;
-    
     self.$origin = calloutOrigin;
     
     // now set the *actual* anchor point for our layer so that our "popup" animation starts from this point.
@@ -326,7 +325,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     
     // if we're outside the bounds of our constraint rect, we'll give our delegate an opportunity to shift us into position.
     // consider both our size and the size of our target rect (which we'll assume to be the size of the content you want to scroll into view.
-    CGRect contentRect = CGRectUnion(self.frame, CGRectInset(rect, -COMFORTABLE_MARGIN, -COMFORTABLE_MARGIN));
+    CGRect contentRect = CGRectUnion(self.frame, rect);
     CGSize offset = [self offsetToContainRect:contentRect inRect:constrainedRect];
     
     NSTimeInterval delay = 0;
@@ -464,7 +463,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     self.backgroundView.frame = self.bounds;
     
     // if we're pointing up, we'll need to push almost everything down a bit
-    CGFloat dy = self.arrowDirection == SMCalloutArrowDirectionUp ? TOP_ANCHOR_MARGIN : 0;
+    CGFloat dy = self.currentArrowDirection == SMCalloutArrowDirectionUp ? TOP_ANCHOR_MARGIN : 0;
     
     self.titleViewOrDefault.$x = self.innerContentMarginLeft;
     self.titleViewOrDefault.$y = (self.subtitleView || self.subtitle.length ? TITLE_SUB_TOP : TITLE_TOP) + dy;
@@ -488,16 +487,21 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 @end
 
+// import this known "private API" from SMCalloutBackgroundView
+@interface SMCalloutBackgroundView (EmbeddedImages)
++ (UIImage *)embeddedImageNamed:(NSString *)name;
+@end
+
 //
 // Callout Background View.
 //
 
-@interface SMCalloutBackgroundView ()
+@interface SMCalloutMaskedBackgroundView ()
 @property (nonatomic, strong) UIView *containerView, *containerBorderView, *arrowView;
 @property (nonatomic, strong) UIImageView *arrowImageView, *arrowBorderView;
 @end
 
-@implementation SMCalloutBackgroundView
+@implementation SMCalloutMaskedBackgroundView
 
 - (id)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
@@ -541,7 +545,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 // Make sure we relayout our images when our arrow point changes!
 - (void)setArrowPoint:(CGPoint)arrowPoint {
-    _arrowPoint = arrowPoint;
+    [super setArrowPoint:arrowPoint];
     [self setNeedsLayout];
 }
 
@@ -580,6 +584,23 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         self.arrowView.$y = self.containerView.$height - 0.5;
         self.arrowBorderView.$y = 0.5;
     }
+}
+
+@end
+
+@implementation SMCalloutBackgroundView
+
++ (SMCalloutBackgroundView *)platformBackgroundView {
+    
+    // if you haven't compiled SMClassicCalloutView into your app, then we can't possibly create an instance of it!
+    if (!NSClassFromString(@"SMCalloutDrawnBackgroundView"))
+        return [SMCalloutMaskedBackgroundView new];
+    
+    // ok we have both - so choose the best one based on current platform
+    if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1)
+        return [SMCalloutMaskedBackgroundView new]; // iOS 7+
+    else
+        return [NSClassFromString(@"SMCalloutDrawnBackgroundView") new];
 }
 
 + (NSData *)dataWithBase64EncodedString:(NSString *)string {
@@ -666,7 +687,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     SEL selector = NSSelectorFromString(name);
     
     if (![(id)self respondsToSelector:selector]) {
-        NSLog(@"Could not find an embedded image. Ensure that you've added a category method to UIImage named +%@", name);
+        NSLog(@"Could not find an embedded image. Ensure that you've added a class-level method named +%@", name);
         return nil;
     }
     

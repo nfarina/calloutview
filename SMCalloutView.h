@@ -41,8 +41,9 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 @property (nonatomic, unsafe_unretained) id<SMCalloutViewDelegate> delegate;
 @property (nonatomic, copy) NSString *title, *subtitle; // title/titleView relationship mimics UINavigationBar.
 @property (nonatomic, retain) UIView *leftAccessoryView, *rightAccessoryView;
+@property (nonatomic, assign) SMCalloutArrowDirection permittedArrowDirection; // default SMCalloutArrowDirectionDown
 @property (nonatomic, readonly) SMCalloutArrowDirection currentArrowDirection;
-@property (nonatomic, retain) SMCalloutBackgroundView *backgroundView; // default is SMCalloutBackgroundView, created if necessary
+@property (nonatomic, retain) SMCalloutBackgroundView *backgroundView; // default is [SMCalloutBackgroundView platformBackgroundView], created if necessary
 
 // Custom title/subtitle views. if these are set, the respective title/subtitle properties will be ignored.
 // Keep in mind that SMCalloutView calls -sizeThatFits on titleView/subtitleView if defined, so your view
@@ -58,18 +59,18 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 
 @property (nonatomic, assign) SMCalloutAnimation presentAnimation, dismissAnimation; // default SMCalloutAnimationBounce, SMCalloutAnimationFade respectively
 
-// Returns a new instance of SMCalloutView if running on iOS 7 or better, otherwise a new instance of SMClassicCalloutView
-// if available (duck-typed as SMCalloutView since they share the same API).
+
+// Returns a new instance of SMCalloutView if running on iOS 7 or better, otherwise a new instance of SMClassicCalloutView if available.
 + (SMCalloutView *)platformCalloutView;
 
 // Presents a callout view by adding it to "inView" and pointing at the given rect of inView's bounds.
 // Constrains the callout to the bounds of the given view. Optionally scrolls the given rect into view (plus margins)
 // if -delegate is set and responds to -delayForRepositionWithSize.
-- (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToView:(UIView *)constrainedView permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated;
+- (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToView:(UIView *)constrainedView animated:(BOOL)animated;
 
 // Same as the view-based presentation, but inserts the callout into a CALayer hierarchy instead. Be aware that you'll have to direct
 // your own touches to any accessory views, since CALayer doesn't relay touch events.
-- (void)presentCalloutFromRect:(CGRect)rect inLayer:(CALayer *)layer constrainedToLayer:(CALayer *)constrainedLayer permittedArrowDirections:(SMCalloutArrowDirection)arrowDirections animated:(BOOL)animated;
+- (void)presentCalloutFromRect:(CGRect)rect inLayer:(CALayer *)layer constrainedToLayer:(CALayer *)constrainedLayer animated:(BOOL)animated;
 
 - (void)dismissCalloutAnimated:(BOOL)animated;
 
@@ -79,8 +80,18 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 // Background view - default draws the iOS 7 system background style (translucent white with rounded arrow).
 //
 
+// Abstract base class
 @interface SMCalloutBackgroundView : UIView
 @property (nonatomic, assign) CGPoint arrowPoint; // indicates where the tip of the arrow should be drawn, as a pixel offset
+
+// Returns a new instance of SMCalloutMaskedBackgroundView if running on iOS 7 or better, otherwise SMCalloutDrawnBackgroundView if available.
++ (SMCalloutBackgroundView *)platformBackgroundView;
+
+@end
+
+// Default for iOS 7, this reproduces the "masked" behavior of the iOS 7-style callout view.
+// Accessories are masked by the shape of the callout (including the arrow itself).
+@interface SMCalloutMaskedBackgroundView : SMCalloutBackgroundView
 @end
 
 //
