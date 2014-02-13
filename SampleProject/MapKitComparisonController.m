@@ -49,8 +49,6 @@
     // create our custom callout view
     self.calloutView = [SMCalloutView platformCalloutView];
     self.calloutView.delegate = self;
-    self.calloutView.title = @"Cape Canaveral";
-    self.calloutView.subtitle = @"Launchpad";
     
     UIButton *topDisclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
     [topDisclosure addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(disclosureTapped)]];
@@ -91,19 +89,23 @@
     return view;
 }
 
-- (void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKAnnotationView *)view {
+- (void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKAnnotationView *)annotationView {
     
     if (mapView == self.mapKitWithSMCalloutView) {
-        
+
+        // apply the MKAnnotationView's basic properties
+        self.calloutView.title = annotationView.annotation.title;
+        self.calloutView.subtitle = annotationView.annotation.subtitle;
+
         // Apply the MKAnnotationView's desired calloutOffset (from the top-middle of the view)
-        self.calloutView.calloutOffset = view.calloutOffset;
+        self.calloutView.calloutOffset = annotationView.calloutOffset;
         
         // iOS 7 only: Apply our view controller's edge insets to the allowable area in which the callout can be displayed.
         if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1)
             self.calloutView.constrainedInsets = UIEdgeInsetsMake(self.topLayoutGuide.length, 0, self.bottomLayoutGuide.length, 0);
         
         // This does all the magic.
-        [self.calloutView presentCalloutFromRect:view.bounds inView:view constrainedToView:self.view animated:YES];
+        [self.calloutView presentCalloutFromRect:annotationView.bounds inView:annotationView constrainedToView:self.view animated:YES];
     }
 }
 
