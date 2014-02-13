@@ -340,7 +340,10 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     // there's a chance that user code in the delegate method may have called -dismissCalloutAnimated to cancel things; if that
     // happened then we need to bail!
     if (self.popupCancelled) return;
-    
+
+    // now we want to mask our contents to our background view (if requested) to match the iOS 7 style
+    self.layer.mask = self.backgroundView.contentMask;
+
     // if we need to delay, we don't want to be visible while we're delaying, so hide us in preparation for our popup
     self.hidden = YES;
     
@@ -588,6 +591,21 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         self.arrowView.$y = self.containerView.$height - 0.5;
         self.arrowView.transform = CGAffineTransformIdentity;
     }
+}
+
+- (CALayer *)contentMask {
+
+    UIGraphicsBeginImageContextWithOptions(self.bounds.size, NO, 0);
+    
+    [self.layer renderInContext:UIGraphicsGetCurrentContext()];
+    
+    UIImage *maskImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    CALayer *layer = [CALayer layer];
+    layer.frame = self.bounds;
+    layer.contents = (id)maskImage.CGImage;
+    return layer;
 }
 
 @end

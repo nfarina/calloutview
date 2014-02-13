@@ -14,6 +14,7 @@
 		0148A58218AC303100463FE9 /* SMClassicCalloutView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0148A58118AC303100463FE9 /* SMClassicCalloutView.m */; };
 		0148A58518AD37F400463FE9 /* ScrollViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0148A58418AD37F400463FE9 /* ScrollViewController.m */; };
 		0148A58718AD390D00463FE9 /* mars@2x.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 0148A58618AD390D00463FE9 /* mars@2x.jpg */; };
+		0148A58B18AD44F300463FE9 /* Driving@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0148A58A18AD44F300463FE9 /* Driving@2x.png */; };
 		017FD73F15D317B1006825B3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 017FD73D15D317A5006825B3 /* AppDelegate.m */; };
 		017FD74015D317B1006825B3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 017FD73C15D3162C006825B3 /* main.m */; };
 		01A1575918AAFFA900A93F0E /* MapKitComparisonController.m in Sources */ = {isa = PBXBuildFile; fileRef = 01A1575818AAFFA900A93F0E /* MapKitComparisonController.m */; };
@@ -33,6 +34,7 @@
 		0148A58318AD37F400463FE9 /* ScrollViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScrollViewController.h; sourceTree = SOURCE_ROOT; };
 		0148A58418AD37F400463FE9 /* ScrollViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScrollViewController.m; sourceTree = SOURCE_ROOT; };
 		0148A58618AD390D00463FE9 /* mars@2x.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "mars@2x.jpg"; sourceTree = SOURCE_ROOT; };
+		0148A58A18AD44F300463FE9 /* Driving@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Driving@2x.png"; sourceTree = SOURCE_ROOT; };
 		017FD73A15D3162C006825B3 /* CalloutViewSamples-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "CalloutViewSamples-Info.plist"; sourceTree = SOURCE_ROOT; };
 		017FD73B15D3162C006825B3 /* CalloutViewSamples-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CalloutViewSamples-Prefix.pch"; sourceTree = SOURCE_ROOT; };
 		017FD73C15D3162C006825B3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = SOURCE_ROOT; };
@@ -125,6 +127,7 @@
 				017FD73B15D3162C006825B3 /* CalloutViewSamples-Prefix.pch */,
 				017FD73C15D3162C006825B3 /* main.m */,
 				0148A58618AD390D00463FE9 /* mars@2x.jpg */,
+				0148A58A18AD44F300463FE9 /* Driving@2x.png */,
 				01A1D513161129080021F8DD /* Default-568h@2x.png */,
 			);
 			name = "Supporting Files";
@@ -181,6 +184,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0148A58718AD390D00463FE9 /* mars@2x.jpg in Resources */,
+				0148A58B18AD44F300463FE9 /* Driving@2x.png in Resources */,
 				01A1D514161129080021F8DD /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
