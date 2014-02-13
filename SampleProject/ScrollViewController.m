@@ -36,18 +36,31 @@
     [self.pinView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(pinTapped)]];
     [self.marsView addSubview:self.pinView];
     
-    self.calloutView = [SMCalloutView new];
+    self.calloutView = [SMCalloutView platformCalloutView];
     self.calloutView.delegate = self;
     self.calloutView.title = @"Curiosity";
     
     // create a little accessory view to mimic the little car that Maps.app shows
-    UIView *blueView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 44, 44+30)];
-    blueView.backgroundColor = [UIColor colorWithRed:0 green:0.5 blue:1 alpha:1];
     UIImageView *carView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Driving"]];
-    carView.frame = CGRectMake(11, 14, carView.image.size.width, carView.image.size.height);
-    [blueView addSubview:carView];
-    
-    self.calloutView.leftAccessoryView = blueView;
+
+    // wrap it in a blue background on iOS 7+
+    if ([self.calloutView.backgroundView isKindOfClass:[SMCalloutMaskedBackgroundView class]]) {
+
+        UIView *blueView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 44, 44+30)];
+        blueView.backgroundColor = [UIColor colorWithRed:0 green:0.5 blue:1 alpha:1];
+        carView.frame = CGRectMake(11, 14, carView.image.size.width, carView.image.size.height);
+        [blueView addSubview:carView];
+        self.calloutView.leftAccessoryView = blueView;
+    }
+    else {
+        // "inset" the car graphic to match the callout's title on iOS 6-
+        carView.layer.shadowOffset = CGSizeMake(0, -1);
+        carView.layer.shadowColor = [UIColor colorWithWhite:0 alpha:0.5].CGColor;
+        carView.layer.shadowOpacity = 1;
+        carView.layer.shadowRadius = 0;
+        carView.clipsToBounds = NO;
+        self.calloutView.leftAccessoryView = carView;
+    }
     
     self.view = self.scrollView;
 }

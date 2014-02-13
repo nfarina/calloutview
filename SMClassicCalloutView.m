@@ -94,6 +94,10 @@
     }
 }
 
+- (SMCalloutBackgroundView *)defaultBackgroundView {
+    return [SMCalloutDrawnBackgroundView new];
+}
+
 - (void)rebuildSubviews {
     // remove and re-add our appropriate subviews in the appropriate order
     [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];

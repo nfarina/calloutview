@@ -47,6 +47,9 @@
     self.calloutView = [SMCalloutView platformCalloutView];
     self.calloutView.delegate = self;
     
+    // tell our custom map view about the callout so it can send it touches
+    self.mapKitWithSMCalloutView.calloutView = self.calloutView;
+    
     [self segmentedControlChanged];
 }
 
@@ -72,12 +75,7 @@
     UIButton *disclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
     [disclosure addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(disclosureTapped)]];
     view.rightCalloutAccessoryView = disclosure;
-
-    if (mapView == self.mapKitWithUICalloutView) {
-        UIView *grayView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 30, 35)];
-        grayView.backgroundColor = [UIColor grayColor];
-        view.canShowCallout = YES;
-    }
+    view.canShowCallout = YES;
     
     return view;
 }
@@ -141,7 +139,7 @@
     return kSMCalloutViewRepositionDelayForUIScrollView;
 }
 
-- (void)mapKitDisclosureTapped {
+- (void)disclosureTapped {
     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Tap!" message:@"You tapped the disclosure button."
                                                    delegate:nil cancelButtonTitle:nil otherButtonTitles:@"OK",nil];
     [alert show];

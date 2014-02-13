@@ -104,7 +104,11 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 - (SMCalloutBackgroundView *)backgroundView {
     // create our default background on first access only if it's nil, since you might have set your own background anyway.
-    return _backgroundView ?: (_backgroundView = [SMCalloutBackgroundView platformBackgroundView]);
+    return _backgroundView ?: (_backgroundView = [self defaultBackgroundView]);
+}
+
+- (SMCalloutBackgroundView *)defaultBackgroundView {
+    return [SMCalloutMaskedBackgroundView new];
 }
 
 - (void)rebuildSubviews {
@@ -615,19 +619,6 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 @end
 
 @implementation SMCalloutBackgroundView
-
-+ (SMCalloutBackgroundView *)platformBackgroundView {
-    
-    // if you haven't compiled SMClassicCalloutView into your app, then we can't possibly create an instance of it!
-    if (!NSClassFromString(@"SMCalloutDrawnBackgroundView"))
-        return [SMCalloutMaskedBackgroundView new];
-    
-    // ok we have both - so choose the best one based on current platform
-    if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1)
-        return [SMCalloutMaskedBackgroundView new]; // iOS 7+
-    else
-        return [NSClassFromString(@"SMCalloutDrawnBackgroundView") new];
-}
 
 + (NSData *)dataWithBase64EncodedString:(NSString *)string {
     //

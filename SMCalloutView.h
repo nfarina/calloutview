@@ -44,7 +44,7 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 @property (nonatomic, assign) SMCalloutArrowDirection permittedArrowDirection; // default SMCalloutArrowDirectionDown
 @property (nonatomic, readonly) SMCalloutArrowDirection currentArrowDirection;
 @property (nonatomic, assign) UIEdgeInsets constrainedInsets; // if the UIView you're constraining to has portions that are overlapped by nav bar, tab bar, etc. you'll need to tell us those insets.
-@property (nonatomic, retain) SMCalloutBackgroundView *backgroundView; // default is [SMCalloutBackgroundView platformBackgroundView], created if necessary
+@property (nonatomic, retain) SMCalloutBackgroundView *backgroundView; // default is SMCalloutMaskedBackgroundView, or SMCalloutDrawnBackgroundView when using SMClassicCalloutView
 
 // Custom title/subtitle views. if these are set, the respective title/subtitle properties will be ignored.
 // Keep in mind that SMCalloutView calls -sizeThatFits on titleView/subtitleView if defined, so your view
@@ -85,10 +85,6 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 @interface SMCalloutBackgroundView : UIView
 @property (nonatomic, assign) CGPoint arrowPoint; // indicates where the tip of the arrow should be drawn, as a pixel offset
 @property (nonatomic, assign) CALayer *contentMask; // returns an optional layer whose contents should mask the callout view's contents (not honored by SMClassicCalloutView)
-
-// Returns a new instance of SMCalloutMaskedBackgroundView if running on iOS 7 or better, otherwise SMCalloutDrawnBackgroundView if available.
-+ (SMCalloutBackgroundView *)platformBackgroundView;
-
 @end
 
 // Default for iOS 7, this reproduces the "masked" behavior of the iOS 7-style callout view.
