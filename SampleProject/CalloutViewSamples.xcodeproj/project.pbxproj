@@ -11,9 +11,17 @@
 		011CA09015D3144E007DBC54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 011CA08F15D3144E007DBC54 /* Foundation.framework */; };
 		011CA09215D3144E007DBC54 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 011CA09115D3144E007DBC54 /* CoreGraphics.framework */; };
 		0145C74115D3182F007244F3 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0145C74015D3182F007244F3 /* MapKit.framework */; };
-		0145C74615D32505007244F3 /* mars.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 0145C74515D32505007244F3 /* mars.jpg */; };
+		0148A58218AC303100463FE9 /* SMClassicCalloutView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0148A58118AC303100463FE9 /* SMClassicCalloutView.m */; };
+		0148A58518AD37F400463FE9 /* ScrollViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0148A58418AD37F400463FE9 /* ScrollViewController.m */; };
+		0148A58718AD390D00463FE9 /* mars@2x.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 0148A58618AD390D00463FE9 /* mars@2x.jpg */; };
+		0148A58B18AD44F300463FE9 /* Driving@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0148A58A18AD44F300463FE9 /* Driving@2x.png */; };
+		0148A58D18AD5F5600463FE9 /* UITableNext@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0148A58C18AD5F5600463FE9 /* UITableNext@2x.png */; };
+		0148A59018AD615800463FE9 /* first@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0148A58E18AD615800463FE9 /* first@2x.png */; };
+		0148A59118AD615800463FE9 /* second@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0148A58F18AD615800463FE9 /* second@2x.png */; };
+		0148A59818AD7AA000463FE9 /* SMCalloutView.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 0148A59718AD7AA000463FE9 /* SMCalloutView.podspec */; };
 		017FD73F15D317B1006825B3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 017FD73D15D317A5006825B3 /* AppDelegate.m */; };
 		017FD74015D317B1006825B3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 017FD73C15D3162C006825B3 /* main.m */; };
+		01A1575918AAFFA900A93F0E /* MapKitComparisonController.m in Sources */ = {isa = PBXBuildFile; fileRef = 01A1575818AAFFA900A93F0E /* MapKitComparisonController.m */; };
 		01A1D514161129080021F8DD /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 01A1D513161129080021F8DD /* Default-568h@2x.png */; };
 		01A6EE6515D49BD500E895D6 /* SMCalloutView.m in Sources */ = {isa = PBXBuildFile; fileRef = 01A6EE6415D49BD500E895D6 /* SMCalloutView.m */; };
 		01A6EE7915D572C300E895D6 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01A6EE7815D572C300E895D6 /* QuartzCore.framework */; };
@@ -25,12 +33,23 @@
 		011CA08F15D3144E007DBC54 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		011CA09115D3144E007DBC54 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		0145C74015D3182F007244F3 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
-		0145C74515D32505007244F3 /* mars.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = mars.jpg; sourceTree = SOURCE_ROOT; };
+		0148A58018AC303100463FE9 /* SMClassicCalloutView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMClassicCalloutView.h; path = ../SMClassicCalloutView.h; sourceTree = "<group>"; };
+		0148A58118AC303100463FE9 /* SMClassicCalloutView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMClassicCalloutView.m; path = ../SMClassicCalloutView.m; sourceTree = "<group>"; };
+		0148A58318AD37F400463FE9 /* ScrollViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScrollViewController.h; sourceTree = SOURCE_ROOT; };
+		0148A58418AD37F400463FE9 /* ScrollViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScrollViewController.m; sourceTree = SOURCE_ROOT; };
+		0148A58618AD390D00463FE9 /* mars@2x.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "mars@2x.jpg"; sourceTree = SOURCE_ROOT; };
+		0148A58A18AD44F300463FE9 /* Driving@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Driving@2x.png"; sourceTree = SOURCE_ROOT; };
+		0148A58C18AD5F5600463FE9 /* UITableNext@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "UITableNext@2x.png"; sourceTree = SOURCE_ROOT; };
+		0148A58E18AD615800463FE9 /* first@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "first@2x.png"; sourceTree = SOURCE_ROOT; };
+		0148A58F18AD615800463FE9 /* second@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "second@2x.png"; sourceTree = SOURCE_ROOT; };
+		0148A59718AD7AA000463FE9 /* SMCalloutView.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = SMCalloutView.podspec; path = ../SMCalloutView.podspec; sourceTree = "<group>"; };
 		017FD73A15D3162C006825B3 /* CalloutViewSamples-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "CalloutViewSamples-Info.plist"; sourceTree = SOURCE_ROOT; };
 		017FD73B15D3162C006825B3 /* CalloutViewSamples-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CalloutViewSamples-Prefix.pch"; sourceTree = SOURCE_ROOT; };
 		017FD73C15D3162C006825B3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = SOURCE_ROOT; };
 		017FD73D15D317A5006825B3 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = SOURCE_ROOT; };
 		017FD73E15D317A5006825B3 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = SOURCE_ROOT; };
+		01A1575718AAFFA900A93F0E /* MapKitComparisonController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapKitComparisonController.h; sourceTree = SOURCE_ROOT; };
+		01A1575818AAFFA900A93F0E /* MapKitComparisonController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MapKitComparisonController.m; sourceTree = SOURCE_ROOT; };
 		01A1D513161129080021F8DD /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = SOURCE_ROOT; };
 		01A6EE6315D49BD500E895D6 /* SMCalloutView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMCalloutView.h; path = ../SMCalloutView.h; sourceTree = "<group>"; };
 		01A6EE6415D49BD500E895D6 /* SMCalloutView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMCalloutView.m; path = ../SMCalloutView.m; sourceTree = "<group>"; };
@@ -88,6 +107,10 @@
 			children = (
 				017FD73E15D317A5006825B3 /* AppDelegate.h */,
 				017FD73D15D317A5006825B3 /* AppDelegate.m */,
+				0148A58318AD37F400463FE9 /* ScrollViewController.h */,
+				0148A58418AD37F400463FE9 /* ScrollViewController.m */,
+				01A1575718AAFFA900A93F0E /* MapKitComparisonController.h */,
+				01A1575818AAFFA900A93F0E /* MapKitComparisonController.m */,
 				017FD73915D31618006825B3 /* Supporting Files */,
 			);
 			name = Samples;
@@ -99,6 +122,9 @@
 			children = (
 				01A6EE6315D49BD500E895D6 /* SMCalloutView.h */,
 				01A6EE6415D49BD500E895D6 /* SMCalloutView.m */,
+				0148A58018AC303100463FE9 /* SMClassicCalloutView.h */,
+				0148A58118AC303100463FE9 /* SMClassicCalloutView.m */,
+				0148A59718AD7AA000463FE9 /* SMCalloutView.podspec */,
 			);
 			name = "Callout View";
 			sourceTree = "<group>";
@@ -109,7 +135,11 @@
 				017FD73A15D3162C006825B3 /* CalloutViewSamples-Info.plist */,
 				017FD73B15D3162C006825B3 /* CalloutViewSamples-Prefix.pch */,
 				017FD73C15D3162C006825B3 /* main.m */,
-				0145C74515D32505007244F3 /* mars.jpg */,
+				0148A58618AD390D00463FE9 /* mars@2x.jpg */,
+				0148A58A18AD44F300463FE9 /* Driving@2x.png */,
+				0148A58C18AD5F5600463FE9 /* UITableNext@2x.png */,
+				0148A58E18AD615800463FE9 /* first@2x.png */,
+				0148A58F18AD615800463FE9 /* second@2x.png */,
 				01A1D513161129080021F8DD /* Default-568h@2x.png */,
 			);
 			name = "Supporting Files";
@@ -165,7 +195,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0145C74615D32505007244F3 /* mars.jpg in Resources */,
+				0148A58D18AD5F5600463FE9 /* UITableNext@2x.png in Resources */,
+				0148A58718AD390D00463FE9 /* mars@2x.jpg in Resources */,
+				0148A58B18AD44F300463FE9 /* Driving@2x.png in Resources */,
+				0148A59018AD615800463FE9 /* first@2x.png in Resources */,
+				0148A59818AD7AA000463FE9 /* SMCalloutView.podspec in Resources */,
+				0148A59118AD615800463FE9 /* second@2x.png in Resources */,
 				01A1D514161129080021F8DD /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -177,6 +212,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0148A58518AD37F400463FE9 /* ScrollViewController.m in Sources */,
+				0148A58218AC303100463FE9 /* SMClassicCalloutView.m in Sources */,
+				01A1575918AAFFA900A93F0E /* MapKitComparisonController.m in Sources */,
 				01A6EE6515D49BD500E895D6 /* SMCalloutView.m in Sources */,
 				017FD73F15D317B1006825B3 /* AppDelegate.m in Sources */,
 				017FD74015D317B1006825B3 /* main.m in Sources */,
