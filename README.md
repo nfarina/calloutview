@@ -96,7 +96,7 @@ More Info
 
 You can read more info if you wish in the [blog post][].
 
-  [blog post]: http://nfarina.com/post/29883229869/callout-view
+  [blog post]: http://nfarina.com/post/78014139253/smcalloutview-for-ios-7
 
 
 ARC Support
