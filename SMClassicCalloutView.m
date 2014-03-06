@@ -209,6 +209,8 @@
     
     // figure out the constrained view's rect in our popup view's coordinate system
     CGRect constrainedRect = [constrainedLayer convertRect:constrainedLayer.bounds toLayer:layer];
+    
+    // apply our edge constraints
     constrainedRect = UIEdgeInsetsInsetRect(constrainedRect, self.constrainedInsets);
     
     // form our subviews based on our content set so far
