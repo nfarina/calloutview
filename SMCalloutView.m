@@ -246,10 +246,13 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 // this private method handles both CALayer and UIView parents depending on what's passed.
 - (void)presentCalloutFromRect:(CGRect)rect inLayer:(CALayer *)layer ofView:(UIView *)view constrainedToLayer:(CALayer *)constrainedLayer animated:(BOOL)animated {
-    
+
     // Sanity check: dismiss this callout immediately if it's displayed somewhere
     if (self.layer.superlayer) [self dismissCalloutAnimated:NO];
     
+    // cancel any presenting animation that may be in progress
+    [self.layer removeAnimationForKey:@"present"];
+
     // figure out the constrained view's rect in our popup view's coordinate system
     CGRect constrainedRect = [constrainedLayer convertRect:constrainedLayer.bounds toLayer:layer];
 
@@ -398,12 +401,12 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 - (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)finished {
     BOOL presenting = [[anim valueForKey:@"presenting"] boolValue];
-    
-    if (presenting) {
+
+    if (presenting && finished) {
         if ([_delegate respondsToSelector:@selector(calloutViewDidAppear:)])
             [_delegate calloutViewDidAppear:(id)self];
     }
-    else if (!presenting) {
+    else if (!presenting && finished) {
         
         [self removeFromParent];
         [self.layer removeAnimationForKey:@"dismiss"];
@@ -414,7 +417,10 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 }
 
 - (void)dismissCalloutAnimated:(BOOL)animated {
+    
+    // cancel all animations that may be in progress
     [self.layer removeAnimationForKey:@"present"];
+    [self.layer removeAnimationForKey:@"dismiss"];
     
     self.popupCancelled = YES;
     
@@ -423,7 +429,9 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         animation.delegate = self;
         [self.layer addAnimation:animation forKey:@"dismiss"];
     }
-    else [self removeFromParent];
+    else {
+        [self removeFromParent];
+    }
 }
 
 - (void)removeFromParent {
