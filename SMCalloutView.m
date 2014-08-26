@@ -15,14 +15,14 @@
 // Callout View.
 //
 
-#define CALLOUT_DEFAULT_HEIGHT 57 // fixed height of system callout; ours can be any height when contentView is set
 #define CALLOUT_DEFAULT_CONTAINER_HEIGHT 44 // height of just the main portion without arrow
+#define CALLOUT_SUB_DEFAULT_CONTAINER_HEIGHT 52 // height of just the main portion without arrow (when subtitle is present)
 #define CALLOUT_MIN_WIDTH 61 // minimum width of system callout
-#define TITLE_HMARGIN 13 // the title/subtitle view's normal horizontal margin from the edges of our callout view or from the accessories
+#define TITLE_HMARGIN 12 // the title/subtitle view's normal horizontal margin from the edges of our callout view or from the accessories
 #define TITLE_TOP 11 // the top of the title view when no subtitle is present
-#define TITLE_SUB_TOP 3 // the top of the title view when a subtitle IS present
+#define TITLE_SUB_TOP 4 // the top of the title view when a subtitle IS present
 #define TITLE_HEIGHT 21 // title height, fixed
-#define SUBTITLE_TOP 24 // the top of the subtitle, when present
+#define SUBTITLE_TOP 28 // the top of the subtitle, when present
 #define SUBTITLE_HEIGHT 15 // subtitle height, fixed
 #define BETWEEN_ACCESSORIES_MARGIN 7 // margin between accessories when no title/subtitle is present
 #define CONTENT_VIEW_MARGIN 13 // margin around content view when present
@@ -180,6 +180,8 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 - (CGFloat)calloutContainerHeight {
     if (self.contentView)
         return self.contentView.$height + CONTENT_VIEW_MARGIN*2;
+    else if (self.subtitleView || self.subtitle.length > 0)
+        return CALLOUT_SUB_DEFAULT_CONTAINER_HEIGHT;
     else
         return CALLOUT_DEFAULT_CONTAINER_HEIGHT;
 }
