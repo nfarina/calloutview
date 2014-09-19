@@ -732,8 +732,11 @@ static UIImage *blackArrowImage = nil, *whiteArrowImage = nil, *grayArrowImage =
 }
 
 + (UIImage *)embeddedImageNamed:(NSString *)name {
-    if ([UIScreen mainScreen].scale == 2)
+    CGFloat screenScale = [UIScreen mainScreen].scale;
+    if (screenScale > 1.0) {
         name = [name stringByAppendingString:@"$2x"];
+        screenScale = 2.0;
+    }
     
     SEL selector = NSSelectorFromString(name);
     
@@ -749,7 +752,7 @@ static UIImage *blackArrowImage = nil, *whiteArrowImage = nil, *grayArrowImage =
     #pragma clang diagnostic pop
     
     UIImage *rawImage = [UIImage imageWithData:[self dataWithBase64EncodedString:base64String]];
-    return [UIImage imageWithCGImage:rawImage.CGImage scale:[UIScreen mainScreen].scale orientation:UIImageOrientationUp];
+    return [UIImage imageWithCGImage:rawImage.CGImage scale:screenScale orientation:UIImageOrientationUp];
 }
 
 + (NSString *)CalloutArrow { return @"iVBORw0KGgoAAAANSUhEUgAAACcAAAANCAYAAAAqlHdlAAAAHGlET1QAAAACAAAAAAAAAAcAAAAoAAAABwAAAAYAAADJEgYpIwAAAJVJREFUOBFiYIAAdn5+fkFOTkE5Dg5eW05O3lJOTr6zQPyfDhhoD28pxF5BOZA7gE5ih7oLN8XJyR8MdNwrGjkQaC5/MG7biZDh4OBXBDruLpUdeBdkLhHWE1bCzs6nAnTcUyo58DnIPMK2kqAC6DALIP5JoQNB+i1IsJZ4pcBEm0iJ40D6ibeNDJVAx00k04ETSbUOAAAA//+SwicfAAAAe0lEQVRjYCAdMHNy8u7l5OT7Tzzm3Qu0hpl0q8jQwcPDIwp02B0iHXeHl5dXhAxryNfCzc2tC3TcJwIO/ARSR74tFOjk4uL1BzruHw4H/gPJU2A85Vq5uPjTgY77g+bAPyBxyk2nggkcHPxOnJz8B4AOfAGiQXwqGMsAACGK1kPPMHNBAAAAAElFTkSuQmCC"; }
