@@ -102,8 +102,11 @@ extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
 @protocol SMCalloutViewDelegate <NSObject>
 @optional
 
-// Implementing this method allows the callout to be "clicked" like a button, with highlight state. default YES.
+// Controls whether the callout "highlights" when pressed. default YES. You must also respond to `-calloutViewClicked` below.
 // Not honored by SMClassicCalloutView.
+- (BOOL)calloutViewShouldHighlight:(SMCalloutView *)calloutView;
+
+// Called when the callout view is clicked. Not honored by SMClassicCalloutView.
 - (void)calloutViewClicked:(SMCalloutView *)calloutView;
 
 // Called when the callout view detects that it will be outside the constrained view when it appears,

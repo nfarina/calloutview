@@ -63,15 +63,23 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         self.backgroundColor = [UIColor clearColor];
         self.containerView = [UIButton new];
 
-        [self.containerView addTarget:self action:@selector(shouldHighlight) forControlEvents:UIControlEventTouchDown | UIControlEventTouchDragInside];
-        [self.containerView addTarget:self action:@selector(shouldNotHighlight) forControlEvents:UIControlEventTouchDragOutside | UIControlEventTouchCancel | UIControlEventTouchUpOutside | UIControlEventTouchUpInside];
+        [self.containerView addTarget:self action:@selector(highlightIfNecessary) forControlEvents:UIControlEventTouchDown | UIControlEventTouchDragInside];
+        [self.containerView addTarget:self action:@selector(unhighlightIfNecessary) forControlEvents:UIControlEventTouchDragOutside | UIControlEventTouchCancel | UIControlEventTouchUpOutside | UIControlEventTouchUpInside];
         [self.containerView addTarget:self action:@selector(calloutClicked) forControlEvents:UIControlEventTouchUpInside];
     }
     return self;
 }
 
-- (void)shouldHighlight { if ([self.delegate respondsToSelector:@selector(calloutViewClicked:)]) self.backgroundView.highlighted = YES; }
-- (void)shouldNotHighlight { if ([self.delegate respondsToSelector:@selector(calloutViewClicked:)]) self.backgroundView.highlighted = NO; }
+- (BOOL)supportsHighlighting {
+    if (![self.delegate respondsToSelector:@selector(calloutViewClicked:)])
+        return NO;
+    if ([self.delegate respondsToSelector:@selector(calloutViewShouldHighlight:)])
+        return [self.delegate calloutViewShouldHighlight:self];
+    return YES;
+}
+
+- (void)highlightIfNecessary { if (self.supportsHighlighting) self.backgroundView.highlighted = YES; }
+- (void)unhighlightIfNecessary { if (self.supportsHighlighting) self.backgroundView.highlighted = NO; }
 
 - (void)calloutClicked {
     if ([self.delegate respondsToSelector:@selector(calloutViewClicked:)])
