@@ -143,16 +143,16 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     if (self.rightAccessoryView) [self.containerView addSubview:self.rightAccessoryView];
 }
 
-// margin around the left accessory: left,top,bottom. Accessories are centered vertically when shorter
+// top margin around the left accessory. Accessories are centered vertically when shorter
 // than the callout, otherwise they grow from the upper corner.
-- (CGFloat)leftAccessoryMargin {
+- (CGFloat)leftAccessoryVerticalMargin {
     if (self.leftAccessoryView.$height < self.calloutContainerHeight)
         return roundf((self.calloutContainerHeight - self.leftAccessoryView.$height) / 2);
     else
         return 0;
 }
 
-- (CGFloat)rightAccessoryMargin {
+- (CGFloat)rightAccessoryVerticalMargin {
     if (self.rightAccessoryView.$height < self.calloutContainerHeight)
         return roundf((self.calloutContainerHeight - self.rightAccessoryView.$height) / 2);
     else
@@ -161,14 +161,14 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 - (CGFloat)innerContentMarginLeft {
     if (self.leftAccessoryView)
-        return self.leftAccessoryMargin + self.leftAccessoryView.$width + TITLE_HMARGIN;
+        return self.leftAccessoryView.$width + TITLE_HMARGIN * 2;
     else
         return TITLE_HMARGIN;
 }
 
 - (CGFloat)innerContentMarginRight {
     if (self.rightAccessoryView)
-        return self.rightAccessoryMargin + self.rightAccessoryView.$width + TITLE_HMARGIN;
+        return self.rightAccessoryView.$width + TITLE_HMARGIN * 2;
     else
         return TITLE_HMARGIN;
 }
@@ -179,7 +179,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 - (CGFloat)calloutContainerHeight {
     if (self.contentView)
-        return self.contentView.$height + CONTENT_VIEW_MARGIN*2;
+        return self.contentView.$height + CONTENT_VIEW_MARGIN * 2;
     else if (self.subtitleView || self.subtitle.length > 0)
         return CALLOUT_SUB_DEFAULT_CONTAINER_HEIGHT;
     else
@@ -217,7 +217,7 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     else {
         // ok we have no title or subtitle to speak of. In this case, the system callout would actually not display
         // at all! But we can handle it.
-        preferredWidth = self.leftAccessoryView.$width + self.rightAccessoryView.$width + self.leftAccessoryMargin + self.rightAccessoryMargin;
+        preferredWidth = self.leftAccessoryView.$width + self.rightAccessoryView.$width + TITLE_HMARGIN * 2;
         
         if (self.leftAccessoryView && self.rightAccessoryView)
             preferredWidth += BETWEEN_ACCESSORIES_MARGIN;
@@ -510,11 +510,11 @@ NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     self.subtitleViewOrDefault.$y = SUBTITLE_TOP + dy;
     self.subtitleViewOrDefault.$width = self.titleViewOrDefault.$width;
     
-    self.leftAccessoryView.$x = self.leftAccessoryMargin;
-    self.leftAccessoryView.$y = self.leftAccessoryMargin + dy;
+    self.leftAccessoryView.$x = TITLE_HMARGIN;
+    self.leftAccessoryView.$y = self.leftAccessoryVerticalMargin + dy;
     
-    self.rightAccessoryView.$x = self.$width-self.rightAccessoryMargin-self.rightAccessoryView.$width;
-    self.rightAccessoryView.$y = self.rightAccessoryMargin + dy;
+    self.rightAccessoryView.$x = self.$width-TITLE_HMARGIN-self.rightAccessoryView.$width;
+    self.rightAccessoryView.$y = self.rightAccessoryVerticalMargin + dy;
     
     if (self.contentView) {
         self.contentView.$x = self.innerContentMarginLeft;
