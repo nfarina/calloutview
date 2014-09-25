@@ -6,7 +6,7 @@
 SMCalloutView
 -------------
 Created by Nick Farina (nfarina@gmail.com)
-Version 2.0
+Version 2.0.3
 
 */
 
