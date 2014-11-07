@@ -11,9 +11,9 @@ Version 2.0.3
 */
 
 // options for which directions the callout is allowed to "point" in.
-typedef NS_ENUM(NSUInteger, SMCalloutArrowDirection) {
-    SMCalloutArrowDirectionUp = 1UL << 0,
-    SMCalloutArrowDirectionDown = 1UL << 1,
+typedef NS_OPTIONS(NSUInteger, SMCalloutArrowDirection) {
+    SMCalloutArrowDirectionUp = 1 << 0,
+    SMCalloutArrowDirectionDown = 1 << 1,
     SMCalloutArrowDirectionAny = SMCalloutArrowDirectionUp | SMCalloutArrowDirectionDown
 };
 
@@ -26,7 +26,7 @@ typedef NS_ENUM(NSInteger, SMCalloutAnimation) {
 
 // when delaying our popup in order to scroll content into view, you can use this amount to match the
 // animation duration of UIScrollView when using -setContentOffset:animated.
-extern NSTimeInterval kSMCalloutViewRepositionDelayForUIScrollView;
+extern NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView;
 
 @protocol SMCalloutViewDelegate;
 @class SMCalloutBackgroundView;
