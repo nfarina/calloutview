@@ -130,4 +130,7 @@ extern NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView;
 // Called after the callout view is removed from the screen, or after the disappearance animation is complete.
 - (void)calloutViewDidDisappear:(SMCalloutView *)calloutView;
 
+// called to return the content margin in the event there is a custom contentView
+- (CGFloat)marginForContentView:(SMCalloutView*)calloutView;
+
 @end

@@ -196,7 +196,14 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 - (CGFloat)calloutContainerHeight {
     if (self.contentView)
-        return self.contentView.$height + CONTENT_VIEW_MARGIN * 2;
+    {
+        CGFloat contentViewMargin = CONTENT_VIEW_MARGIN;
+        if ( [self.delegate respondsToSelector:@selector(marginForContentView:)] )
+        {
+            contentViewMargin = [self.delegate marginForContentView:self];
+        }
+        return self.contentView.$height + contentViewMargin * 2;
+    }
     else if (self.subtitleView || self.subtitle.length > 0)
         return CALLOUT_SUB_DEFAULT_CONTAINER_HEIGHT;
     else
@@ -534,8 +541,15 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     self.rightAccessoryView.$y = self.rightAccessoryVerticalMargin + dy;
     
     if (self.contentView) {
+        
+        CGFloat contentViewMargin = CONTENT_VIEW_MARGIN;
+        if ( [self.delegate respondsToSelector:@selector(marginForContentView:)] )
+        {
+            contentViewMargin = [self.delegate marginForContentView:self];
+        }
+        
         self.contentView.$x = self.innerContentMarginLeft;
-        self.contentView.$y = CONTENT_VIEW_MARGIN + dy;
+        self.contentView.$y = contentViewMargin + dy;
     }
 }
 
