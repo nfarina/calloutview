@@ -91,6 +91,7 @@ extern NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView;
 @property (nonatomic, assign) CGPoint arrowPoint; // indicates where the tip of the arrow should be drawn, as a pixel offset
 @property (nonatomic, assign) BOOL highlighted; // will be set by the callout when the callout is in a highlighted state
 @property (nonatomic, assign) CALayer *contentMask; // returns an optional layer whose contents should mask the callout view's contents (not honored by SMClassicCalloutView)
+@property (nonatomic, assign) CGFloat anchorHeight; //The arrow height, useful for custom background view with custom arrow
 @end
 
 // Default for iOS 7, this reproduces the "masked" behavior of the iOS 7-style callout view.

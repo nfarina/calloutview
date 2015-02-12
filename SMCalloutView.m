@@ -27,7 +27,7 @@
 #define BETWEEN_ACCESSORIES_MARGIN 7 // margin between accessories when no title/subtitle is present
 #define CONTENT_VIEW_MARGIN 12 // margin around content view when present, can be overridden with contentViewMargin
 #define ANCHOR_MARGIN 27 // the smallest possible distance from the edge of our control to the "tip" of the anchor, from either left or right
-#define ANCHOR_HEIGHT 13 // effective height of the anchor
+#define DEFAULT_ANCHOR_HEIGHT 13 // effective height of the anchor, will be overriden by anchorHeight propertiy of the SMCalloutBackgroundView if asigned. 
 #define TOP_ANCHOR_MARGIN 13 // all the above measurements assume a bottom anchor! if we're pointing "up" we'll need to add this top margin to everything.
 #define COMFORTABLE_MARGIN 10 // when we try to reposition content to be visible, we'll consider this margin around your target rect
 
@@ -197,7 +197,13 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 }
 
 - (CGFloat)calloutHeight {
-    return self.calloutContainerHeight + ANCHOR_HEIGHT;
+    if(self.backgroundView.anchorHeight)
+    {
+        return self.calloutContainerHeight + self.backgroundView.anchorHeight;
+    }
+    else {
+        return self.calloutContainerHeight + DEFAULT_ANCHOR_HEIGHT;
+    }
 }
 
 - (CGFloat)calloutContainerHeight {
