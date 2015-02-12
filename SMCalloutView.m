@@ -25,7 +25,7 @@
 #define SUBTITLE_TOP 28 // the top of the subtitle, when present
 #define SUBTITLE_HEIGHT 15 // subtitle height, fixed
 #define BETWEEN_ACCESSORIES_MARGIN 7 // margin between accessories when no title/subtitle is present
-#define CONTENT_VIEW_MARGIN 12 // margin around content view when present
+#define CONTENT_VIEW_MARGIN 12 // margin around content view when present, can be overridden with contentViewMargin
 #define ANCHOR_MARGIN 27 // the smallest possible distance from the edge of our control to the "tip" of the anchor, from either left or right
 #define ANCHOR_HEIGHT 13 // effective height of the anchor
 #define TOP_ANCHOR_MARGIN 13 // all the above measurements assume a bottom anchor! if we're pointing "up" we'll need to add this top margin to everything.
@@ -38,6 +38,7 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 @property (nonatomic, strong) UILabel *titleLabel, *subtitleLabel;
 @property (nonatomic, assign) SMCalloutArrowDirection currentArrowDirection;
 @property (nonatomic, assign) BOOL popupCancelled;
+@property (nonatomic, assign) BOOL useCustomContentViewMargin;
 @end
 
 @implementation SMCalloutView
@@ -62,6 +63,7 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         self.dismissAnimation = SMCalloutAnimationFade;
         self.backgroundColor = [UIColor clearColor];
         self.containerView = [UIButton new];
+        self.useCustomContentViewMargin = false;
 
         [self.containerView addTarget:self action:@selector(highlightIfNecessary) forControlEvents:UIControlEventTouchDown | UIControlEventTouchDragInside];
         [self.containerView addTarget:self action:@selector(unhighlightIfNecessary) forControlEvents:UIControlEventTouchDragOutside | UIControlEventTouchCancel | UIControlEventTouchUpOutside | UIControlEventTouchUpInside];
@@ -179,6 +181,8 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 - (CGFloat)innerContentMarginLeft {
     if (self.leftAccessoryView)
         return self.leftAccessoryHorizontalMargin + self.leftAccessoryView.$width + TITLE_HMARGIN;
+    else if(self.useCustomContentViewMargin)
+        return self.contentViewMargin.left;
     else
         return TITLE_HMARGIN;
 }
@@ -186,6 +190,8 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 - (CGFloat)innerContentMarginRight {
     if (self.rightAccessoryView)
         return self.rightAccessoryHorizontalMargin + self.rightAccessoryView.$width + TITLE_HMARGIN;
+    else if(self.useCustomContentViewMargin)
+        return self.contentViewMargin.right;
     else
         return TITLE_HMARGIN;
 }
@@ -195,12 +201,24 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 }
 
 - (CGFloat)calloutContainerHeight {
-    if (self.contentView)
-        return self.contentView.$height + CONTENT_VIEW_MARGIN * 2;
+    if (self.contentView) {
+        
+        if(self.useCustomContentViewMargin) {
+            return self.contentView.$height + self.contentViewMargin.bottom + self.contentViewMargin.top;
+        }
+        else {
+            return self.contentView.$height + CONTENT_VIEW_MARGIN * 2;
+        }
+    }
     else if (self.subtitleView || self.subtitle.length > 0)
         return CALLOUT_SUB_DEFAULT_CONTAINER_HEIGHT;
     else
         return CALLOUT_DEFAULT_CONTAINER_HEIGHT;
+}
+
+- (void) setContentViewMargin:(UIEdgeInsets)contentViewMargin {
+    self.useCustomContentViewMargin = true;
+    _contentViewMargin = contentViewMargin;
 }
 
 - (CGSize)sizeThatFits:(CGSize)size {
@@ -535,7 +553,12 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     
     if (self.contentView) {
         self.contentView.$x = self.innerContentMarginLeft;
-        self.contentView.$y = CONTENT_VIEW_MARGIN + dy;
+        if(self.useCustomContentViewMargin) {
+            self.contentView.$y = self.contentViewMargin.top + dy;
+        }
+        else {
+            self.contentView.$y = CONTENT_VIEW_MARGIN + dy;
+        }
     }
 }
 
