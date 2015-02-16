@@ -25,7 +25,7 @@
 #define SUBTITLE_TOP 28 // the top of the subtitle, when present
 #define SUBTITLE_HEIGHT 15 // subtitle height, fixed
 #define BETWEEN_ACCESSORIES_MARGIN 7 // margin between accessories when no title/subtitle is present
-#define CONTENT_VIEW_MARGIN 12 // margin around content view when present, can be overridden with contentViewMargin
+#define CONTENT_VIEW_MARGIN 12 // margin around content view when present, can be overridden with contentViewInset
 #define ANCHOR_MARGIN 27 // the smallest possible distance from the edge of our control to the "tip" of the anchor, from either left or right
 #define DEFAULT_ANCHOR_HEIGHT 13 // effective height of the anchor, will be overriden by anchorHeight propertiy of the SMCalloutBackgroundView if asigned. 
 #define TOP_ANCHOR_MARGIN 13 // all the above measurements assume a bottom anchor! if we're pointing "up" we'll need to add this top margin to everything.
@@ -182,7 +182,7 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     if (self.leftAccessoryView)
         return self.leftAccessoryHorizontalMargin + self.leftAccessoryView.$width + TITLE_HMARGIN;
     else if(self.useCustomContentViewMargin)
-        return self.contentViewMargin.left;
+        return self.contentViewInset.left;
     else
         return TITLE_HMARGIN;
 }
@@ -191,7 +191,7 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     if (self.rightAccessoryView)
         return self.rightAccessoryHorizontalMargin + self.rightAccessoryView.$width + TITLE_HMARGIN;
     else if(self.useCustomContentViewMargin)
-        return self.contentViewMargin.right;
+        return self.contentViewInset.right;
     else
         return TITLE_HMARGIN;
 }
@@ -210,7 +210,7 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     if (self.contentView) {
         
         if(self.useCustomContentViewMargin) {
-            return self.contentView.$height + self.contentViewMargin.bottom + self.contentViewMargin.top;
+            return self.contentView.$height + self.contentViewInset.bottom + self.contentViewInset.top;
         }
         else {
             return self.contentView.$height + CONTENT_VIEW_MARGIN * 2;
@@ -222,9 +222,9 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         return CALLOUT_DEFAULT_CONTAINER_HEIGHT;
 }
 
-- (void) setContentViewMargin:(UIEdgeInsets)contentViewMargin {
+- (void) setContentViewInset:(UIEdgeInsets)contentViewInset {
     self.useCustomContentViewMargin = true;
-    _contentViewMargin = contentViewMargin;
+    _contentViewInset = contentViewInset;
 }
 
 - (CGSize)sizeThatFits:(CGSize)size {
@@ -560,7 +560,7 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     if (self.contentView) {
         self.contentView.$x = self.innerContentMarginLeft;
         if(self.useCustomContentViewMargin) {
-            self.contentView.$y = self.contentViewMargin.top + dy;
+            self.contentView.$y = self.contentViewInset.top + dy;
         }
         else {
             self.contentView.$y = CONTENT_VIEW_MARGIN + dy;

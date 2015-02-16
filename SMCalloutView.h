@@ -55,7 +55,7 @@ extern NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView;
 @property (nonatomic, retain) UIView *contentView;
 
 // Custom content view margin
-@property (nonatomic, assign) UIEdgeInsets contentViewMargin;
+@property (nonatomic, assign) UIEdgeInsets contentViewInset;
 
 // calloutOffset is the offset in screen points from the top-middle of the target view, where the anchor of the callout should be shown.
 @property (nonatomic, assign) CGPoint calloutOffset;
