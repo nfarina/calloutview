@@ -193,12 +193,9 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 - (CGFloat)calloutHeight {
     if(self.backgroundView.anchorHeight)
-    {
-        return self.calloutContainerHeight + self.backgroundView.anchorHeight;
-    }
-    else {
+        return self.calloutContainerHeight + self.backgroundView.anchorHeight.floatValue;
+    else
         return self.calloutContainerHeight + DEFAULT_ANCHOR_HEIGHT;
-    }
 }
 
 - (CGFloat)calloutContainerHeight {
