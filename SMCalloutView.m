@@ -25,8 +25,6 @@
 #define SUBTITLE_TOP 28 // the top of the subtitle, when present
 #define SUBTITLE_HEIGHT 15 // subtitle height, fixed
 #define BETWEEN_ACCESSORIES_MARGIN 7 // margin between accessories when no title/subtitle is present
-#define CONTENT_VIEW_MARGIN 12 // margin around content view when present, can be overridden with contentViewInset
-#define ANCHOR_MARGIN 27 // the smallest possible distance from the edge of our control to the "tip" of the anchor, from either left or right
 #define DEFAULT_ANCHOR_HEIGHT 13 // effective height of the anchor, will be overriden by anchorHeight propertiy of the SMCalloutBackgroundView if asigned. 
 #define TOP_ANCHOR_MARGIN 13 // all the above measurements assume a bottom anchor! if we're pointing "up" we'll need to add this top margin to everything.
 #define COMFORTABLE_MARGIN 10 // when we try to reposition content to be visible, we'll consider this margin around your target rect
@@ -329,8 +327,8 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         calloutX = constrainedRect.origin.x+constrainedRect.size.width-self.$width;
     
     // what's the farthest to the left and right that we could point to, given our background image constraints?
-    CGFloat minPointX = calloutX + ANCHOR_MARGIN;
-    CGFloat maxPointX = calloutX + self.$width - ANCHOR_MARGIN;
+    CGFloat minPointX = calloutX + self.backgroundView.anchorMargin;
+    CGFloat maxPointX = calloutX + self.$width - self.backgroundView.anchorMargin;
     
     // we may need to scoot over to the left or right to point at the correct spot
     CGFloat adjustX = 0;
@@ -587,6 +585,8 @@ static UIImage *blackArrowImage = nil, *whiteArrowImage = nil, *grayArrowImage =
             whiteArrowImage = [self image:blackArrowImage withColor:[UIColor whiteColor]];
             grayArrowImage = [self image:blackArrowImage withColor:[UIColor colorWithWhite:0.85 alpha:1]];
         }
+        
+        self.anchorMargin = 27;
         
         self.arrowView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, blackArrowImage.size.width, blackArrowImage.size.height)];
         self.arrowView.alpha = 0.96;

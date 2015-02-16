@@ -92,6 +92,7 @@ extern NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView;
 @property (nonatomic, assign) BOOL highlighted; // will be set by the callout when the callout is in a highlighted state
 @property (nonatomic, assign) CALayer *contentMask; // returns an optional layer whose contents should mask the callout view's contents (not honored by SMClassicCalloutView)
 @property (nonatomic, strong) NSNumber *anchorHeight; //The arrow height, useful for custom background view with custom arrow
+@property (nonatomic, assign) CGFloat anchorMargin; // the smallest possible distance from the edge of our control to the "tip" of the anchor, from either left or right
 @end
 
 // Default for iOS 7, this reproduces the "masked" behavior of the iOS 7-style callout view.
