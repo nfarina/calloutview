@@ -38,7 +38,6 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 @property (nonatomic, strong) UILabel *titleLabel, *subtitleLabel;
 @property (nonatomic, assign) SMCalloutArrowDirection currentArrowDirection;
 @property (nonatomic, assign) BOOL popupCancelled;
-@property (nonatomic, assign) BOOL useCustomContentViewMargin;
 @end
 
 @implementation SMCalloutView
@@ -63,7 +62,7 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         self.dismissAnimation = SMCalloutAnimationFade;
         self.backgroundColor = [UIColor clearColor];
         self.containerView = [UIButton new];
-        self.useCustomContentViewMargin = false;
+        self.contentViewInset = UIEdgeInsetsMake(12, 12, 12, 12);
 
         [self.containerView addTarget:self action:@selector(highlightIfNecessary) forControlEvents:UIControlEventTouchDown | UIControlEventTouchDragInside];
         [self.containerView addTarget:self action:@selector(unhighlightIfNecessary) forControlEvents:UIControlEventTouchDragOutside | UIControlEventTouchCancel | UIControlEventTouchUpOutside | UIControlEventTouchUpInside];
@@ -181,19 +180,15 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 - (CGFloat)innerContentMarginLeft {
     if (self.leftAccessoryView)
         return self.leftAccessoryHorizontalMargin + self.leftAccessoryView.$width + TITLE_HMARGIN;
-    else if(self.useCustomContentViewMargin)
-        return self.contentViewInset.left;
     else
-        return TITLE_HMARGIN;
+        return self.contentViewInset.left;
 }
 
 - (CGFloat)innerContentMarginRight {
     if (self.rightAccessoryView)
         return self.rightAccessoryHorizontalMargin + self.rightAccessoryView.$width + TITLE_HMARGIN;
-    else if(self.useCustomContentViewMargin)
-        return self.contentViewInset.right;
     else
-        return TITLE_HMARGIN;
+        return self.contentViewInset.right;
 }
 
 - (CGFloat)calloutHeight {
@@ -208,23 +203,12 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 - (CGFloat)calloutContainerHeight {
     if (self.contentView) {
-        
-        if(self.useCustomContentViewMargin) {
-            return self.contentView.$height + self.contentViewInset.bottom + self.contentViewInset.top;
-        }
-        else {
-            return self.contentView.$height + CONTENT_VIEW_MARGIN * 2;
-        }
+        return self.contentView.$height + self.contentViewInset.bottom + self.contentViewInset.top;
     }
     else if (self.subtitleView || self.subtitle.length > 0)
         return CALLOUT_SUB_DEFAULT_CONTAINER_HEIGHT;
     else
         return CALLOUT_DEFAULT_CONTAINER_HEIGHT;
-}
-
-- (void) setContentViewInset:(UIEdgeInsets)contentViewInset {
-    self.useCustomContentViewMargin = true;
-    _contentViewInset = contentViewInset;
 }
 
 - (CGSize)sizeThatFits:(CGSize)size {
@@ -559,12 +543,7 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     
     if (self.contentView) {
         self.contentView.$x = self.innerContentMarginLeft;
-        if(self.useCustomContentViewMargin) {
-            self.contentView.$y = self.contentViewInset.top + dy;
-        }
-        else {
-            self.contentView.$y = CONTENT_VIEW_MARGIN + dy;
-        }
+        self.contentView.$y = self.contentViewInset.top + dy;
     }
 }
 
