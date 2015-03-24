@@ -6,10 +6,10 @@
 //
 
 @interface UIView (SMFrameAdditions)
-@property (nonatomic, assign) CGPoint $origin;
-@property (nonatomic, assign) CGSize $size;
-@property (nonatomic, assign) CGFloat $x, $y, $width, $height; // normal rect properties
-@property (nonatomic, assign) CGFloat $left, $top, $right, $bottom; // these will stretch/shrink the rect
+@property (nonatomic, assign) CGPoint frameOrigin;
+@property (nonatomic, assign) CGSize frameSize;
+@property (nonatomic, assign) CGFloat frameX, frameY, frameWidth, frameHeight; // normal rect properties
+@property (nonatomic, assign) CGFloat frameLeft, frameTop, frameRight, frameBottom; // these will stretch/shrink the rect
 @end
 
 //
@@ -62,7 +62,7 @@
         if (!self.titleLabel) {
             // create a default titleView
             self.titleLabel = [UILabel new];
-            self.titleLabel.$height = TITLE_HEIGHT;
+            self.titleLabel.frameHeight = TITLE_HEIGHT;
             self.titleLabel.opaque = NO;
             self.titleLabel.backgroundColor = [UIColor clearColor];
             self.titleLabel.font = [UIFont boldSystemFontOfSize:17];
@@ -82,7 +82,7 @@
         if (!self.subtitleLabel) {
             // create a default subtitleView
             self.subtitleLabel = [UILabel new];
-            self.subtitleLabel.$height = SUBTITLE_HEIGHT;
+            self.subtitleLabel.frameHeight = SUBTITLE_HEIGHT;
             self.subtitleLabel.opaque = NO;
             self.subtitleLabel.backgroundColor = [UIColor clearColor];
             self.subtitleLabel.font = [UIFont systemFontOfSize:12];
@@ -118,21 +118,21 @@
 
 - (CGFloat)innerContentMarginLeft {
     if (self.leftAccessoryView)
-        return ACCESSORY_MARGIN + self.leftAccessoryView.$width + TITLE_ACCESSORY_MARGIN;
+        return ACCESSORY_MARGIN + self.leftAccessoryView.frameWidth + TITLE_ACCESSORY_MARGIN;
     else
         return TITLE_MARGIN;
 }
 
 - (CGFloat)innerContentMarginRight {
     if (self.rightAccessoryView)
-        return ACCESSORY_MARGIN + self.rightAccessoryView.$width + TITLE_ACCESSORY_MARGIN;
+        return ACCESSORY_MARGIN + self.rightAccessoryView.frameWidth + TITLE_ACCESSORY_MARGIN;
     else
         return TITLE_MARGIN;
 }
 
 - (CGFloat)calloutHeight {
     if (self.contentView)
-        return self.contentView.$height + TITLE_TOP*2 + ANCHOR_HEIGHT + BOTTOM_ANCHOR_MARGIN;
+        return self.contentView.frameHeight + TITLE_TOP*2 + ANCHOR_HEIGHT + BOTTOM_ANCHOR_MARGIN;
     else
         return CALLOUT_DEFAULT_HEIGHT;
 }
@@ -162,7 +162,7 @@
     if (self.contentView) {
         
         // if we have a content view, then take our preferred size directly from that
-        preferredWidth = self.contentView.$width + margin;
+        preferredWidth = self.contentView.frameWidth + margin;
     }
     else if (preferredTitleSize.width >= 0.000001 || preferredSubtitleSize.width >= 0.000001) {
         
@@ -172,7 +172,7 @@
     else {
         // ok we have no title or subtitle to speak of. In this case, the system callout would actually not display
         // at all! But we can handle it.
-        preferredWidth = self.leftAccessoryView.$width + self.rightAccessoryView.$width + ACCESSORY_MARGIN*2;
+        preferredWidth = self.leftAccessoryView.frameWidth + self.rightAccessoryView.frameWidth + ACCESSORY_MARGIN*2;
         
         if (self.leftAccessoryView && self.rightAccessoryView)
             preferredWidth += BETWEEN_ACCESSORIES_MARGIN;
@@ -221,7 +221,7 @@
     self.subtitleLabel.text = self.subtitle;
     
     // size the callout to fit the width constraint as best as possible
-    self.$size = [self sizeThatFits:CGSizeMake(constrainedRect.size.width, self.calloutHeight)];
+    self.frameSize = [self sizeThatFits:CGSizeMake(constrainedRect.size.width, self.calloutHeight)];
     
     // how much room do we have in the constraint box, both above and below our target rect?
     CGFloat topSpace = CGRectGetMinY(rect) - CGRectGetMinY(constrainedRect);
@@ -245,11 +245,11 @@
     CGFloat anchorY = self.calloutOffset.y + (bestDirection == SMCalloutArrowDirectionDown ? CGRectGetMinY(rect) : CGRectGetMaxY(rect));
     
     // we prefer to sit in the exact center of our constrained view, so we have visually pleasing equal left/right margins.
-    CGFloat calloutX = roundf(CGRectGetMidX(constrainedRect) - self.$width / 2);
+    CGFloat calloutX = roundf(CGRectGetMidX(constrainedRect) - self.frameWidth / 2);
     
     // what's the farthest to the left and right that we could point to, given our background image constraints?
     CGFloat minPointX = calloutX + ANCHOR_MARGIN;
-    CGFloat maxPointX = calloutX + self.$width - ANCHOR_MARGIN;
+    CGFloat maxPointX = calloutX + self.frameWidth - ANCHOR_MARGIN;
     
     // we may need to scoot over to the left or right to point at the correct spot
     CGFloat adjustX = 0;
@@ -269,7 +269,7 @@
     
     self.currentArrowDirection = bestDirection;
     
-    self.$origin = calloutOrigin;
+    self.frameOrigin = calloutOrigin;
     
     // now set the *actual* anchor point for our layer so that our "popup" animation starts from this point.
     CGPoint anchorPoint = [layer convertPoint:CGPointMake(anchorX, anchorY) toLayer:self.layer];
@@ -278,12 +278,12 @@
     self.backgroundView.arrowPoint = anchorPoint;
     
     // adjust it to unit coordinates for the actual layer.anchorPoint property
-    anchorPoint.x /= self.$width;
-    anchorPoint.y /= self.$height;
+    anchorPoint.x /= self.frameWidth;
+    anchorPoint.y /= self.frameHeight;
     self.layer.anchorPoint = anchorPoint;
     
     // setting the anchor point moves the view a bit, so we need to reset
-    self.$origin = calloutOrigin;
+    self.frameOrigin = calloutOrigin;
     
     // make sure our frame is not on half-pixels or else we may be blurry!
     self.frame = CGRectIntegral(self.frame);
@@ -432,11 +432,11 @@
 }
 
 - (CGFloat)centeredPositionOfView:(UIView *)view ifSmallerThan:(CGFloat)height {
-    return view.$height < height ? floorf(height/2 - view.$height/2) : 0;
+    return view.frameHeight < height ? floorf(height/2 - view.frameHeight/2) : 0;
 }
 
 - (CGFloat)centeredPositionOfView:(UIView *)view relativeToView:(UIView *)parentView {
-    return roundf((parentView.$height - view.$height) / 2);
+    return roundf((parentView.frameHeight - view.frameHeight) / 2);
 }
 
 - (void)layoutSubviews {
@@ -446,30 +446,30 @@
     // if we're pointing up, we'll need to push almost everything down a bit
     CGFloat dy = self.currentArrowDirection == SMCalloutArrowDirectionUp ? TOP_ANCHOR_MARGIN : 0;
     
-    self.titleViewOrDefault.$x = self.innerContentMarginLeft;
-    self.titleViewOrDefault.$y = (self.subtitleView || self.subtitle.length ? TITLE_SUB_TOP : TITLE_TOP) + dy;
-    self.titleViewOrDefault.$width = self.$width - self.innerContentMarginLeft - self.innerContentMarginRight;
+    self.titleViewOrDefault.frameX = self.innerContentMarginLeft;
+    self.titleViewOrDefault.frameY = (self.subtitleView || self.subtitle.length ? TITLE_SUB_TOP : TITLE_TOP) + dy;
+    self.titleViewOrDefault.frameWidth = self.frameWidth - self.innerContentMarginLeft - self.innerContentMarginRight;
     
-    self.subtitleViewOrDefault.$x = self.titleViewOrDefault.$x;
-    self.subtitleViewOrDefault.$y = SUBTITLE_TOP + dy;
-    self.subtitleViewOrDefault.$width = self.titleViewOrDefault.$width;
+    self.subtitleViewOrDefault.frameX = self.titleViewOrDefault.frameX;
+    self.subtitleViewOrDefault.frameY = SUBTITLE_TOP + dy;
+    self.subtitleViewOrDefault.frameWidth = self.titleViewOrDefault.frameWidth;
     
-    self.leftAccessoryView.$x = ACCESSORY_MARGIN;
+    self.leftAccessoryView.frameX = ACCESSORY_MARGIN;
     if (self.contentView)
-        self.leftAccessoryView.$y = TITLE_TOP + [self centeredPositionOfView:self.leftAccessoryView relativeToView:self.contentView] + dy;
+        self.leftAccessoryView.frameY = TITLE_TOP + [self centeredPositionOfView:self.leftAccessoryView relativeToView:self.contentView] + dy;
     else
-        self.leftAccessoryView.$y = ACCESSORY_TOP + [self centeredPositionOfView:self.leftAccessoryView ifSmallerThan:ACCESSORY_HEIGHT] + dy;
+        self.leftAccessoryView.frameY = ACCESSORY_TOP + [self centeredPositionOfView:self.leftAccessoryView ifSmallerThan:ACCESSORY_HEIGHT] + dy;
     
-    self.rightAccessoryView.$x = self.$width-ACCESSORY_MARGIN-self.rightAccessoryView.$width;
+    self.rightAccessoryView.frameX = self.frameWidth-ACCESSORY_MARGIN-self.rightAccessoryView.frameWidth;
     if (self.contentView)
-        self.rightAccessoryView.$y = TITLE_TOP + [self centeredPositionOfView:self.rightAccessoryView relativeToView:self.contentView] + dy;
+        self.rightAccessoryView.frameY = TITLE_TOP + [self centeredPositionOfView:self.rightAccessoryView relativeToView:self.contentView] + dy;
     else
-        self.rightAccessoryView.$y = ACCESSORY_TOP + [self centeredPositionOfView:self.rightAccessoryView ifSmallerThan:ACCESSORY_HEIGHT] + dy;
+        self.rightAccessoryView.frameY = ACCESSORY_TOP + [self centeredPositionOfView:self.rightAccessoryView ifSmallerThan:ACCESSORY_HEIGHT] + dy;
     
     
     if (self.contentView) {
-        self.contentView.$x = self.innerContentMarginLeft;
-        self.contentView.$y = TITLE_TOP + dy;
+        self.contentView.frameX = self.innerContentMarginLeft;
+        self.contentView.frameY = TITLE_TOP + dy;
     }
 }
 
@@ -533,10 +533,10 @@
     // will occur. However, if you wish to define your own custom background using prerendered images, you could
     // define stretchable images using -stretchableImageWithLeftCapWidth:TopCapHeight and they'd get stretched
     // properly here if necessary.
-    leftCap.$height = rightCap.$height = leftBackground.$height = rightBackground.$height = self.$height - 13;
-    topAnchor.$height = bottomAnchor.$height = self.$height;
+    leftCap.frameHeight = rightCap.frameHeight = leftBackground.frameHeight = rightBackground.frameHeight = self.frameHeight - 13;
+    topAnchor.frameHeight = bottomAnchor.frameHeight = self.frameHeight;
     
-    BOOL pointingUp = self.arrowPoint.y < self.$height/2;
+    BOOL pointingUp = self.arrowPoint.y < self.frameHeight/2;
     
     // show the correct anchor based on our direction
     topAnchor.hidden = !pointingUp;
@@ -544,25 +544,25 @@
     
     // if we're pointing up, we'll need to push almost everything down a bit
     CGFloat dy = pointingUp ? TOP_ANCHOR_MARGIN : 0;
-    leftCap.$y = rightCap.$y = leftBackground.$y = rightBackground.$y = dy;
+    leftCap.frameY = rightCap.frameY = leftBackground.frameY = rightBackground.frameY = dy;
     
-    leftCap.$x = 0;
-    rightCap.$x = self.$width - rightCap.$width;
+    leftCap.frameX = 0;
+    rightCap.frameX = self.frameWidth - rightCap.frameWidth;
     
     // move both anchors, only one will have been made visible in our -popup method
-    CGFloat anchorX = roundf(self.arrowPoint.x - bottomAnchor.$width / 2);
-    topAnchor.$origin = CGPointMake(anchorX, 0);
+    CGFloat anchorX = roundf(self.arrowPoint.x - bottomAnchor.frameWidth / 2);
+    topAnchor.frameOrigin = CGPointMake(anchorX, 0);
     
     // make sure the anchor graphic isn't overlapping with an endcap
-    if (topAnchor.$left < leftCap.$right) topAnchor.$x = leftCap.$right;
-    if (topAnchor.$right > rightCap.$left) topAnchor.$x = rightCap.$left - topAnchor.$width; // don't stretch it
+    if (topAnchor.frameLeft < leftCap.frameRight) topAnchor.frameX = leftCap.frameRight;
+    if (topAnchor.frameRight > rightCap.frameLeft) topAnchor.frameX = rightCap.frameLeft - topAnchor.frameWidth; // don't stretch it
     
-    bottomAnchor.$origin = topAnchor.$origin; // match
+    bottomAnchor.frameOrigin = topAnchor.frameOrigin; // match
     
-    leftBackground.$left = leftCap.$right;
-    leftBackground.$right = topAnchor.$left;
-    rightBackground.$left = topAnchor.$right;
-    rightBackground.$right = rightCap.$left;
+    leftBackground.frameLeft = leftCap.frameRight;
+    leftBackground.frameRight = topAnchor.frameLeft;
+    rightBackground.frameLeft = topAnchor.frameRight;
+    rightBackground.frameRight = rightCap.frameLeft;
 }
 
 @end
@@ -608,7 +608,7 @@
 
 - (void)drawRect:(CGRect)rect {
     
-    BOOL pointingUp = self.arrowPoint.y < self.$height/2;
+    BOOL pointingUp = self.arrowPoint.y < self.frameHeight/2;
     CGSize anchorSize = CGSizeMake(27, ANCHOR_HEIGHT);
     CGFloat anchorX = roundf(self.arrowPoint.x - anchorSize.width / 2);
     CGRect anchorRect = CGRectMake(anchorX, 0, anchorSize.width, anchorSize.height);
@@ -617,8 +617,8 @@
     if (anchorRect.origin.x < ANCHOR_MARGIN_MIN)
         anchorRect.origin.x = ANCHOR_MARGIN_MIN;
     
-    else if (anchorRect.origin.x + anchorRect.size.width > self.$width - ANCHOR_MARGIN_MIN)
-        anchorRect.origin.x = self.$width - anchorRect.size.width - ANCHOR_MARGIN_MIN;
+    else if (anchorRect.origin.x + anchorRect.size.width > self.frameWidth - ANCHOR_MARGIN_MIN)
+        anchorRect.origin.x = self.frameWidth - anchorRect.size.width - ANCHOR_MARGIN_MIN;
     
     // determine size
     CGFloat stroke = 1.0;
