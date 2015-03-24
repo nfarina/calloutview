@@ -25,9 +25,6 @@
 #define SUBTITLE_TOP 28 // the top of the subtitle, when present
 #define SUBTITLE_HEIGHT 15 // subtitle height, fixed
 #define BETWEEN_ACCESSORIES_MARGIN 7 // margin between accessories when no title/subtitle is present
-#define CONTENT_VIEW_MARGIN 12 // margin around content view when present
-#define ANCHOR_MARGIN 27 // the smallest possible distance from the edge of our control to the "tip" of the anchor, from either left or right
-#define ANCHOR_HEIGHT 13 // effective height of the anchor
 #define TOP_ANCHOR_MARGIN 13 // all the above measurements assume a bottom anchor! if we're pointing "up" we'll need to add this top margin to everything.
 #define COMFORTABLE_MARGIN 10 // when we try to reposition content to be visible, we'll consider this margin around your target rect
 
@@ -62,6 +59,7 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         self.dismissAnimation = SMCalloutAnimationFade;
         self.backgroundColor = [UIColor clearColor];
         self.containerView = [UIButton new];
+        self.contentViewInset = UIEdgeInsetsMake(12, 12, 12, 12);
 
         [self.containerView addTarget:self action:@selector(highlightIfNecessary) forControlEvents:UIControlEventTouchDown | UIControlEventTouchDragInside];
         [self.containerView addTarget:self action:@selector(unhighlightIfNecessary) forControlEvents:UIControlEventTouchDragOutside | UIControlEventTouchCancel | UIControlEventTouchUpOutside | UIControlEventTouchUpInside];
@@ -180,23 +178,23 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     if (self.leftAccessoryView)
         return self.leftAccessoryHorizontalMargin + self.leftAccessoryView.frameWidth + TITLE_HMARGIN;
     else
-        return TITLE_HMARGIN;
+        return self.contentViewInset.left;
 }
 
 - (CGFloat)innerContentMarginRight {
     if (self.rightAccessoryView)
         return self.rightAccessoryHorizontalMargin + self.rightAccessoryView.frameWidth + TITLE_HMARGIN;
     else
-        return TITLE_HMARGIN;
+        return self.contentViewInset.right;
 }
 
 - (CGFloat)calloutHeight {
-    return self.calloutContainerHeight + ANCHOR_HEIGHT;
+    return self.calloutContainerHeight + self.backgroundView.anchorHeight;
 }
 
 - (CGFloat)calloutContainerHeight {
     if (self.contentView)
-        return self.contentView.frameHeight + CONTENT_VIEW_MARGIN * 2;
+        return self.contentView.frameHeight + self.contentViewInset.bottom + self.contentViewInset.top;
     else if (self.subtitleView || self.subtitle.length > 0)
         return CALLOUT_SUB_DEFAULT_CONTAINER_HEIGHT;
     else
@@ -324,8 +322,8 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         calloutX = constrainedRect.origin.x+constrainedRect.size.width-self.frameWidth;
     
     // what's the farthest to the left and right that we could point to, given our background image constraints?
-    CGFloat minPointX = calloutX + ANCHOR_MARGIN;
-    CGFloat maxPointX = calloutX + self.frameWidth - ANCHOR_MARGIN;
+    CGFloat minPointX = calloutX + self.backgroundView.anchorMargin;
+    CGFloat maxPointX = calloutX + self.frameWidth - self.backgroundView.anchorMargin;
     
     // we may need to scoot over to the left or right to point at the correct spot
     CGFloat adjustX = 0;
@@ -530,12 +528,12 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     self.leftAccessoryView.frameX = self.leftAccessoryHorizontalMargin;
     self.leftAccessoryView.frameY = self.leftAccessoryVerticalMargin + dy;
     
-    self.rightAccessoryView.frameX = self.frameWidth-self.rightAccessoryHorizontalMargin-self.rightAccessoryView.frameWidth;
+    self.rightAccessoryView.frameX = self.frameWidth - self.rightAccessoryHorizontalMargin - self.rightAccessoryView.frameWidth;
     self.rightAccessoryView.frameY = self.rightAccessoryVerticalMargin + dy;
     
     if (self.contentView) {
         self.contentView.frameX = self.innerContentMarginLeft;
-        self.contentView.frameY = CONTENT_VIEW_MARGIN + dy;
+        self.contentView.frameY = self.contentViewInset.top + dy;
     }
 }
 
@@ -582,6 +580,9 @@ static UIImage *blackArrowImage = nil, *whiteArrowImage = nil, *grayArrowImage =
             whiteArrowImage = [self image:blackArrowImage withColor:[UIColor whiteColor]];
             grayArrowImage = [self image:blackArrowImage withColor:[UIColor colorWithWhite:0.85 alpha:1]];
         }
+        
+        self.anchorHeight = 13;
+        self.anchorMargin = 27;
         
         self.arrowView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, blackArrowImage.size.width, blackArrowImage.size.height)];
         self.arrowView.alpha = 0.96;
