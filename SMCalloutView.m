@@ -122,7 +122,7 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 
 - (SMCalloutBackgroundView *)backgroundView {
     // create our default background on first access only if it's nil, since you might have set your own background anyway.
-    return _backgroundView ?: (_backgroundView = [self defaultBackgroundView]);
+    return _backgroundView ? _backgroundView : (_backgroundView = [self defaultBackgroundView]);
 }
 
 - (SMCalloutBackgroundView *)defaultBackgroundView {
@@ -160,7 +160,7 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 }
 
 - (CGFloat)leftAccessoryHorizontalMargin {
-    return MIN(self.leftAccessoryVerticalMargin, TITLE_HMARGIN);
+    return fminf(self.leftAccessoryVerticalMargin, TITLE_HMARGIN);
 }
 
 - (CGFloat)rightAccessoryVerticalMargin {
@@ -171,7 +171,7 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 }
 
 - (CGFloat)rightAccessoryHorizontalMargin {
-    return MIN(self.rightAccessoryVerticalMargin, TITLE_HMARGIN);
+    return fminf(self.rightAccessoryVerticalMargin, TITLE_HMARGIN);
 }
 
 - (CGFloat)innerContentMarginLeft {
@@ -250,7 +250,7 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     CGFloat nudgeLeft = fminf(0, CGRectGetMaxX(outerRect) - CGRectGetMaxX(innerRect));
     CGFloat nudgeTop = fmaxf(0, CGRectGetMinY(outerRect) - CGRectGetMinY(innerRect));
     CGFloat nudgeBottom = fminf(0, CGRectGetMaxY(outerRect) - CGRectGetMaxY(innerRect));
-    return CGSizeMake(nudgeLeft ?: nudgeRight, nudgeTop ?: nudgeBottom);
+    return CGSizeMake(nudgeLeft ? nudgeLeft : nudgeRight, nudgeTop ? nudgeTop : nudgeBottom);
 }
 
 - (void)presentCalloutFromRect:(CGRect)rect inView:(UIView *)view constrainedToView:(UIView *)constrainedView animated:(BOOL)animated {
