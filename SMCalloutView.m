@@ -159,11 +159,8 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         return 0;
 }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wgnu-statement-expression"
-
 - (CGFloat)leftAccessoryHorizontalMargin {
-    return MIN(self.leftAccessoryVerticalMargin, TITLE_HMARGIN);
+    return fminf(self.leftAccessoryVerticalMargin, TITLE_HMARGIN);
 }
 
 - (CGFloat)rightAccessoryVerticalMargin {
@@ -174,10 +171,8 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 }
 
 - (CGFloat)rightAccessoryHorizontalMargin {
-    return MIN(self.rightAccessoryVerticalMargin, TITLE_HMARGIN);
+    return fminf(self.rightAccessoryVerticalMargin, TITLE_HMARGIN);
 }
-
-#pragma clang diagnostic pop
 
 - (CGFloat)innerContentMarginLeft {
     if (self.leftAccessoryView)
