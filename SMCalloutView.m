@@ -59,6 +59,8 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         self.dismissAnimation = SMCalloutAnimationFade;
         self.backgroundColor = [UIColor clearColor];
         self.containerView = [UIButton new];
+        self.containerView.isAccessibilityElement = NO;
+        self.isAccessibilityElement = NO;
         self.contentViewInset = UIEdgeInsetsMake(12, 12, 12, 12);
 
         [self.containerView addTarget:self action:@selector(highlightIfNecessary) forControlEvents:UIControlEventTouchDown | UIControlEventTouchDragInside];
@@ -535,6 +537,44 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
         self.contentView.frameX = self.innerContentMarginLeft;
         self.contentView.frameY = self.contentViewInset.top + dy;
     }
+}
+
+#pragma mark - Accessibility
+
+- (NSInteger)accessibilityElementCount {
+    return (!!self.leftAccessoryView + !!self.titleViewOrDefault +
+            !!self.subtitleViewOrDefault + !!self.rightAccessoryView);
+}
+
+- (id)accessibilityElementAtIndex:(NSInteger)index {
+    if (index == 0) {
+        return self.leftAccessoryView ? self.leftAccessoryView : self.titleViewOrDefault;
+    }
+    if (index == 1) {
+        return self.leftAccessoryView ? self.titleViewOrDefault : self.subtitleViewOrDefault;
+    }
+    if (index == 2) {
+        return self.leftAccessoryView ? self.subtitleViewOrDefault : self.rightAccessoryView;
+    }
+    if (index == 3) {
+        return self.leftAccessoryView ? self.rightAccessoryView : nil;
+    }
+    return nil;
+}
+
+- (NSInteger)indexOfAccessibilityElement:(id)element {
+    if (element == nil) return NSNotFound;
+    if (element == self.leftAccessoryView) return 0;
+    if (element == self.titleViewOrDefault) {
+        return self.leftAccessoryView ? 1 : 0;
+    }
+    if (element == self.subtitleViewOrDefault) {
+        return self.leftAccessoryView ? 2 : 1;
+    }
+    if (element == self.rightAccessoryView) {
+        return self.leftAccessoryView ? 3 : 2;
+    }
+    return NSNotFound;
 }
 
 @end
