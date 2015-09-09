@@ -6,7 +6,7 @@
 SMCalloutView
 -------------
 Created by Nick Farina (nfarina@gmail.com)
-Version 2.0.3
+Version 2.1.2
 
 */
 
@@ -19,7 +19,7 @@ typedef NS_OPTIONS(NSUInteger, SMCalloutArrowDirection) {
 
 /// options for the callout present/dismiss animation
 typedef NS_ENUM(NSInteger, SMCalloutAnimation) {
-    /// the "bounce" animation we all know and love from UIAlertView
+    /// the "bounce" animation we all know and love from @c UIAlertView
     SMCalloutAnimationBounce,
     /// a simple fade in or out
     SMCalloutAnimationFade,
@@ -30,7 +30,7 @@ typedef NS_ENUM(NSInteger, SMCalloutAnimation) {
 NS_ASSUME_NONNULL_BEGIN
 
 /// when delaying our popup in order to scroll content into view, you can use this amount to match the
-/// animation duration of UIScrollView when using -setContentOffset:animated.
+/// animation duration of UIScrollView when using @c -setContentOffset:animated.
 extern NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView;
 
 @protocol SMCalloutViewDelegate;
@@ -170,13 +170,18 @@ extern NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView;
 /// Called when the callout view is clicked. Not honored by @c SMClassicCalloutView.
 - (void)calloutViewClicked:(SMCalloutView *)calloutView;
 
-/// Called when the callout view detects that it will be outside the constrained view when it appears,
-/// or if the target rect was already outside the constrained view. You can implement this selector to
-/// respond to this situation by repositioning your content first in order to make everything visible. The
-/// @c CGSize passed is the calculated offset necessary to make everything visible (plus a nice margin).
-/// It expects you to return the amount of time you need to reposition things so the popup can be delayed.
-/// Typically you would return @c kSMCalloutViewRepositionDelayForUIScrollView if you're repositioning by
-/// calling @c [UIScrollView @c setContentOffset:animated:].
+/**
+ Called when the callout view detects that it will be outside the constrained view when it appears, 
+ or if the target rect was already outside the constrained view. You can implement this selector 
+ to respond to this situation by repositioning your content first in order to make everything visible.
+ The @c CGSize passed is the calculated offset necessary to make everything visible (plus a nice margin). 
+ It expects you to return the amount of time you need to reposition things so the popup can be delayed. 
+ Typically you would return @c kSMCalloutViewRepositionDelayForUIScrollView if you're repositioning by calling @c [UIScrollView @c setContentOffset:animated:].
+ 
+ @param calloutView the @c SMCalloutView to reposition
+ @param offset caluclated offset necessary to make everything visible
+ @returns @c NSTimeInterval to delay the repositioning
+ */
 - (NSTimeInterval)calloutView:(SMCalloutView *)calloutView delayForRepositionWithSize:(CGSize)offset;
 
 /// Called before the callout view appears on screen, or before the appearance animation will start.
