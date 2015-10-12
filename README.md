@@ -83,12 +83,12 @@ Nope, but other intrepid coders have!
 - For an awesome replacement of the pulsing blue "Current Location" dot, check
   out [Sam Vermette's SVPulsingAnnotationView][dot].
 
-- And for the outdoor map data and tiles themselves, check out [MapBox's iOS
+- And for the outdoor map data and tiles themselves, check out [Mapbox's iOS
   SDK][mapbox], a complete open-source solution for custom maps. They even use
   `SMCalloutView` out of the box!
 
   [dot]: https://github.com/samvermette/SVPulsingAnnotationView
-  [mapbox]: https://github.com/mapbox/mapbox-ios-sdk
+  [mapbox]: https://github.com/mapbox/ios-sdk/
 
 
 More Info
