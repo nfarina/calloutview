@@ -88,7 +88,7 @@ Nope, but other intrepid coders have!
   `SMCalloutView` out of the box!
 
   [dot]: https://github.com/samvermette/SVPulsingAnnotationView
-  [mapbox]: https://github.com/mapbox/ios-sdk/
+  [mapbox]: https://www.mapbox.com/mobile/
 
 
 More Info
