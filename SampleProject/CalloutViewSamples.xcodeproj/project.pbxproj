@@ -171,7 +171,7 @@
 		011CA08015D3144E007DBC54 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0630;
+				LastUpgradeCheck = 0710;
 			};
 			buildConfigurationList = 011CA08315D3144E007DBC54 /* Build configuration list for PBXProject "CalloutViewSamples" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -240,6 +240,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -304,6 +305,7 @@
 				GCC_WARN_PEDANTIC = YES;
 				INFOPLIST_FILE = "CalloutViewSamples-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yourcompany.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -317,6 +319,7 @@
 				GCC_WARN_PEDANTIC = YES;
 				INFOPLIST_FILE = "CalloutViewSamples-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yourcompany.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
