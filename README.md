@@ -97,11 +97,3 @@ More Info
 You can read more info if you wish in the [blog post][].
 
   [blog post]: http://nfarina.com/post/78014139253/smcalloutview-for-ios-7
-
-
-ARC Support
------------
-
-This class requires LLVM 4.0 with [Automatic Reference Counting
-(ARC)](http://clang.llvm.org/docs/AutomaticReferenceCounting.html), enabled by
-default in modern Xcode projects.
