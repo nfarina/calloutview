@@ -269,8 +269,9 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     // Sanity check: dismiss this callout immediately if it's displayed somewhere
     if (self.layer.superlayer) [self dismissCalloutAnimated:NO];
     
-    // cancel any presenting animation that may be in progress
+    // cancel all animations that may be in progress
     [self.layer removeAnimationForKey:@"present"];
+    [self.layer removeAnimationForKey:@"dismiss"];
 
     // figure out the constrained view's rect in our popup view's coordinate system
     CGRect constrainedRect = [constrainedLayer convertRect:constrainedLayer.bounds toLayer:layer];
