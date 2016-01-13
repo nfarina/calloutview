@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.license      = 'Apache License, Version 2.0'
   s.author       = { "Nick Farina" => "nfarina@gmail.com" }
   s.source       = { :git => "https://github.com/nfarina/calloutview.git", :tag => "2.1.3" }
-  s.platform     = :ios
+  s.platform     = :ios, '7.0'
   s.source_files = 'SMCalloutView.{h,m}', 'SMClassicCalloutView.{h,m}'
   s.requires_arc = true
 end
