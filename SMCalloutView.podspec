@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "SMCalloutView"
-  s.version      = "2.1.4"
+  s.version      = "2.1.5"
   s.summary      = "A lightweight callout view class for iOS mimicking UICalloutView."
   s.description  = <<-DESC
                     SMCalloutView aims to be an exact replica of the private UICalloutView system control.
@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   s.homepage     = "https://github.com/nfarina/calloutview"
   s.license      = 'Apache License, Version 2.0'
   s.author       = { "Nick Farina" => "nfarina@gmail.com" }
-  s.source       = { :git => "https://github.com/nfarina/calloutview.git", :tag => "2.1.4" }
+  s.source       = { :git => "https://github.com/nfarina/calloutview.git", :tag => "2.1.5" }
   s.platform     = :ios, '7.0'
   s.source_files = 'SMCalloutView.{h,m}', 'SMClassicCalloutView.{h,m}'
   s.requires_arc = true
