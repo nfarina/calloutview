@@ -40,7 +40,12 @@ extern NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView;
 // Callout view.
 //
 
+// iOS 10+ expects CAAnimationDelegate to be set explicitly.
+#if __IPHONE_OS_VERSION_MAX_ALLOWED < 100000
 @interface SMCalloutView : UIView
+#else
+@interface SMCalloutView : UIView <CAAnimationDelegate>
+#endif
 
 @property (nonatomic, weak, nullable) id<SMCalloutViewDelegate> delegate;
 /// title/titleView relationship mimics UINavigationBar.
