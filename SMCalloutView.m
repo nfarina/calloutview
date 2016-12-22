@@ -138,7 +138,7 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     [self setNeedsDisplay];
     
     [self addSubview:self.backgroundView];
-    [self addSubview:self.containerView];
+    [self.backgroundView addSubview:self.containerView];
     
     if (self.contentView) {
         [self.containerView addSubview:self.contentView];
