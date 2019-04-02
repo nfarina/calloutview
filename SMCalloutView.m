@@ -198,7 +198,7 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
     if (self.contentView)
         return self.contentView.frameHeight + self.contentViewInset.bottom + self.contentViewInset.top;
     else if (self.subtitleView || self.subtitle.length > 0)
-        return CALLOUT_SUB_DEFAULT_CONTAINER_HEIGHT;
+        return CALLOUT_SUB_DEFAULT_CONTAINER_HEIGHT + self.subtitleView.frameHeight - 15;
     else
         return CALLOUT_DEFAULT_CONTAINER_HEIGHT;
 }
