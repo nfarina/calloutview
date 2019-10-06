@@ -98,7 +98,11 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
             self.titleLabel.opaque = NO;
             self.titleLabel.backgroundColor = [UIColor clearColor];
             self.titleLabel.font = [UIFont systemFontOfSize:17];
-            self.titleLabel.textColor = [UIColor blackColor];
+            if (@available(iOS 13.0, *)) {
+                self.titleLabel.textColor = [UIColor labelColor];
+            } else {
+                self.titleLabel.textColor = [UIColor blackColor];
+            }
         }
         return self.titleLabel;
     }
@@ -116,7 +120,11 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
             self.subtitleLabel.opaque = NO;
             self.subtitleLabel.backgroundColor = [UIColor clearColor];
             self.subtitleLabel.font = [UIFont systemFontOfSize:12];
-            self.subtitleLabel.textColor = [UIColor blackColor];
+            if (@available(iOS 13.0, *)) {
+                self.subtitleLabel.textColor = [UIColor secondaryLabelColor];
+            } else {
+                self.subtitleLabel.textColor = [UIColor blackColor];
+            }
         }
         return self.subtitleLabel;
     }
@@ -594,32 +602,72 @@ NSTimeInterval const kSMCalloutViewRepositionDelayForUIScrollView = 1.0/3.0;
 @property (nonatomic, strong) UIImageView *arrowImageView, *arrowHighlightedImageView, *arrowBorderView;
 @end
 
-static UIImage *blackArrowImage = nil, *whiteArrowImage = nil, *grayArrowImage = nil;
+static UIImage *blackArrowImage = nil, *normalArrowImageLight = nil, *normalArrowImageDark = nil, *highlightedArrowImageLight = nil, *highlightedArrowImageDark = nil, *arrowBorderImageLight = nil, *arrowBorderImageDark = nil;
+static UIColor *normalBackgroundColor, *highlightedBackgroundColor, *borderColor;
 
 @implementation SMCalloutMaskedBackgroundView
 
 - (id)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-
+        
+        UIColor *normalBackgroundColorLight = [UIColor whiteColor];
+        UIColor *normalBackgroundColorDark = [UIColor colorWithWhite:0.2 alpha:1.0];
+        UIColor *highlightedBackgroundColorLight = [UIColor colorWithWhite:0.85 alpha:1];
+        UIColor *highlightedBackgroundColorDark = [UIColor colorWithWhite:0.15 alpha:1];
+        UIColor *borderColorLight = [UIColor colorWithWhite:0 alpha:0.2];
+        UIColor *borderColorDark = [UIColor colorWithWhite:1 alpha:0.2];
+        
+        if (@available(iOS 13.0, *)) {
+            normalBackgroundColor = [UIColor colorWithDynamicProvider:^UIColor * _Nonnull(UITraitCollection * _Nonnull traitCollection) {
+                if (traitCollection.userInterfaceStyle == UIUserInterfaceStyleLight) {
+                    return normalBackgroundColorLight;
+                } else {
+                    return normalBackgroundColorDark;
+                }
+            }];
+            highlightedBackgroundColor = [UIColor colorWithDynamicProvider:^UIColor * _Nonnull(UITraitCollection * _Nonnull traitCollection) {
+                if (traitCollection.userInterfaceStyle == UIUserInterfaceStyleLight) {
+                    return highlightedBackgroundColorLight;
+                } else {
+                    return highlightedBackgroundColorDark;
+                }
+            }];
+            borderColor = [UIColor colorWithDynamicProvider:^UIColor * _Nonnull(UITraitCollection * _Nonnull traitCollection) {
+                if (traitCollection.userInterfaceStyle == UIUserInterfaceStyleLight) {
+                    return borderColorLight;
+                } else {
+                    return borderColorDark;
+                }
+            }];
+        } else {
+            normalBackgroundColor = normalBackgroundColorLight;
+            highlightedBackgroundColor = highlightedBackgroundColorLight;
+            borderColor = borderColorLight;
+        }
+        
         // Here we're mimicking the very particular (and odd) structure of the system callout view.
         // The hierarchy and view/layer values were discovered by inspecting map kit using Reveal.app
         
         self.containerView = [UIView new];
-        self.containerView.backgroundColor = [UIColor whiteColor];
+        self.containerView.backgroundColor = normalBackgroundColor;
         self.containerView.alpha = 0.96;
         self.containerView.layer.cornerRadius = 8;
-        self.containerView.layer.shadowRadius = 30;
-        self.containerView.layer.shadowOpacity = 0.1;
+        self.layer.shadowRadius = 6;
+        self.layer.shadowOffset = CGSizeMake(0, 4);
+        self.layer.shadowOpacity = 0.1;
         
         self.containerBorderView = [UIView new];
-        self.containerBorderView.layer.borderColor = [UIColor colorWithWhite:0 alpha:0.1].CGColor;
         self.containerBorderView.layer.borderWidth = 0.5;
         self.containerBorderView.layer.cornerRadius = 8.5;
         
         if (!blackArrowImage) {
             blackArrowImage = [SMCalloutBackgroundView embeddedImageNamed:@"CalloutArrow"];
-            whiteArrowImage = [self image:blackArrowImage withColor:[UIColor whiteColor]];
-            grayArrowImage = [self image:blackArrowImage withColor:[UIColor colorWithWhite:0.85 alpha:1]];
+            normalArrowImageLight = [self image:blackArrowImage withColor:normalBackgroundColorLight];
+            normalArrowImageDark = [self image:blackArrowImage withColor:normalBackgroundColorDark];
+            highlightedArrowImageLight = [self image:blackArrowImage withColor:highlightedBackgroundColorLight];
+            highlightedArrowImageDark = [self image:blackArrowImage withColor:highlightedBackgroundColorDark];
+            arrowBorderImageLight = [self image:blackArrowImage withColor:borderColorLight];
+            arrowBorderImageDark = [self image:blackArrowImage withColor:borderColorDark];
         }
         
         self.anchorHeight = 13;
@@ -627,12 +675,12 @@ static UIImage *blackArrowImage = nil, *whiteArrowImage = nil, *grayArrowImage =
         
         self.arrowView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, blackArrowImage.size.width, blackArrowImage.size.height)];
         self.arrowView.alpha = 0.96;
-        self.arrowImageView = [[UIImageView alloc] initWithImage:whiteArrowImage];
-        self.arrowHighlightedImageView = [[UIImageView alloc] initWithImage:grayArrowImage];
+        self.arrowImageView = [[UIImageView alloc] initWithImage:normalArrowImageLight];
+        self.arrowHighlightedImageView = [[UIImageView alloc] initWithImage:highlightedArrowImageLight];
         self.arrowHighlightedImageView.hidden = YES;
-        self.arrowBorderView = [[UIImageView alloc] initWithImage:blackArrowImage];
-        self.arrowBorderView.alpha = 0.1;
+        self.arrowBorderView = [[UIImageView alloc] initWithImage:arrowBorderImageLight];
         self.arrowBorderView.frameY = 0.5;
+        [self updateColors];
         
         [self addSubview:self.containerView];
         [self.containerView addSubview:self.containerBorderView];
@@ -652,7 +700,7 @@ static UIImage *blackArrowImage = nil, *whiteArrowImage = nil, *grayArrowImage =
 
 - (void)setHighlighted:(BOOL)highlighted {
     [super setHighlighted:highlighted];
-    self.containerView.backgroundColor = highlighted ? [UIColor colorWithWhite:0.85 alpha:1] : [UIColor whiteColor];
+    self.containerView.backgroundColor = highlighted ? highlightedBackgroundColor : normalBackgroundColor;
     self.arrowImageView.hidden = highlighted;
     self.arrowHighlightedImageView.hidden = !highlighted;
 }
@@ -691,6 +739,33 @@ static UIImage *blackArrowImage = nil, *whiteArrowImage = nil, *grayArrowImage =
     else {
         self.arrowView.frameY = self.containerView.frameHeight - 0.5;
         self.arrowView.transform = CGAffineTransformIdentity;
+    }
+}
+
+- (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection {
+    [super traitCollectionDidChange:previousTraitCollection];
+    [self updateColors];
+}
+
+- (void)updateColors {
+    if (@available(iOS 13.0, *)) {
+        [self.traitCollection performAsCurrentTraitCollection:^{
+            if (UITraitCollection.currentTraitCollection.userInterfaceStyle == UIUserInterfaceStyleLight) {
+                self.arrowImageView.image = normalArrowImageLight;
+                self.arrowHighlightedImageView.image = highlightedArrowImageLight;
+                self.arrowBorderView.image = arrowBorderImageLight;
+            } else {
+                self.arrowImageView.image = normalArrowImageDark;
+                self.arrowHighlightedImageView.image = highlightedArrowImageDark;
+                self.arrowBorderView.image = arrowBorderImageDark;
+            }
+            self.containerBorderView.layer.borderColor = borderColor.CGColor;
+        }];
+    } else {
+        self.arrowImageView.image = normalArrowImageLight;
+        self.arrowHighlightedImageView.image = highlightedArrowImageLight;
+        self.arrowBorderView.image = arrowBorderImageLight;
+        self.containerBorderView.layer.borderColor = borderColor.CGColor;
     }
 }
 
@@ -857,3 +932,4 @@ static UIImage *blackArrowImage = nil, *whiteArrowImage = nil, *grayArrowImage =
 - (void)setFrameBottom:(CGFloat)bottom { self.frame = (CGRect){ .origin=self.frame.origin, .size.width=self.frame.size.width, .size.height=fmaxf(bottom-self.frame.origin.y,0) }; }
 
 @end
+
