@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "SMCalloutView"
-  s.version      = "2.1.5"
+  s.version      = "2.2.0"
   s.summary      = "A lightweight callout view class for iOS mimicking UICalloutView."
   s.description  = <<-DESC
                     SMCalloutView aims to be an exact replica of the private UICalloutView system control.
